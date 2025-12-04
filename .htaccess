@@ -1,0 +1,9 @@
+RewriteEngine On
+
+# Si la URL es la raíz (http://localhost/proyectos/Wine-Pick-QR-TFI/)
+RewriteRule ^$ public/index.php [QSA,L]
+
+# Si no es archivo ni carpeta física, también mandamos a public/index.php
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ public/index.php [QSA,L]
