@@ -199,6 +199,7 @@ class ProductController
             'is_active' => (bool) $product['is_active'],
             'created_at' => $product['created_at'],
             'updated_at' => $product['updated_at'],
+            'qr_link' => BASE_URL . '/#qr?code=' . rawurlencode($product['public_code']),
         ];
     }
 }

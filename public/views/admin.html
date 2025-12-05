@@ -49,6 +49,17 @@
 
     <div id="product-create-status" aria-live="polite"></div>
 
+    <div id="product-qr-card" hidden>
+      <h3>QR del producto</h3>
+      <p id="product-qr-text">Generaremos el QR con el código público.</p>
+      <div id="product-qr-render" aria-live="polite"></div>
+      <div class="qr-actions">
+        <button type="button" id="qr-download-btn">Descargar PNG</button>
+        <button type="button" id="qr-print-btn">Imprimir</button>
+        <button type="button" id="qr-regenerate-btn">Regenerar</button>
+      </div>
+    </div>
+
     <button type="submit">Crear producto</button>
   </form>
 </section>
