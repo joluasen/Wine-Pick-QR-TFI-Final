@@ -1,0 +1,7 @@
+/*
+   Archivo: public/css/styles.css
+   Propósito: archivo CSS reservado. Según la solicitud actual se han eliminado
+   las reglas visuales para dejar la UI neutral. Mantener el archivo por
+   compatibilidad con rutas que lo soliciten; reintroducir estilos desde aquí
+   cuando se requiera una guía de presentación consistente.
+*/

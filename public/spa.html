@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+        <!--
+            Archivo: public/spa.html
+            Propósito: Documento HTML principal de la PWA.
+            Contiene la cabecera (manifest, favicon) y el contenedor `#app-root` donde
+            se inyectan las vistas parciales desde `public/views/*.html` mediante el
+            router cliente (`public/js/router.js`).
+            Este archivo no incluye estilos visuales por diseño (UI neutral).
+        -->
+    <meta charset="UTF-8">
+    <title>WINE-PICK-QR</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Manifest PWA -->
+    <link rel="manifest" href="./manifest.json">
+
+    <!-- Icono base -->
+    <link rel="icon" type="image/png" sizes="192x192" href="./assets/icons/icon-192.png">
+</head>
+<body>
+    <header class="app-header">
+        <h1 class="app-title">WINE-PICK-QR</h1>
+        <nav class="app-nav">
+            <button class="nav-btn" data-link="#home">Inicio</button>
+            <button class="nav-btn" data-link="#qr">Consulta por QR</button>
+            <button class="nav-btn" data-link="#search">Búsqueda</button>
+            <button class="nav-btn" data-link="#admin">Admin</button>
+        </nav>
+    </header>
+
+    <main id="app-root">
+        <!-- Las vistas se cargan dinámicamente desde /views/*.html -->
+    </main>
+
+    <footer class="app-footer">
+        <small>WINE-PICK-QR &copy; 2025</small>
+    </footer>
+
+    <!-- JS principal (módulos ES) -->
+    <script type="module" src="./js/app.js"></script>
+</body>
+</html>
+
