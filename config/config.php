@@ -3,37 +3,44 @@
 declare(strict_types=1);
 
 /**
- * Configuración básica del proyecto WINE-PICK-QR.
+ * Configuración Central del Proyecto Wine-Pick-QR
  * 
- * NOTA:
- * - Ajusta DB_NAME, DB_USER y DB_PASS según tu entorno XAMPP.
- * - Por ahora NO abrimos conexión a la BD automáticamente para evitar errores
- *   si la base todavía no existe.
+ * Este archivo contiene todas las constantes de configuración necesarias para
+ * la aplicación, incluyendo parámetros de base de datos, rutas del sistema de
+ * archivos y configuración de entorno.
+ * 
+ * Modificar estos valores según el entorno de despliegue (desarrollo, staging,
+ * producción) sin afectar el código de la aplicación.
  */
 
-// Entorno: 'dev' | 'prod'
+// Entorno de ejecución: 'dev' | 'prod'
 define('WPQ_ENV', 'dev');
 
-// Parámetros de base de datos (MySQL / MariaDB en XAMPP)
+// Parámetros de conexión a base de datos (MySQL/MariaDB)
 define('DB_HOST', 'localhost');
-define('DB_NAME', 'wine_pick_qr');   // Cambiá este nombre si usás otro
+define('DB_NAME', 'wine_pick_qr');
 define('DB_USER', 'root');
-define('DB_PASS', '');               // En XAMPP por defecto suele ser vacío
+define('DB_PASS', '');
 define('DB_CHARSET', 'utf8mb4');
 
 // Rutas del sistema de archivos
-define('BASE_PATH', dirname(__DIR__));      // .../wine-pick-qr
+define('BASE_PATH', dirname(__DIR__));
 define('APP_PATH', BASE_PATH . '/app');
 define('PUBLIC_PATH', BASE_PATH . '/public');
 define('CONFIG_PATH', BASE_PATH . '/config');
 define('LOGS_PATH', BASE_PATH . '/logs');
 
-// URL base (para entornos locales)
+// URL base de la aplicación
 define('BASE_URL', 'http://localhost/proyectos/Wine-Pick-QR-TFI');
 
 /**
- * Función de ayuda para depuración controlada.
- * Solo muestra detalles si estamos en entorno 'dev'.
+ * Registra mensajes de depuración en el archivo de logs.
+ * 
+ * Solo escribe en logs cuando el entorno está configurado como 'dev'.
+ * En producción, esta función no produce salida.
+ * 
+ * @param string $message Mensaje a registrar en el log.
+ * @return void
  */
 function wpq_debug_log(string $message): void
 {
@@ -44,7 +51,6 @@ function wpq_debug_log(string $message): void
     $date = date('Y-m-d H:i:s');
     $line = "[{$date}] {$message}\n";
 
-    // Aseguramos que exista la carpeta logs
     if (!is_dir(LOGS_PATH)) {
         @mkdir(LOGS_PATH, 0777, true);
     }
