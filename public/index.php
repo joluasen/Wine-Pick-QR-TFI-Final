@@ -2,64 +2,112 @@
 // public/index.php
 declare(strict_types=1);
 
-/**
- * Punto de Entrada Principal de la Aplicación
- * 
- * Este archivo es el índice frontal (front controller) de la aplicación Wine-Pick-QR.
- * Realiza las inicializaciones necesarias, carga la configuración, registra el autoloader
- * y delega la solicitud HTTP al router para su procesamiento.
- */
-
 ini_set('display_errors', '1');
 error_reporting(E_ALL);
 
 session_start();
 
 require_once __DIR__ . '/../config/config.php';
+?>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>WINE-PICK-QR</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-// Autoloader PSR-4 para cargar clases automáticamente
-spl_autoload_register(function ($class) {
-    $paths = [
-        BASE_PATH . '/app/Utils/' . $class . '.php',
-        BASE_PATH . '/app/Models/' . $class . '.php',
-        BASE_PATH . '/app/Controllers/' . $class . '.php',
-    ];
+    <!-- Manifest PWA -->
+    <link rel="manifest" href="./manifest.json">
+    <meta name="theme-color" content="#8b0000">
 
-    foreach ($paths as $file) {
-        if (file_exists($file)) {
-            require_once $file;
-            return;
-        }
-    }
-});
+    <!-- Icono base -->
+    <link rel="icon" type="image/png" sizes="192x192" href="./assets/icons/icon-192.png">
 
-// Registrar solicitud recibida (solo en desarrollo)
-wpq_debug_log('Solicitud recibida: ' . $_SERVER['REQUEST_METHOD'] . ' ' . $_SERVER['REQUEST_URI'] 
-    . ' desde ' . ($_SERVER['REMOTE_ADDR'] ?? 'desconocido'));
+    <!-- Estilos base -->
+    <link rel="stylesheet" href="./css/styles.css">
+</head>
+<body>
+    <header class="app-header">
+        <h1 class="app-title">WINE-PICK-QR</h1>
+        <nav class="app-nav">
+            <button class="nav-btn" data-link="#home">Inicio</button>
+            <button class="nav-btn" data-link="#qr">Consulta por QR</button>
+            <button class="nav-btn" data-link="#search">Búsqueda</button>
+            <button class="nav-btn" data-link="#admin">Admin</button>
+        </nav>
+    </header>
 
-// Procesar la solicitud a través del enrutador
-// Si el usuario accede a la raíz del proyecto, mostrar una página índice
-// con información básica de la API en vez de "Ruta no encontrada".
-$fullUri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) ?? '/';
-$projectPath = parse_url(BASE_URL, PHP_URL_PATH) ?: '/proyectos/Wine-Pick-QR-TFI';
-$relative = (strpos($fullUri, $projectPath) === 0) ? substr($fullUri, strlen($projectPath)) : $fullUri;
-if ($relative === '' || $relative === '/' || $relative === '/index.php') {
-    // Respuesta HTML mínima y profesional embebida directamente en index.php
-    header('Content-Type: text/html; charset=utf-8', true, 200);
-    echo '<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Wine-Pick-QR</title></head><body style="font-family:Arial,Helvetica,sans-serif;margin:32px;color:#222">';
-    echo '<h1>Wine-Pick-QR</h1>';
-    exit;
-}
+    <main class="app-main">
+        <!-- Vista: Inicio -->
+        <section class="view view--active" data-view="home">
+            <h2>Inicio</h2>
+            <p>Bienvenido a WINE-PICK-QR.</p>
+            <p>
+                Desde aquí podrás:
+            </p>
+            <ul>
+                <li>Ir a <strong>Consulta por QR</strong> para escanear códigos en góndola.</li>
+                <li>Usar la <strong>Búsqueda</strong> para encontrar productos por texto.</li>
+                <li>Acceder al <strong>Panel Admin</strong> (para alta de productos y promos).</li>
+            </ul>
+        </section>
 
-try {
-    $router = new Router();
-    $router->dispatch();
-} catch (\Exception $e) {
-    // Manejo centralizado de excepciones no capturadas
-    JsonResponse::error(
-        'INTERNAL_ERROR',
-        'Error interno del servidor.',
-        500,
-        ['exception' => $e->getMessage()]
-    );
-}
+        <!-- Vista: Consulta por QR (esqueleto) -->
+        <section class="view" data-view="qr">
+            <h2>Consulta por QR</h2>
+            <p>Esta vista mostrará la información del producto a partir de un código QR.</p>
+            <p>
+                Próximamente aquí se integrará la lógica de:
+                <br>– Lectura de código (o ingreso manual de código),
+                <br>– Llamada a la API de consulta por código.
+            </p>
+        </section>
+
+        <!-- Vista: Búsqueda de productos (esqueleto) -->
+        <section class="view" data-view="search">
+            <h2>Búsqueda de productos</h2>
+            <p>Buscá vinos o licores por nombre, bodega, tipo, etc.</p>
+
+            <form id="search-form">
+                <label for="search-input">Texto de búsqueda:</label>
+                <input id="search-input" type="text" name="q" placeholder="Ej: Malbec, bodega, etc.">
+                <button type="submit">Buscar</button>
+            </form>
+
+            <div id="search-results">
+                <!-- Aquí se mostrarán los resultados de búsqueda (HU-C2) -->
+                <p class="placeholder">Los resultados aparecerán aquí.</p>
+            </div>
+        </section>
+
+        <!-- Vista: Acceso admin (esqueleto) -->
+        <section class="view" data-view="admin">
+            <h2>Acceso administrador</h2>
+            <p>Login al panel administrativo.</p>
+
+            <form id="admin-login-form">
+                <label for="admin-user">Usuario</label>
+                <input id="admin-user" type="text" name="user" autocomplete="username">
+
+                <label for="admin-pass">Contraseña</label>
+                <input id="admin-pass" type="password" name="pass" autocomplete="current-password">
+
+                <button type="submit">Ingresar</button>
+            </form>
+
+            <p class="placeholder">
+                Más adelante, desde aquí se redirigirá al panel admin
+                (HU-A1: alta de producto y otras operaciones).
+            </p>
+        </section>
+    </main>
+
+    <footer class="app-footer">
+        <small>WINE-PICK-QR &copy; <?php echo date('Y'); ?></small>
+    </footer>
+
+    <!-- JS principal (módulos ES) -->
+    <script type="module" src="./js/app.js"></script>
+</body>
+</html>
+
