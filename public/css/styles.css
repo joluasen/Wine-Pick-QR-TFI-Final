@@ -1,7 +1,346 @@
 /*
    Archivo: public/css/styles.css
-   Propósito: archivo CSS reservado. Según la solicitud actual se han eliminado
-   las reglas visuales para dejar la UI neutral. Mantener el archivo por
-   compatibilidad con rutas que lo soliciten; reintroducir estilos desde aquí
-   cuando se requiera una guía de presentación consistente.
+   Propósito: Estilos visuales de Wine-Pick-QR PWA
+   Paleta: Bordeaux oscuro minimalista con fondo blanco
 */
+
+/* Reset y base */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  --primary: #4A0E1A;
+  --primary-light: #6B0F2A;
+  --primary-dark: #2D0810;
+  --accent: #721C2E;
+  --bg: #FAFAFA;
+  --bg-card: #FFFFFF;
+  --text: #1A1A1A;
+  --text-light: #5A5A5A;
+  --border: #DDDDDD;
+  --border-light: #EEEEEE;
+  --success: #2E7D42;
+  --error: #C62828;
+  --info: #0277BD;
+  --shadow: rgba(74, 14, 26, 0.08);
+  --shadow-hover: rgba(74, 14, 26, 0.12);
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.65;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  font-size: 15px;
+}
+
+/* Header */
+.app-header {
+  background: var(--primary);
+  color: white;
+  padding: 1.25rem 2rem;
+  border-bottom: 1px solid var(--primary-dark);
+}
+
+.app-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  letter-spacing: 0.5px;
+}
+
+.app-nav {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.nav-btn {
+  background: transparent;
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 400;
+  transition: all 0.15s ease;
+}
+
+.nav-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+.nav-btn:active {
+  transform: scale(0.98);
+}
+
+/* Main content */
+#app-root {
+  flex: 1;
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+section[data-view] {
+  background: var(--bg-card);
+  padding: 2.5rem;
+  border-radius: 2px;
+  border: 1px solid var(--border-light);
+  box-shadow: 0 1px 3px var(--shadow);
+}
+
+section[data-view] h2 {
+  color: var(--primary);
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--border);
+}
+
+section[data-view] h3 {
+  color: var(--primary);
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-top: 2rem;
+  margin-bottom: 0.75rem;
+}
+
+section[data-view] > p {
+  color: var(--text-light);
+  margin-bottom: 2rem;
+  font-size: 0.95rem;
+}
+
+/* Forms */
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  max-width: 600px;
+}
+
+label {
+  font-weight: 500;
+  color: var(--text);
+  margin-bottom: 0.4rem;
+  display: block;
+  font-size: 0.9rem;
+}
+
+input[type="text"],
+input[type="number"],
+input[type="email"],
+input[type="password"],
+select,
+textarea {
+  width: 100%;
+  padding: 0.7rem 0.9rem;
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  font-size: 0.95rem;
+  transition: all 0.15s ease;
+  background: var(--bg-card);
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(74, 14, 26, 0.05);
+}
+
+textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+/* Buttons */
+button[type="submit"],
+button[type="button"],
+.btn {
+  background: var(--primary);
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 2px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+button[type="submit"]:hover,
+button[type="button"]:hover,
+.btn:hover {
+  background: var(--primary-dark);
+}
+
+button[type="submit"]:active,
+button[type="button"]:active,
+.btn:active {
+  transform: scale(0.98);
+}
+
+button:disabled {
+  background: #999;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* Status messages */
+[id$="-status"],
+[class*="status"] {
+  padding: 0.75rem 1rem;
+  border-radius: 2px;
+  margin: 1rem 0;
+  font-weight: 400;
+  font-size: 0.9rem;
+  border-left: 3px solid;
+}
+
+[data-type="info"] {
+  background: #F0F7FF;
+  color: #014678;
+  border-left-color: var(--info);
+}
+
+[data-type="success"] {
+  background: #F1F8F4;
+  color: #1B5E2F;
+  border-left-color: var(--success);
+}
+
+[data-type="error"] {
+  background: #FFF4F4;
+  color: #8B1C1C;
+  border-left-color: var(--error);
+}
+
+/* QR Card */
+#product-qr-card {
+  margin-top: 2rem;
+  padding: 1.5rem;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 2px;
+}
+
+#product-qr-card h3 {
+  margin-top: 0;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+#product-qr-render {
+  display: flex;
+  justify-content: center;
+  margin: 1.5rem 0;
+  padding: 1.5rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
+  border-radius: 2px;
+}
+
+.qr-actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.qr-actions button {
+  background: var(--primary-light);
+  padding: 0.6rem 1rem;
+  font-size: 0.85rem;
+  font-weight: 400;
+}
+
+/* Product result display */
+#qr-result,
+#search-results {
+  margin-top: 2rem;
+}
+
+#qr-result > div,
+.product-card {
+  background: var(--bg-card);
+  padding: 1.5rem;
+  border-radius: 2px;
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--primary);
+}
+
+.product-card h3 {
+  color: var(--primary);
+  margin-top: 0;
+  margin-bottom: 0.75rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.product-card p {
+  margin: 0.5rem 0;
+  color: var(--text);
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+.product-card strong {
+  color: var(--text);
+  font-weight: 500;
+}
+
+/* Footer */
+.app-footer {
+  background: var(--primary);
+  color: white;
+  text-align: center;
+  padding: 1rem;
+  margin-top: auto;
+  border-top: 1px solid var(--primary-dark);
+}
+
+.app-footer small {
+  opacity: 0.85;
+  font-size: 0.85rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  #app-root {
+    padding: 1rem;
+  }
+
+  section[data-view] {
+    padding: 1.5rem;
+  }
+
+  .app-title {
+    font-size: 1.5rem;
+  }
+
+  .app-nav {
+    gap: 0.5rem;
+  }
+
+  .nav-btn {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+  }
+
+  form {
+    max-width: 100%;
+  }
+}

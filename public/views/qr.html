@@ -6,14 +6,16 @@
   `public/js/views/qrView.js`.
 -->
 <section data-view="qr">
-  <h2>Consulta por QR</h2>
-  <p>Ingresa el código/QR del producto o escanéalo (cuando se habilite la cámara).</p>
+  <h2>Consulta por Código</h2>
+  <p>Ingresa el código del producto para ver su información detallada.</p>
 
   <form id="qr-form">
-    <label for="qr-code">Código público / QR</label>
-    <input id="qr-code" name="qr_code" type="text" placeholder="Ej: MALBEC-RES-750-001" required>
+    <div>
+      <label for="qr-code">Código del producto</label>
+      <input id="qr-code" name="qr_code" type="text" placeholder="Ej: MALBEC-RES-750-001" required>
+    </div>
     <div id="qr-status" aria-live="polite"></div>
-    <button type="submit">Consultar</button>
+    <button type="submit">Buscar Producto</button>
   </form>
 
   <div id="qr-result"></div>
