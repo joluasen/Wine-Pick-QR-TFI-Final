@@ -1,0 +1,20 @@
+<!--
+  Vista parcial: search.html
+  Descripción: formulario y contenedor de resultados para búsquedas de productos.
+  Se carga de forma dinámica en `#app-root` y su comportamiento se implementa
+  en `public/js/views/searchView.js` (controlador de vista).
+-->
+<section data-view="search">
+  <h2>Búsqueda de productos</h2>
+  <p>Buscá vinos o licores por nombre, bodega, tipo, etc.</p>
+
+  <form id="search-form">
+    <label for="search-input">Texto de búsqueda:</label>
+    <input id="search-input" type="text" name="q" placeholder="Ej: Malbec, bodega, etc.">
+    <button type="submit">Buscar</button>
+  </form>
+
+  <div id="search-results">
+    <p class="placeholder">Los resultados aparecerán aquí.</p>
+  </div>
+</section>

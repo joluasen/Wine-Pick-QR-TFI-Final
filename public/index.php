@@ -3,9 +3,16 @@
 declare(strict_types=1);
 
 /**
- * Front controller combinado
- * - Si la ruta solicitada empieza con /api/ ejecuta el enrutador backend (API)
- * - En caso contrario sirve la PWA (SPA) ubicada en public/spa.html
+ * Front controller (entrada HTTP)
+ *
+ * Responsabilidad:
+ * - Delegar solicitudes cuyo path comienza con `/api/` al enrutador del backend.
+ * - Servir archivos estáticos desde `public/` cuando existan (manifest, JS, CSS, imágenes).
+ * - Para cualquier otra ruta, devolver la SPA estática `public/spa.html`.
+ *
+ * Notas:
+ * - Diseñado para uso en desarrollo local con la aplicación PWA y la API coexistiendo
+ *   en el mismo host y directorio `public/`.
  */
 
 ini_set('display_errors', '1');
@@ -54,9 +61,43 @@ if (strpos($relative, '/api/') === 0) {
     exit;
 }
 
-// Para cualquier otra ruta servimos la SPA (PWA)
-// Se reservó previamente la SPA en public/spa.html
-$spa = __DIR__ . '/spa.html';
+// Antes de servir la SPA, comprobar si el recurso solicitado existe
+$publicDir = __DIR__;
+$requestedPath = $relative;
+
+// Normalizar ruta (asegurar que empieza con '/')
+if ($requestedPath === '' || $requestedPath[0] !== '/') {
+    $requestedPath = '/' . ltrim($requestedPath, '/');
+}
+
+$candidate = realpath($publicDir . $requestedPath);
+
+if ($candidate !== false && strpos($candidate, $publicDir) === 0 && is_file($candidate)) {
+    // Determinar tipo MIME básico por extensión
+    $ext = strtolower(pathinfo($candidate, PATHINFO_EXTENSION));
+    $mimeMap = [
+        'html' => 'text/html; charset=utf-8',
+        'htm'  => 'text/html; charset=utf-8',
+        'json' => 'application/json; charset=utf-8',
+        'js'   => 'application/javascript; charset=utf-8',
+        'css'  => 'text/css; charset=utf-8',
+        'png'  => 'image/png',
+        'jpg'  => 'image/jpeg',
+        'jpeg' => 'image/jpeg',
+        'svg'  => 'image/svg+xml',
+        'ico'  => 'image/x-icon',
+        'map'  => 'application/json; charset=utf-8',
+        'txt'  => 'text/plain; charset=utf-8'
+    ];
+
+    $contentType = $mimeMap[$ext] ?? 'application/octet-stream';
+    header('Content-Type: ' . $contentType, true, 200);
+    readfile($candidate);
+    exit;
+}
+
+// Si no es un archivo estático, servir la SPA (public/spa.html)
+$spa = $publicDir . '/spa.html';
 if (file_exists($spa)) {
     header('Content-Type: text/html; charset=utf-8', true, 200);
     readfile($spa);

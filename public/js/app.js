@@ -1,4 +1,12 @@
 // public/js/app.js
+/**
+ * Punto de entrada del cliente
+ *
+ * Responsabilidad:
+ * - Configurar la navegación interna (botones que actualizan el hash).
+ * - Inicializar el router SPA.
+ * - Registrar el service worker cuando corresponda.
+ */
 import { initRouter } from './router.js';
 
 function setupNavigation() {

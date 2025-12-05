@@ -1,14 +1,17 @@
 // public/js/views/qrView.js
-
+/**
+ * Controlador de la vista 'qr'
+ *
+ * Responsabilidad:
+ * - Preparar el contenedor para la lectura de códigos (cámara o ingreso manual).
+ * - Enlazar eventos y llamadas a la API para obtener datos por código.
+ * - Recibe el contenedor DOM (la sección cargada) como argumento.
+ */
 let initialized = false;
 
-export function initQrView() {
+export function initQrView(container) {
   if (initialized) return;
-  console.log('Vista Consulta por QR inicializada');
-
-  // A futuro:
-  // - Manejo de cámara / ingreso manual de código
-  // - Llamadas a la API de consulta por código (HU-C1)
-
+  // Inicialización perezosa: dejar el hook implementado para agregar soporte
+  // de cámara o entrada manual cuando se implemente la funcionalidad.
   initialized = true;
 }
