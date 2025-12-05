@@ -5,49 +5,18 @@
   `public/js/views/adminView.js`.
 -->
 <section data-view="admin">
-  <h2>Panel administrador</h2>
-  <p>Formulario de alta de productos. (Nota: autenticación no implementada en esta
-  versión; se asume acceso restringido por despliegue).</p>
+  <h2>Acceso administrador</h2>
+  <p>Login al panel administrativo.</p>
 
-  <div id="admin-messages" role="status" aria-live="polite"></div>
+  <form id="admin-login-form">
+    <label for="admin-user">Usuario</label>
+    <input id="admin-user" type="text" name="user" autocomplete="username">
 
-  <form id="product-create-form">
-    <fieldset>
-      <legend>Datos obligatorios</legend>
-      <label for="p-name">Nombre *</label>
-      <input id="p-name" name="name" type="text" required>
+    <label for="admin-pass">Contraseña</label>
+    <input id="admin-pass" type="password" name="pass" autocomplete="current-password">
 
-      <label for="p-winery">Bodega / Destilería *</label>
-      <input id="p-winery" name="winery_distillery" type="text" required>
-
-      <label for="p-type">Tipo (vino, cerveza, gin, etc.) *</label>
-      <input id="p-type" name="drink_type" type="text" required>
-
-      <label for="p-price">Precio (centavos) *</label>
-      <input id="p-price" name="base_price" type="number" min="0" required>
-
-      <label for="p-code">Código público (QR) *</label>
-      <input id="p-code" name="public_code" type="text" required>
-    </fieldset>
-
-    <fieldset>
-      <legend>Datos opcionales</legend>
-      <label for="p-varietal">Varietal</label>
-      <input id="p-varietal" name="varietal" type="text">
-
-      <label for="p-origin">Origen</label>
-      <input id="p-origin" name="origin" type="text">
-
-      <label for="p-year">Año (vintage)</label>
-      <input id="p-year" name="vintage_year" type="number" min="1900" max="2100">
-
-      <label for="p-desc">Descripción corta</label>
-      <textarea id="p-desc" name="short_description" rows="3"></textarea>
-
-      <label for="p-stock">Stock visible</label>
-      <input id="p-stock" name="visible_stock" type="number" min="0">
-    </fieldset>
-
-    <button type="submit">Crear producto</button>
+    <button type="submit">Ingresar</button>
   </form>
+
+  <p class="placeholder">Más adelante, desde aquí se redirigirá al panel admin (HU-A1: alta de producto y otras operaciones).</p>
 </section>
