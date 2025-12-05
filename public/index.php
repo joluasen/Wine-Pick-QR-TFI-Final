@@ -38,6 +38,19 @@ wpq_debug_log('Solicitud recibida: ' . $_SERVER['REQUEST_METHOD'] . ' ' . $_SERV
     . ' desde ' . ($_SERVER['REMOTE_ADDR'] ?? 'desconocido'));
 
 // Procesar la solicitud a través del enrutador
+// Si el usuario accede a la raíz del proyecto, mostrar una página índice
+// con información básica de la API en vez de "Ruta no encontrada".
+$fullUri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) ?? '/';
+$projectPath = parse_url(BASE_URL, PHP_URL_PATH) ?: '/proyectos/Wine-Pick-QR-TFI';
+$relative = (strpos($fullUri, $projectPath) === 0) ? substr($fullUri, strlen($projectPath)) : $fullUri;
+if ($relative === '' || $relative === '/' || $relative === '/index.php') {
+    // Respuesta HTML mínima y profesional embebida directamente en index.php
+    header('Content-Type: text/html; charset=utf-8', true, 200);
+    echo '<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Wine-Pick-QR</title></head><body style="font-family:Arial,Helvetica,sans-serif;margin:32px;color:#222">';
+    echo '<h1>Wine-Pick-QR</h1>';
+    exit;
+}
+
 try {
     $router = new Router();
     $router->dispatch();
