@@ -23,7 +23,8 @@ const routes = {
 
 function getViewFromHash() {
   const hash = window.location.hash || '#home';
-  return routes[hash] || 'home';
+  const baseHash = hash.split('?')[0];
+  return routes[baseHash] || 'home';
 }
 
 async function showView(viewName) {

@@ -7,6 +7,14 @@
 -->
 <section data-view="qr">
   <h2>Consulta por QR</h2>
-  <p>Esta vista mostrará la información del producto a partir de un código QR.</p>
-  <p>Próximamente aquí se integrará la lógica de lectura de código y la llamada a la API.</p>
+  <p>Ingresa el código/QR del producto o escanéalo (cuando se habilite la cámara).</p>
+
+  <form id="qr-form">
+    <label for="qr-code">Código público / QR</label>
+    <input id="qr-code" name="qr_code" type="text" placeholder="Ej: MALBEC-RES-750-001" required>
+    <div id="qr-status" aria-live="polite"></div>
+    <button type="submit">Consultar</button>
+  </form>
+
+  <div id="qr-result"></div>
 </section>
