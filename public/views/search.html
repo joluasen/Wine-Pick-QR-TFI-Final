@@ -5,16 +5,18 @@
   en `public/js/views/searchView.js` (controlador de vista).
 -->
 <section data-view="search">
-  <h2>Búsqueda de productos</h2>
-  <p>Buscá vinos o licores por nombre, bodega, tipo, etc.</p>
+  <h2>Búsqueda de Productos</h2>
+  <p>Encuentra vinos, espumantes, licores y más por nombre, bodega, varietal u origen.</p>
 
   <form id="search-form">
-    <label for="search-input">Texto de búsqueda:</label>
-    <input id="search-input" type="text" name="q" placeholder="Ej: Malbec, bodega, etc.">
+    <div>
+      <label for="search-input">Buscar producto</label>
+      <input id="search-input" type="text" name="q" placeholder="Ej: Malbec, Norton, Mendoza..." required>
+    </div>
     <button type="submit">Buscar</button>
   </form>
 
   <div id="search-results">
-    <p class="placeholder">Los resultados aparecerán aquí.</p>
+    <p style="color: var(--text-light); text-align: center; padding: 2rem;">Los resultados aparecerán aquí después de buscar.</p>
   </div>
 </section>
