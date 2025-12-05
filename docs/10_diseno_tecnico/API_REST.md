@@ -22,6 +22,35 @@ El objetivo principal es proporcionar una referencia clara para:
 
 ---
 
+## Estado de implementación (Sprint 1)
+
+### Endpoints completados ✅
+
+- **GET /api/public/productos/{codigo}** – Obtener producto por código público (QR).
+- **GET /api/public/productos?search=...** – Búsqueda de productos por texto.
+- **POST /api/admin/productos** – Crear nuevo producto.
+
+### Estructura técnica implementada
+
+- **Router simple** (`app/Utils/Router.php`): enrutador que mapea URLs a controladores.
+- **Clase Database** (`app/Utils/Database.php`): manejo de conexiones MySQLi con prepared statements.
+- **Modelo Product** (`app/Models/Product.php`): lógica de acceso a datos.
+- **Controlador ProductController** (`app/Controllers/ProductController.php`): lógica de negocio.
+- **Respuestas JSON uniforme** (`app/Utils/JsonResponse.php`): formato consistente.
+
+### Base de datos
+
+- Tablas creadas: `admin_users`, `products`, `promotions`, `consult_events`.
+- Datos de prueba insertados: 6 productos de ejemplo.
+
+### Notas
+
+- La autenticación de administradores aún no está implementada (los endpoints admin aceptan cualquier petición).
+- El registro de eventos de consulta (`consult_events`) se implementará en próximos sprints.
+- Validaciones avanzadas (JSON Schema, etc.) se añadirán en iteraciones posteriores.
+
+---
+
 ## 1. Convenciones generales
 
 ### 1.1 Base de la API
@@ -152,17 +181,17 @@ Se utiliza para:
 
 - `search` (obligatorio, `string`): término de búsqueda. Se aplica a:
   - `name`
+  - `short_description`
   - `winery_distillery`
   - `varietal`
-  - `public_code`
+  - `origin`
 
-- `page` (opcional, `int`, por defecto `1`).
-- `limit` (opcional, `int`, por defecto `20`, máx. `100`).
+En el MVP actual el límite es fijo (20 resultados). La paginación se implementará en futuros sprints.
 
 **Ejemplo de petición**
 
 ```http
-GET /api/public/productos?search=malbec&page=1&limit=10
+GET /api/public/productos?search=bodega
 ```
 
 **Ejemplo de respuesta (éxito)**
@@ -171,28 +200,43 @@ GET /api/public/productos?search=malbec&page=1&limit=10
 {
   "ok": true,
   "data": {
-    "items": [
+    "count": 2,
+    "products": [
       {
-        "id": 12,
-        "public_code": "MALBEC-RESERVA-2020",
-        "name": "Malbec Reserva 2020",
+        "id": 1,
+        "public_code": "MALBEC-RES-750-001",
+        "name": "Malbec Reserva 750ml",
         "drink_type": "vino",
-        "winery": "Bodega Example",
+        "winery_distillery": "Bodega Ejemplo",
         "varietal": "Malbec",
         "origin": "Mendoza, Argentina",
+        "vintage_year": 2021,
+        "short_description": "Malbec reserva intenso y frutado.",
+        "base_price": 5500.00,
+        "visible_stock": 24,
+        "image_url": null,
+        "is_active": true,
+        "created_at": "2025-12-04 21:02:28",
+        "updated_at": "2025-12-04 21:02:28"
+      },
+      {
+        "id": 2,
+        "public_code": "CABERNET-750-001",
+        "name": "Cabernet Sauvignon 750ml",
+        "drink_type": "vino",
+        "winery_distillery": "Bodega Ejemplo",
+        "varietal": "Cabernet Sauvignon",
+        "origin": "Mendoza, Argentina",
         "vintage_year": 2020,
-        "short_description": "Reserva red wine, ideal for red meat.",
-        "base_price": 4500.0,
-        "visible_stock": 25,
-        "image_url": "https://example.com/images/malbec_reserva_2020.jpg",
-        "is_active": 1
+        "short_description": "Cabernet con buena estructura y notas de roble.",
+        "base_price": 5200.00,
+        "visible_stock": 18,
+        "image_url": null,
+        "is_active": true,
+        "created_at": "2025-12-04 21:02:28",
+        "updated_at": "2025-12-04 21:02:28"
       }
-    ],
-    "pagination": {
-      "page": 1,
-      "limit": 10,
-      "count": 1
-    }
+    ]
   },
   "error": null
 }
@@ -228,17 +272,12 @@ Se usa cuando:
 
 **Parámetros de ruta**
 
-- `public_code` (obligatorio, `string`): código público del producto, el mismo incluido en el QR.
-
-**Parámetros de query**
-
-- `channel` (opcional, `string`, valores previstos: `QR`, `SEARCH`):  
-  Origen de la consulta. En el MVP todavía no se usa, pero el diseño lo contempla.
+- `codigo` (obligatorio, `string`): código público del producto, el mismo incluido en el QR.
 
 **Ejemplo de petición**
 
 ```http
-GET /api/public/productos/MALBEC-RESERVA-2020?channel=QR
+GET /api/public/productos/MALBEC-RES-750-001
 ```
 
 **Ejemplo de respuesta (éxito)**
@@ -247,19 +286,21 @@ GET /api/public/productos/MALBEC-RESERVA-2020?channel=QR
 {
   "ok": true,
   "data": {
-    "id": 12,
-    "public_code": "MALBEC-RESERVA-2020",
-    "name": "Malbec Reserva 2020",
+    "id": 1,
+    "public_code": "MALBEC-RES-750-001",
+    "name": "Malbec Reserva 750ml",
     "drink_type": "vino",
-    "winery": "Bodega Example",
+    "winery_distillery": "Bodega Ejemplo",
     "varietal": "Malbec",
     "origin": "Mendoza, Argentina",
-    "vintage_year": 2020,
-    "short_description": "Reserva red wine, ideal for red meat.",
-    "base_price": 4500.0,
-    "visible_stock": 25,
-    "image_url": "https://example.com/images/malbec_reserva_2020.jpg",
-    "is_active": 1
+    "vintage_year": 2021,
+    "short_description": "Malbec reserva intenso y frutado.",
+    "base_price": 5500.00,
+    "visible_stock": 24,
+    "image_url": null,
+    "is_active": true,
+    "created_at": "2025-12-04 21:02:28",
+    "updated_at": "2025-12-04 21:02:28"
   },
   "error": null
 }
@@ -268,8 +309,20 @@ GET /api/public/productos/MALBEC-RESERVA-2020?channel=QR
 **Errores típicos**
 
 - `404 Not Found` → producto no encontrado o no activo.
-- `400 Bad Request` → `public_code` vacío.
 - `500 Internal Server Error` → error inesperado.
+
+**Ejemplo de respuesta (error 404)**
+
+```json
+{
+  "ok": false,
+  "data": null,
+  "error": {
+    "code": "NOT_FOUND",
+    "message": "Producto no encontrado."
+  }
+}
+```
 
 ---
 
@@ -421,50 +474,80 @@ POST /api/admin/productos
 
 Crea un producto nuevo en la tabla `products`.
 
-**Cuerpo de la petición (JSON)**
+**Cuerpo de la petición (JSON) – Mínimo**
 
 ```json
 {
-  "public_code": "MALBEC-RESERVA-2020",
-  "name": "Malbec Reserva 2020",
+  "public_code": "MALBEC-RES-2021",
+  "name": "Malbec Reserva 2021",
   "drink_type": "vino",
-  "winery": "Bodega Example",
-  "varietal": "Malbec",
-  "origin": "Mendoza, Argentina",
-  "vintage_year": 2020,
-  "short_description": "Reserva red wine",
-  "base_price": 4500.0,
-  "visible_stock": 25,
-  "image_url": "https://example.com/images/malbec.jpg",
-  "is_active": true
+  "winery_distillery": "Bodega Ejemplo",
+  "base_price": 5500.00
 }
 ```
 
-**Campos mínimos requeridos**
+**Cuerpo de la petición (JSON) – Completo**
 
-- `public_code`
-- `name`
-- `drink_type` (uno de: `vino`, `espumante`, `whisky`, `gin`, `licor`, `cerveza`, `otro`)
-- `winery`
-- `base_price` (> 0)
+```json
+{
+  "public_code": "MALBEC-RES-2021",
+  "name": "Malbec Reserva 2021",
+  "drink_type": "vino",
+  "winery_distillery": "Bodega Ejemplo",
+  "varietal": "Malbec",
+  "origin": "Mendoza, Argentina",
+  "vintage_year": 2021,
+  "short_description": "Malbec reserva intenso y frutado.",
+  "base_price": 5500.00,
+  "visible_stock": 24,
+  "image_url": null,
+  "is_active": 1
+}
+```
 
-**Ejemplo de respuesta (éxito)**
+**Campos requeridos**
+
+- `public_code` (string, único): código público del producto.
+- `name` (string): nombre del producto.
+- `drink_type` (enum): uno de: `vino`, `espumante`, `whisky`, `gin`, `licor`, `cerveza`, `otro`.
+- `winery_distillery` (string): nombre de la bodega o destilería.
+- `base_price` (number): precio base (debe ser > 0).
+
+**Campos opcionales**
+
+- `varietal` (string): tipo de varietal (ej: Malbec, Chardonnay).
+- `origin` (string): origen geográfico (ej: Mendoza, Argentina).
+- `vintage_year` (int): año de cosecha.
+- `short_description` (string): descripción corta.
+- `visible_stock` (int): stock visible en tienda.
+- `image_url` (string): URL de la imagen del producto.
+- `is_active` (bool): si el producto está activo (por defecto: 1).
+
+**Ejemplo de respuesta (éxito 201 Created)**
 
 ```json
 {
   "ok": true,
   "data": {
-    "id": 15,
-    "public_code": "MALBEC-RESERVA-2020",
-    "name": "Malbec Reserva 2020",
+    "id": 7,
+    "public_code": "MALBEC-RES-2021",
+    "name": "Malbec Reserva 2021",
     "drink_type": "vino",
-    "winery": "Bodega Example",
+    "winery_distillery": "Bodega Ejemplo",
     "varietal": "Malbec",
     "origin": "Mendoza, Argentina",
-    "vintage_year": 2020,
-    "short_description": "Reserva red wine",
-    "base_price": 4500.0,
-    "visible_stock": 25,
+    "vintage_year": 2021,
+    "short_description": "Malbec reserva intenso y frutado.",
+    "base_price": 5500.00,
+    "visible_stock": 24,
+    "image_url": null,
+    "is_active": true,
+    "created_at": "2025-12-05 01:10:00",
+    "updated_at": "2025-12-05 01:10:00"
+  },
+  "error": null
+}
+```
     "image_url": "https://example.com/images/malbec.jpg",
     "is_active": 1
   },
@@ -472,9 +555,7 @@ Crea un producto nuevo en la tabla `products`.
 }
 ```
 
-**Errores típicos**
-
-- Falta de campos:
+**Errores típicos – Falta de campo requerido**
 
 ```json
 {
@@ -482,16 +563,15 @@ Crea un producto nuevo en la tabla `products`.
   "data": null,
   "error": {
     "code": "VALIDATION_ERROR",
-    "message": "Invalid request data.",
+    "message": "El campo \"name\" es requerido.",
     "details": {
-      "name": "Field is required.",
-      "base_price": "Must be a positive number."
+      "field": "name"
     }
   }
 }
 ```
 
-- Código público duplicado:
+**Errores típicos – Campo drink_type inválido**
 
 ```json
 {
@@ -499,9 +579,43 @@ Crea un producto nuevo en la tabla `products`.
   "data": null,
   "error": {
     "code": "VALIDATION_ERROR",
-    "message": "Invalid request data.",
+    "message": "El \"drink_type\" no es válido. Valores aceptados: vino, espumante, whisky, gin, licor, cerveza, otro",
     "details": {
-      "public_code": "This public code is already in use."
+      "field": "drink_type",
+      "valid_values": ["vino", "espumante", "whisky", "gin", "licor", "cerveza", "otro"]
+    }
+  }
+}
+```
+
+**Errores típicos – Código público duplicado**
+
+```json
+{
+  "ok": false,
+  "data": null,
+  "error": {
+    "code": "VALIDATION_ERROR",
+    "message": "Ya existe un producto con este código (public_code).",
+    "details": {
+      "field": "public_code",
+      "error": "Duplicate entry 'MALBEC-RES-2021' for key 'uq_products_public_code'"
+    }
+  }
+}
+```
+
+**Errores típicos – Precio inválido**
+
+```json
+{
+  "ok": false,
+  "data": null,
+  "error": {
+    "code": "VALIDATION_ERROR",
+    "message": "El \"base_price\" debe ser mayor a 0.",
+    "details": {
+      "field": "base_price"
     }
   }
 }
