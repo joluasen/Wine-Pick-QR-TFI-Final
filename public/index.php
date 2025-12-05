@@ -2,74 +2,112 @@
 // public/index.php
 declare(strict_types=1);
 
-// Mostrar errores en entorno de desarrollo
 ini_set('display_errors', '1');
 error_reporting(E_ALL);
 
-// Iniciar sesión (se usará para la parte de administración)
 session_start();
 
-// Cargar configuración básica
 require_once __DIR__ . '/../config/config.php';
-
-// Ejemplo de uso del logger de depuración
-wpq_debug_log('Solicitud recibida en public/index.php desde ' . ($_SERVER['REMOTE_ADDR'] ?? 'desconocido'));
-
-// En el futuro aquí se instanciará el Router / Front Controller,
-// que delegará en los controladores de la carpeta app/Controllers.
-
-// Para el Sprint 0 / estructura base, mostramos una respuesta simple.
 ?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>WINE-PICK-QR - Backend</title>
+    <title>WINE-PICK-QR</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <style>
-        body {
-            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-            background-color: #f5f5f5;
-            margin: 0;
-            padding: 2rem;
-        }
-        .container {
-            max-width: 640px;
-            margin: 2rem auto;
-            background: #fff;
-            border-radius: 8px;
-            padding: 1.5rem 2rem;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.08);
-        }
-        h1 {
-            margin-top: 0;
-            color: #8b0000;
-        }
-        code {
-            background: #eee;
-            padding: 2px 4px;
-            border-radius: 4px;
-        }
-        .ok {
-            color: #22863a;
-            font-weight: bold;
-        }
-    </style>
+
+    <!-- Manifest PWA -->
+    <link rel="manifest" href="./manifest.json">
+    <meta name="theme-color" content="#8b0000">
+
+    <!-- Icono base -->
+    <link rel="icon" type="image/png" sizes="192x192" href="./assets/icons/icon-192.png">
+
+    <!-- Estilos base -->
+    <link rel="stylesheet" href="./css/styles.css">
 </head>
 <body>
-    <div class="container">
-        <h1>WINE-PICK-QR – Backend PHP</h1>
-        <p class="ok">✅ Punto de entrada cargado correctamente.</p>
-        <p>
-            Estás viendo la salida de <code>public/index.php</code>.<br>
-            La estructura base del backend está creada.
-        </p>
-        <p style="font-size: 0.9rem; color: #555;">
-            Próximos pasos (a nivel técnico):<br>
-            – Implementar un front controller / router simple.<br>
-            – Añadir controladores para productos, promociones, etc.<br>
-            – Conectar con la base de datos usando los parámetros de <code>config/config.php</code>.
-        </p>
-    </div>
+    <header class="app-header">
+        <h1 class="app-title">WINE-PICK-QR</h1>
+        <nav class="app-nav">
+            <button class="nav-btn" data-link="#home">Inicio</button>
+            <button class="nav-btn" data-link="#qr">Consulta por QR</button>
+            <button class="nav-btn" data-link="#search">Búsqueda</button>
+            <button class="nav-btn" data-link="#admin">Admin</button>
+        </nav>
+    </header>
+
+    <main class="app-main">
+        <!-- Vista: Inicio -->
+        <section class="view view--active" data-view="home">
+            <h2>Inicio</h2>
+            <p>Bienvenido a WINE-PICK-QR.</p>
+            <p>
+                Desde aquí podrás:
+            </p>
+            <ul>
+                <li>Ir a <strong>Consulta por QR</strong> para escanear códigos en góndola.</li>
+                <li>Usar la <strong>Búsqueda</strong> para encontrar productos por texto.</li>
+                <li>Acceder al <strong>Panel Admin</strong> (para alta de productos y promos).</li>
+            </ul>
+        </section>
+
+        <!-- Vista: Consulta por QR (esqueleto) -->
+        <section class="view" data-view="qr">
+            <h2>Consulta por QR</h2>
+            <p>Esta vista mostrará la información del producto a partir de un código QR.</p>
+            <p>
+                Próximamente aquí se integrará la lógica de:
+                <br>– Lectura de código (o ingreso manual de código),
+                <br>– Llamada a la API de consulta por código.
+            </p>
+        </section>
+
+        <!-- Vista: Búsqueda de productos (esqueleto) -->
+        <section class="view" data-view="search">
+            <h2>Búsqueda de productos</h2>
+            <p>Buscá vinos o licores por nombre, bodega, tipo, etc.</p>
+
+            <form id="search-form">
+                <label for="search-input">Texto de búsqueda:</label>
+                <input id="search-input" type="text" name="q" placeholder="Ej: Malbec, bodega, etc.">
+                <button type="submit">Buscar</button>
+            </form>
+
+            <div id="search-results">
+                <!-- Aquí se mostrarán los resultados de búsqueda (HU-C2) -->
+                <p class="placeholder">Los resultados aparecerán aquí.</p>
+            </div>
+        </section>
+
+        <!-- Vista: Acceso admin (esqueleto) -->
+        <section class="view" data-view="admin">
+            <h2>Acceso administrador</h2>
+            <p>Login al panel administrativo.</p>
+
+            <form id="admin-login-form">
+                <label for="admin-user">Usuario</label>
+                <input id="admin-user" type="text" name="user" autocomplete="username">
+
+                <label for="admin-pass">Contraseña</label>
+                <input id="admin-pass" type="password" name="pass" autocomplete="current-password">
+
+                <button type="submit">Ingresar</button>
+            </form>
+
+            <p class="placeholder">
+                Más adelante, desde aquí se redirigirá al panel admin
+                (HU-A1: alta de producto y otras operaciones).
+            </p>
+        </section>
+    </main>
+
+    <footer class="app-footer">
+        <small>WINE-PICK-QR &copy; <?php echo date('Y'); ?></small>
+    </footer>
+
+    <!-- JS principal (módulos ES) -->
+    <script type="module" src="./js/app.js"></script>
 </body>
 </html>
+
