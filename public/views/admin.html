@@ -1,22 +1,54 @@
 <!--
   Vista parcial: admin.html
-  Descripción: formulario de acceso para usuarios administradores. El manejo
-  del login y la navegación posterior se implementa en
-  `public/js/views/adminView.js`.
+  Descripción: formulario de alta de producto para administradores. El manejo
+  de eventos y validaciones se implementa en `public/js/views/adminView.js`.
 -->
 <section data-view="admin">
-  <h2>Acceso administrador</h2>
-  <p>Login al panel administrativo.</p>
+  <h2>Alta de producto (admin)</h2>
+  <p>Completa los campos obligatorios y envía para crear un nuevo producto.</p>
 
-  <form id="admin-login-form">
-    <label for="admin-user">Usuario</label>
-    <input id="admin-user" type="text" name="user" autocomplete="username">
+  <form id="product-create-form">
+    <label for="public_code">Código público / QR *</label>
+    <input id="public_code" name="public_code" type="text" required>
 
-    <label for="admin-pass">Contraseña</label>
-    <input id="admin-pass" type="password" name="pass" autocomplete="current-password">
+    <label for="name">Nombre *</label>
+    <input id="name" name="name" type="text" required>
 
-    <button type="submit">Ingresar</button>
+    <label for="drink_type">Tipo de bebida *</label>
+    <select id="drink_type" name="drink_type" required>
+      <option value="">-- Selecciona --</option>
+      <option value="vino">Vino</option>
+      <option value="espumante">Espumante</option>
+      <option value="whisky">Whisky</option>
+      <option value="gin">Gin</option>
+      <option value="licor">Licor</option>
+      <option value="cerveza">Cerveza</option>
+      <option value="otro">Otro</option>
+    </select>
+
+    <label for="winery_distillery">Bodega / Destilería *</label>
+    <input id="winery_distillery" name="winery_distillery" type="text" required>
+
+    <label for="base_price">Precio base *</label>
+    <input id="base_price" name="base_price" type="number" step="0.01" min="0" required>
+
+    <label for="varietal">Varietal</label>
+    <input id="varietal" name="varietal" type="text">
+
+    <label for="origin">Origen</label>
+    <input id="origin" name="origin" type="text">
+
+    <label for="vintage_year">Año</label>
+    <input id="vintage_year" name="vintage_year" type="number" min="1900" max="2100">
+
+    <label for="short_description">Descripción corta</label>
+    <textarea id="short_description" name="short_description" rows="2"></textarea>
+
+    <label for="visible_stock">Stock visible</label>
+    <input id="visible_stock" name="visible_stock" type="number" min="0" step="1">
+
+    <div id="product-create-status" aria-live="polite"></div>
+
+    <button type="submit">Crear producto</button>
   </form>
-
-  <p class="placeholder">Más adelante, desde aquí se redirigirá al panel admin (HU-A1: alta de producto y otras operaciones).</p>
 </section>
