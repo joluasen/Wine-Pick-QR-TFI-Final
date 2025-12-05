@@ -1,0 +1,22 @@
+<!--
+  Vista parcial: admin.html
+  Descripción: formulario de acceso para usuarios administradores. El manejo
+  del login y la navegación posterior se implementa en
+  `public/js/views/adminView.js`.
+-->
+<section data-view="admin">
+  <h2>Acceso administrador</h2>
+  <p>Login al panel administrativo.</p>
+
+  <form id="admin-login-form">
+    <label for="admin-user">Usuario</label>
+    <input id="admin-user" type="text" name="user" autocomplete="username">
+
+    <label for="admin-pass">Contraseña</label>
+    <input id="admin-pass" type="password" name="pass" autocomplete="current-password">
+
+    <button type="submit">Ingresar</button>
+  </form>
+
+  <p class="placeholder">Más adelante, desde aquí se redirigirá al panel admin (HU-A1: alta de producto y otras operaciones).</p>
+</section>

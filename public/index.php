@@ -3,11 +3,16 @@
 declare(strict_types=1);
 
 /**
- * Punto de Entrada Principal de la Aplicación
- * 
- * Este archivo es el índice frontal (front controller) de la aplicación Wine-Pick-QR.
- * Realiza las inicializaciones necesarias, carga la configuración, registra el autoloader
- * y delega la solicitud HTTP al router para su procesamiento.
+ * Front controller (entrada HTTP)
+ *
+ * Responsabilidad:
+ * - Delegar solicitudes cuyo path comienza con `/api/` al enrutador del backend.
+ * - Servir archivos estáticos desde `public/` cuando existan (manifest, JS, CSS, imágenes).
+ * - Para cualquier otra ruta, devolver la SPA estática `public/spa.html`.
+ *
+ * Notas:
+ * - Diseñado para uso en desarrollo local con la aplicación PWA y la API coexistiendo
+ *   en el mismo host y directorio `public/`.
  */
 
 ini_set('display_errors', '1');
@@ -17,49 +22,90 @@ session_start();
 
 require_once __DIR__ . '/../config/config.php';
 
-// Autoloader PSR-4 para cargar clases automáticamente
-spl_autoload_register(function ($class) {
-    $paths = [
-        BASE_PATH . '/app/Utils/' . $class . '.php',
-        BASE_PATH . '/app/Models/' . $class . '.php',
-        BASE_PATH . '/app/Controllers/' . $class . '.php',
-    ];
-
-    foreach ($paths as $file) {
-        if (file_exists($file)) {
-            require_once $file;
-            return;
-        }
-    }
-});
-
-// Registrar solicitud recibida (solo en desarrollo)
-wpq_debug_log('Solicitud recibida: ' . $_SERVER['REQUEST_METHOD'] . ' ' . $_SERVER['REQUEST_URI'] 
-    . ' desde ' . ($_SERVER['REMOTE_ADDR'] ?? 'desconocido'));
-
-// Procesar la solicitud a través del enrutador
-// Si el usuario accede a la raíz del proyecto, mostrar una página índice
-// con información básica de la API en vez de "Ruta no encontrada".
 $fullUri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) ?? '/';
 $projectPath = parse_url(BASE_URL, PHP_URL_PATH) ?: '/proyectos/Wine-Pick-QR-TFI';
 $relative = (strpos($fullUri, $projectPath) === 0) ? substr($fullUri, strlen($projectPath)) : $fullUri;
-if ($relative === '' || $relative === '/' || $relative === '/index.php') {
-    // Respuesta HTML mínima y profesional embebida directamente en index.php
-    header('Content-Type: text/html; charset=utf-8', true, 200);
-    echo '<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Wine-Pick-QR</title></head><body style="font-family:Arial,Helvetica,sans-serif;margin:32px;color:#222">';
-    echo '<h1>Wine-Pick-QR</h1>';
+
+// Si es una petición a la API, delegar al router backend
+if (strpos($relative, '/api/') === 0) {
+    // Autoloader PSR-4 para cargar clases del backend
+    spl_autoload_register(function ($class) {
+        $paths = [
+            BASE_PATH . '/app/Utils/' . $class . '.php',
+            BASE_PATH . '/app/Models/' . $class . '.php',
+            BASE_PATH . '/app/Controllers/' . $class . '.php',
+        ];
+
+        foreach ($paths as $file) {
+            if (file_exists($file)) {
+                require_once $file;
+                return;
+            }
+        }
+    });
+
+    // Registrar solicitud
+    wpq_debug_log('Solicitud API: ' . $_SERVER['REQUEST_METHOD'] . ' ' . $_SERVER['REQUEST_URI'] . ' desde ' . ($_SERVER['REMOTE_ADDR'] ?? 'desconocido'));
+
+    try {
+        $router = new Router();
+        $router->dispatch();
+    } catch (\Exception $e) {
+        JsonResponse::error(
+            'INTERNAL_ERROR',
+            'Error interno del servidor.',
+            500,
+            ['exception' => $e->getMessage()]
+        );
+    }
     exit;
 }
 
-try {
-    $router = new Router();
-    $router->dispatch();
-} catch (\Exception $e) {
-    // Manejo centralizado de excepciones no capturadas
-    JsonResponse::error(
-        'INTERNAL_ERROR',
-        'Error interno del servidor.',
-        500,
-        ['exception' => $e->getMessage()]
-    );
+// Antes de servir la SPA, comprobar si el recurso solicitado existe
+$publicDir = __DIR__;
+$requestedPath = $relative;
+
+// Normalizar ruta (asegurar que empieza con '/')
+if ($requestedPath === '' || $requestedPath[0] !== '/') {
+    $requestedPath = '/' . ltrim($requestedPath, '/');
 }
+
+$candidate = realpath($publicDir . $requestedPath);
+
+if ($candidate !== false && strpos($candidate, $publicDir) === 0 && is_file($candidate)) {
+    // Determinar tipo MIME básico por extensión
+    $ext = strtolower(pathinfo($candidate, PATHINFO_EXTENSION));
+    $mimeMap = [
+        'html' => 'text/html; charset=utf-8',
+        'htm'  => 'text/html; charset=utf-8',
+        'json' => 'application/json; charset=utf-8',
+        'js'   => 'application/javascript; charset=utf-8',
+        'css'  => 'text/css; charset=utf-8',
+        'png'  => 'image/png',
+        'jpg'  => 'image/jpeg',
+        'jpeg' => 'image/jpeg',
+        'svg'  => 'image/svg+xml',
+        'ico'  => 'image/x-icon',
+        'map'  => 'application/json; charset=utf-8',
+        'txt'  => 'text/plain; charset=utf-8'
+    ];
+
+    $contentType = $mimeMap[$ext] ?? 'application/octet-stream';
+    header('Content-Type: ' . $contentType, true, 200);
+    readfile($candidate);
+    exit;
+}
+
+// Si no es un archivo estático, servir la SPA (public/spa.html)
+$spa = $publicDir . '/spa.html';
+if (file_exists($spa)) {
+    header('Content-Type: text/html; charset=utf-8', true, 200);
+    readfile($spa);
+    exit;
+}
+
+// Fallback mínimo
+header('Content-Type: text/plain; charset=utf-8', true, 200);
+echo "Wine-Pick-QR - API / PWA\n";
+exit;
+
