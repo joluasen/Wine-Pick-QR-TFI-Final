@@ -2,23 +2,17 @@
 /**
  * Controlador de la vista 'admin'
  *
- * Responsabilidad:
- * - Gestionar el formulario de alta de producto para administradores.
- * - Validar datos mínimos y enviar POST /api/admin/productos.
- * - Mostrar estados: en curso, éxito, error de validación o error general.
- * - Generar, descargar e imprimir el QR del producto creado.
+ * - Verifica autenticación (requiere sesión admin)
+ * - Envía POST /api/admin/productos para crear producto
+ * - Muestra estados de carga, éxito y error
+ * - Permite cerrar sesión
  */
 let lastQrData = null;
 
-function setStatus(statusEl, message, type = 'info') {
-  if (!statusEl) return;
-  statusEl.textContent = message;
-  statusEl.dataset.type = type;
-}
-
-function clearForm(form) {
-  if (!form) return;
-  form.reset();
+function setStatus(el, message, type = 'info') {
+  if (!el) return;
+  el.textContent = message;
+  el.dataset.type = type;
 }
 
 function buildQrLink(code) {
@@ -48,57 +42,51 @@ function renderQr(qrRenderEl, qrTextEl) {
   }
 }
 
-function getQrDataUrl(qrRenderEl) {
-  if (!qrRenderEl) return null;
-  const canvas = qrRenderEl.querySelector('canvas');
-  if (canvas && canvas.toDataURL) {
-    return canvas.toDataURL('image/png');
+async function logoutAndRedirect(statusEl) {
+  try {
+    await fetch('./api/admin/logout', { method: 'POST' });
+  } catch (err) {
+    // Ignorar error de red en logout
   }
-  return null;
+  setStatus(statusEl, 'Sesión cerrada. Redirigiendo a login...', 'info');
+  setTimeout(() => {
+    window.location.hash = '#login';
+  }, 300);
 }
 
-function downloadQr(qrRenderEl) {
-  const dataUrl = getQrDataUrl(qrRenderEl);
-  if (!dataUrl || !lastQrData) return;
-
-  const link = document.createElement('a');
-  link.href = dataUrl;
-  link.download = `qr-${lastQrData.code || 'producto'}.png`;
-  link.click();
-}
-
-function printQr(qrRenderEl) {
-  const dataUrl = getQrDataUrl(qrRenderEl);
-  if (!dataUrl || !lastQrData) return;
-
-  const win = window.open('', '_blank', 'width=400,height=480');
-  if (!win) return;
-  win.document.write(`<!DOCTYPE html><title>Imprimir QR</title><img src="${dataUrl}" style="width:320px;height:320px;display:block;margin:16px auto;" alt="QR" />`);
-  win.document.close();
-  win.focus();
-  win.print();
-}
-
-export function initAdminView(container) {
+export async function initAdminView(container) {
   const form = container.querySelector('#product-create-form');
   const statusEl = container.querySelector('#product-create-status');
   const qrCard = container.querySelector('#product-qr-card');
-  const qrTextEl = container.querySelector('#product-qr-text');
   const qrRenderEl = container.querySelector('#product-qr-render');
-  const qrDownloadBtn = container.querySelector('#qr-download-btn');
-  const qrPrintBtn = container.querySelector('#qr-print-btn');
-  const qrRegenerateBtn = container.querySelector('#qr-regenerate-btn');
+  const qrTextEl = container.querySelector('#product-qr-text');
 
-  if (qrDownloadBtn) {
-    qrDownloadBtn.addEventListener('click', () => downloadQr(qrRenderEl));
+  // Botón de logout dinámico para no tocar la vista
+  let logoutBtn = container.querySelector('#logout-btn');
+  if (!logoutBtn) {
+    logoutBtn = document.createElement('button');
+    logoutBtn.id = 'logout-btn';
+    logoutBtn.type = 'button';
+    logoutBtn.textContent = 'Cerrar sesión';
+    logoutBtn.style.marginBottom = '1rem';
+    logoutBtn.addEventListener('click', () => logoutAndRedirect(statusEl));
+    container.prepend(logoutBtn);
   }
 
-  if (qrPrintBtn) {
-    qrPrintBtn.addEventListener('click', () => printQr(qrRenderEl));
-  }
+  const checkAuth = async () => {
+    try {
+      const res = await fetch('./api/admin/me', { headers: { Accept: 'application/json' } });
+      return res.ok;
+    } catch (err) {
+      return false;
+    }
+  };
 
-  if (qrRegenerateBtn) {
-    qrRegenerateBtn.addEventListener('click', () => renderQr(qrRenderEl, qrTextEl));
+  const isAuth = await checkAuth();
+  if (!isAuth) {
+    setStatus(statusEl, 'No autenticado. Redirigiendo a login...', 'error');
+    setTimeout(() => { window.location.hash = '#login'; }, 400);
+    return;
   }
 
   if (form) {
@@ -108,26 +96,8 @@ export function initAdminView(container) {
       const formData = new FormData(form);
       const payload = Object.fromEntries(formData.entries());
 
-      // Normalizar numéricos
-      payload.base_price = payload.base_price ? Number(payload.base_price) : 0;
-      payload.visible_stock = payload.visible_stock ? Number(payload.visible_stock) : null;
-      payload.vintage_year = payload.vintage_year ? Number(payload.vintage_year) : null;
-
-      // Validaciones mínimas en cliente
-      if (!payload.name || payload.name.trim() === '') {
-        setStatus(statusEl, 'El nombre es obligatorio.', 'error');
-        return;
-      }
-      if (!payload.public_code || payload.public_code.trim() === '') {
-        setStatus(statusEl, 'El código público / QR es obligatorio.', 'error');
-        return;
-      }
-      if (!payload.base_price || Number.isNaN(payload.base_price) || payload.base_price <= 0) {
-        setStatus(statusEl, 'El precio base debe ser mayor a 0.', 'error');
-        return;
-      }
-
       setStatus(statusEl, 'Creando producto...', 'info');
+      if (qrCard) qrCard.hidden = true;
 
       try {
         const res = await fetch('./api/admin/productos', {
@@ -140,7 +110,12 @@ export function initAdminView(container) {
         });
 
         const json = await res.json().catch(() => null);
-        console.log('Alta producto → status', res.status, 'json', json);
+
+        if (res.status === 401) {
+          setStatus(statusEl, 'Sesión expirada. Inicia sesión nuevamente.', 'error');
+          setTimeout(() => { window.location.hash = '#login'; }, 400);
+          return;
+        }
 
         if (!res.ok || !json?.ok) {
           const msg = json?.error?.message || `Error HTTP ${res.status}`;
@@ -148,21 +123,19 @@ export function initAdminView(container) {
           return;
         }
 
-        setStatus(statusEl, 'Producto creado correctamente.', 'success');
+        // Éxito
+        setStatus(statusEl, 'Producto creado con éxito.', 'success');
+        form.reset();
+
+        // Guardar QR data y renderizar
         lastQrData = {
-          code: payload.public_code,
-          link: json?.data?.qr_link || buildQrLink(payload.public_code),
+          code: json.data?.public_code,
+          link: json.data?.qr_link,
         };
-
-        if (qrCard) {
-          qrCard.hidden = false;
-          renderQr(qrRenderEl, qrTextEl);
-        }
-
-        clearForm(form);
+        if (qrCard) qrCard.hidden = false;
+        renderQr(qrRenderEl, qrTextEl);
       } catch (err) {
-        console.error('Error de red al crear producto', err);
-        setStatus(statusEl, `Error al crear el producto: ${err.message}`, 'error');
+        setStatus(statusEl, `Error de red: ${err.message}`, 'error');
       }
     });
   }

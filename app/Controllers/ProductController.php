@@ -96,6 +96,11 @@ class ProductController
      */
     public function create(): void
     {
+        // Proteger endpoint: requiere sesión de admin
+        if (empty($_SESSION['admin_user_id'])) {
+            ApiResponse::unauthorized('No autenticado. Inicia sesión para continuar.');
+        }
+
         // Obtener JSON del body
         $body = file_get_contents('php://input');
         $data = json_decode($body, true);
