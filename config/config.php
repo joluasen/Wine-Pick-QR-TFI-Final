@@ -39,7 +39,7 @@ define('WPQ_ENV', $_ENV['WPQ_ENV'] ?? 'dev');
 
 // Parámetros de conexión a base de datos (MySQL/MariaDB)
 define('DB_HOST', $_ENV['DB_HOST'] ?? 'localhost');
-define('DB_NAME', $_ENV['DB_NAME'] ?? 'winepick_db');
+define('DB_NAME', $_ENV['DB_NAME'] ?? 'wine_pick_qr');
 define('DB_USER', $_ENV['DB_USER'] ?? 'root');
 define('DB_PASS', $_ENV['DB_PASS'] ?? '');
 define('DB_CHARSET', $_ENV['DB_CHARSET'] ?? 'utf8mb4');
