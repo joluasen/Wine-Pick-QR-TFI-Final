@@ -262,5 +262,36 @@ class Product
 
         return $this->db->fetchOne($query, [$id], 'i');
     }
+
+    /**
+     * Obtener promoción activa de un producto.
+     * 
+     * @param int $productId ID del producto.
+     * 
+     * @return array|null Datos de la promoción activa o null si no hay.
+     */
+    public function getActivePromotion(int $productId): ?array
+    {
+        $now = date('Y-m-d H:i:s');
+        
+        $query = "
+            SELECT
+                id,
+                promotion_type,
+                parameter_value,
+                visible_text,
+                start_at,
+                end_at
+            FROM promotions
+            WHERE product_id = ?
+            AND is_active = 1
+            AND start_at <= ?
+            AND (end_at IS NULL OR end_at >= ?)
+            ORDER BY start_at DESC
+            LIMIT 1
+        ";
+
+        return $this->db->fetchOne($query, [$productId, $now, $now], 'iss');
+    }
 }
 ?>

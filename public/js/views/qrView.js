@@ -34,19 +34,50 @@ function renderProduct(resultEl, product) {
     public_code,
   } = product;
 
-  const list = document.createElement('div');
-  list.classList.add('product-card');
-  list.innerHTML = `
-    <h3>${name || 'Producto'}</h3>
-    <p><strong>Bodega / marca:</strong> ${winery_distillery || '—'}</p>
-    <p><strong>Tipo / varietal:</strong> ${drink_type || '—'}${varietal ? ' · ' + varietal : ''}</p>
-    <p><strong>Precio:</strong> $${base_price ?? '—'}</p>
-    <p><strong>Código público:</strong> ${public_code || '—'}</p>
-    <p><strong>Descripción:</strong> ${short_description || '—'}</p>
+  // Mostrar en modal
+  const modal = document.getElementById('product-modal');
+  const modalCard = document.getElementById('modal-product-card');
+  
+  if (!modal || !modalCard) return;
+
+  const imageUrl = product.image_url || '';
+  
+  modalCard.innerHTML = `
+    <div class="product-card-modal">
+      <div class="product-left">
+        <div class="product-image-container">
+          <img src="${imageUrl}" alt="${name}" class="product-image" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+          <div class="product-image-placeholder" style="display: none;">
+            <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+              <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+              <line x1="12" y1="22.08" x2="12" y2="12"></line>
+            </svg>
+            <span>Producto</span>
+          </div>
+        </div>
+        ${product.promotion ? `
+          <div class="product-promotion">
+            <span class="promotion-badge">PROMOCIÓN</span>
+            <p class="promotion-text">${product.promotion.text || 'Oferta especial'}</p>
+          </div>
+        ` : ''}
+      </div>
+      <div class="product-info">
+        <h3 class="product-name">${name || 'Producto'}</h3>
+        <p class="product-winery">${winery_distillery || '—'}</p>
+        <p class="product-type">${drink_type || '—'}${varietal ? ' · ' + varietal : ''}</p>
+        <div class="product-price">$${base_price ?? '—'}</div>
+        ${short_description ? `<p class="product-description">${short_description}</p>` : ''}
+        <div class="product-footer">
+          <p class="product-code">${public_code || '—'}</p>
+        </div>
+      </div>
+    </div>
   `;
 
+  modal.style.display = 'flex';
   resultEl.innerHTML = '';
-  resultEl.appendChild(list);
 }
 
 export function initQrView(container) {
@@ -169,6 +200,23 @@ export function initQrView(container) {
           console.error('Error al detener escáner:', err);
         });
       }
+    });
+  }
+
+  // Funcionalidad del modal
+  const modal = container.querySelector('#product-modal');
+  const modalClose = container.querySelector('.modal-close');
+  const modalOverlay = container.querySelector('.modal-overlay');
+
+  if (modalClose && modal) {
+    modalClose.addEventListener('click', () => {
+      modal.style.display = 'none';
+    });
+  }
+
+  if (modalOverlay && modal) {
+    modalOverlay.addEventListener('click', () => {
+      modal.style.display = 'none';
     });
   }
 

@@ -52,8 +52,11 @@ class ProductController
             ApiResponse::notFound('Producto no encontrado.');
         }
 
+        // Obtener promoción activa si existe
+        $promotion = $this->productModel->getActivePromotion((int)$product['id']);
+
         // Transformar datos para la respuesta
-        $data = $this->formatProductResponse($product);
+        $data = $this->formatProductResponse($product, $promotion);
 
         ApiResponse::success($data, 200);
     }
@@ -186,9 +189,9 @@ class ProductController
      * 
      * @return array
      */
-    private function formatProductResponse(array $product): array
+    private function formatProductResponse(array $product, ?array $promotion = null): array
     {
-        return [
+        $data = [
             'id' => (int) $product['id'],
             'public_code' => $product['public_code'],
             'name' => $product['name'],
@@ -206,6 +209,19 @@ class ProductController
             'updated_at' => $product['updated_at'],
             'qr_link' => BASE_URL . '/#qr?code=' . rawurlencode($product['public_code']),
         ];
+
+        // Agregar promoción si existe
+        if ($promotion) {
+            $data['promotion'] = [
+                'type' => $promotion['promotion_type'],
+                'value' => (float) $promotion['parameter_value'],
+                'text' => $promotion['visible_text'] ?? null,
+            ];
+        } else {
+            $data['promotion'] = null;
+        }
+
+        return $data;
     }
 }
 ?>
