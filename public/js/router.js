@@ -7,19 +7,25 @@
  * - Cargar la vista parcial correspondiente (`/views/{view}.html`) mediante fetch
  *   e inyectarla en el contenedor `#app-root`.
  * - Invocar el inicializador de la vista (controlador) para enlazar eventos.
+ * - Proteger rutas admin (requiere autenticación).
  */
 import { initHomeView } from './views/homeView.js';
 import { initQrView } from './views/qrView.js';
 import { initSearchView } from './views/searchView.js';
 import { initAdminView } from './views/adminView.js';
+import { initLoginView } from './views/loginView.js';
 
 const routes = {
   '': 'home',
   '#home': 'home',
+  '#login': 'login',
   '#qr': 'qr',
   '#search': 'search',
   '#admin': 'admin',
 };
+
+// Rutas que requieren autenticación
+const protectedRoutes = ['admin'];
 
 function getViewFromHash() {
   const hash = window.location.hash || '#home';
@@ -27,9 +33,30 @@ function getViewFromHash() {
   return routes[baseHash] || 'home';
 }
 
+async function checkAuthentication() {
+  try {
+    const res = await fetch('./api/admin/me', {
+      headers: { Accept: 'application/json' }
+    });
+    return res.ok; // true si está autenticado, false si no
+  } catch (err) {
+    return false;
+  }
+}
+
 async function showView(viewName) {
   const root = document.getElementById('app-root');
   if (!root) return;
+
+  // Proteger rutas que requieren autenticación
+  if (protectedRoutes.includes(viewName)) {
+    const isAuthenticated = await checkAuthentication();
+    if (!isAuthenticated) {
+      // Redirigir a login
+      window.location.hash = '#login';
+      return;
+    }
+  }
 
   // Cargar parcial correspondiente
   try {
@@ -50,6 +77,9 @@ async function showView(viewName) {
   switch (viewName) {
     case 'home':
       initHomeView(root);
+      break;
+    case 'login':
+      initLoginView(root);
       break;
     case 'qr':
       initQrView(root);

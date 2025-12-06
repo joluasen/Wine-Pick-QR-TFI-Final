@@ -52,7 +52,12 @@ class Router
         // GET /api/public/productos?search=...
         $this->get('/api/public/productos', 'ProductController@search');
 
-        // POST /api/admin/productos
+        // Auth
+        $this->post('/api/admin/login', 'AuthController@login');
+        $this->post('/api/admin/logout', 'AuthController@logout');
+        $this->get('/api/admin/me', 'AuthController@me');
+
+        // POST /api/admin/productos (protegido)
         $this->post('/api/admin/productos', 'ProductController@create');
     }
 
