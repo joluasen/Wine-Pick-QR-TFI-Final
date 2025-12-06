@@ -7,16 +7,29 @@
 -->
 <section data-view="qr">
   <h2>Consulta por Código</h2>
-  <p>Ingresa el código del producto para ver su información detallada.</p>
+  <p>Escanea un código QR con tu cámara o ingresa el código manualmente.</p>
 
-  <form id="qr-form">
-    <div>
-      <label for="qr-code">Código del producto</label>
-      <input id="qr-code" name="qr_code" type="text" placeholder="Ej: MALBEC-RES-750-001" required>
+  <!-- Sección de escáner QR con cámara -->
+  <div class="qr-scanner-container">
+    <div class="scanner-controls">
+      <button type="button" id="start-scan-btn" class="btn-primary">Iniciar Escaneo</button>
+      <button type="button" id="stop-scan-btn" class="btn-secondary" style="display: none;">Detener Escaneo</button>
     </div>
-    <div id="qr-status" aria-live="polite"></div>
-    <button type="submit">Buscar Producto</button>
-  </form>
+    <div id="qr-reader" style="display: none;"></div>
+  </div>
+
+  <!-- Formulario de ingreso manual -->
+  <div class="manual-input-section">
+    <h3>O ingresa el código manualmente</h3>
+    <form id="qr-form">
+      <div>
+        <label for="qr-code">Código del producto</label>
+        <input id="qr-code" name="qr_code" type="text" placeholder="Ej: MALBEC-RES-750-001" required>
+      </div>
+      <div id="qr-status" aria-live="polite"></div>
+      <button type="submit">Buscar Producto</button>
+    </form>
+  </div>
 
   <div id="qr-result"></div>
 </section>
