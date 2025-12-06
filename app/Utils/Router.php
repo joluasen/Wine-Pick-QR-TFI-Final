@@ -24,8 +24,8 @@ class Router
     {
         $fullUri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) ?? '/';
         
-        // Extraer la ruta relativa al proyecto
-        $projectPath = '/proyectos/Wine-Pick-QR-TFI';
+        // Extraer la ruta relativa al proyecto desde BASE_URL
+        $projectPath = parse_url(BASE_URL, PHP_URL_PATH) ?: '/proyectos/Wine-Pick-QR-TFI';
         if (strpos($fullUri, $projectPath) === 0) {
             $this->requestUri = substr($fullUri, strlen($projectPath));
         } else {

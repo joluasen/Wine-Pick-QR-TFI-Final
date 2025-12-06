@@ -9,19 +9,40 @@ declare(strict_types=1);
  * la aplicación, incluyendo parámetros de base de datos, rutas del sistema de
  * archivos y configuración de entorno.
  * 
- * Modificar estos valores según el entorno de despliegue (desarrollo, staging,
- * producción) sin afectar el código de la aplicación.
+ * Modificar .env en la raíz del proyecto para cambiar entre local y hosting.
  */
 
+// Cargar variables de entorno desde .env
+$envFile = dirname(__DIR__) . '/.env';
+if (file_exists($envFile)) {
+    $lines = file($envFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+    foreach ($lines as $line) {
+        // Ignorar comentarios
+        if (strpos(trim($line), '#') === 0) {
+            continue;
+        }
+        // Parsear KEY=VALUE
+        if (strpos($line, '=') !== false) {
+            list($key, $value) = explode('=', $line, 2);
+            $key = trim($key);
+            $value = trim($value);
+            // No sobrescribir si ya existe en $_ENV o como constante
+            if (!isset($_ENV[$key]) && !defined($key)) {
+                $_ENV[$key] = $value;
+            }
+        }
+    }
+}
+
 // Entorno de ejecución: 'dev' | 'prod'
-define('WPQ_ENV', 'dev');
+define('WPQ_ENV', $_ENV['WPQ_ENV'] ?? 'dev');
 
 // Parámetros de conexión a base de datos (MySQL/MariaDB)
-define('DB_HOST', 'localhost');
-define('DB_NAME', 'wine_pick_qr');
-define('DB_USER', 'root');
-define('DB_PASS', '');
-define('DB_CHARSET', 'utf8mb4');
+define('DB_HOST', $_ENV['DB_HOST'] ?? 'localhost');
+define('DB_NAME', $_ENV['DB_NAME'] ?? 'winepick_db');
+define('DB_USER', $_ENV['DB_USER'] ?? 'root');
+define('DB_PASS', $_ENV['DB_PASS'] ?? '');
+define('DB_CHARSET', $_ENV['DB_CHARSET'] ?? 'utf8mb4');
 
 // Rutas del sistema de archivos
 define('BASE_PATH', dirname(__DIR__));
@@ -31,7 +52,7 @@ define('CONFIG_PATH', BASE_PATH . '/config');
 define('LOGS_PATH', BASE_PATH . '/logs');
 
 // URL base de la aplicación
-define('BASE_URL', 'http://localhost/proyectos/Wine-Pick-QR-TFI');
+define('BASE_URL', $_ENV['BASE_URL'] ?? 'http://localhost/proyectos/Wine-Pick-QR-TFI');
 
 /**
  * Registra mensajes de depuración en el archivo de logs.
@@ -57,3 +78,4 @@ function wpq_debug_log(string $message): void
 
     @file_put_contents(LOGS_PATH . '/debug.log', $line, FILE_APPEND);
 }
+
