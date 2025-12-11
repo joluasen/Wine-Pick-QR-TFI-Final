@@ -59,6 +59,12 @@ class Router
 
         // POST /api/admin/productos (protegido)
         $this->post('/api/admin/productos', 'ProductController@create');
+
+        // POST /api/admin/promociones (protegido)
+        $this->post('/api/admin/promociones', 'PromotionController@create');
+
+        // GET /api/admin/promociones?product_id=... (protegido)
+        $this->get('/api/admin/promociones', 'PromotionController@listByProduct');
     }
 
     /**
@@ -174,8 +180,16 @@ class Router
             );
         }
 
-        // Verificar que el método existe
-        $controller = new $controllerClass();
+        // Inyectar dependencias si es PromotionController
+        if ($controllerClass === 'PromotionController') {
+            $promotionModel = new Promotion(Database::getInstance());
+            $productModel = new Product(Database::getInstance());
+            $controller = new $controllerClass($promotionModel, $productModel);
+        } else {
+            // Controladores sin inyección de dependencias
+            $controller = new $controllerClass();
+        }
+
         if (!method_exists($controller, $methodName)) {
             JsonResponse::error(
                 'INTERNAL_ERROR',
