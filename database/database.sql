@@ -57,12 +57,14 @@ CREATE TABLE products (
 
 -- -----------------------------------------------------
 -- Table: promotions (promociones)
+-- MVP Scope: Promociones simples y combos básicos
+-- Tipos: porcentaje, precio_fijo, 2x1, 3x2, nxm
 -- -----------------------------------------------------
 CREATE TABLE promotions (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     product_id INT UNSIGNED NOT NULL,
-    promotion_type ENUM('porcentaje','precio_fijo','2x1','n_por_m','otro') NOT NULL,
-    parameter_value DECIMAL(10,2) NOT NULL,
+    promotion_type ENUM('porcentaje','precio_fijo','2x1','3x2','nxm') NOT NULL,
+    parameter_value DECIMAL(10,2) NOT NULL COMMENT 'Porcentaje: 0-100. Precio_fijo: precio ARS. nxm: N (llevas N al precio de M)',
     visible_text VARCHAR(255) NULL,
     start_at DATETIME NOT NULL,
     end_at DATETIME NULL,
