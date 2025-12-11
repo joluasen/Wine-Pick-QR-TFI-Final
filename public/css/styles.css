@@ -380,6 +380,290 @@ button:disabled {
   letter-spacing: 1px;
 }
 
+/* Estilo Mercado Libre */
+.meli-container {
+  display: flex;
+  gap: 2.5rem;
+  padding: 1.5rem;
+  background: white;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.meli-image-section {
+  flex: 0 0 350px;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.meli-image-wrapper {
+  width: 100%;
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fafafa;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid #ededed;
+}
+
+.meli-image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.meli-image-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  gap: 0.75rem;
+  color: #999;
+}
+
+.meli-image-placeholder span {
+  font-size: 0.9rem;
+  color: #999;
+}
+
+.meli-specs-box {
+  background: #fafafa;
+  border: 1px solid #ededed;
+  border-radius: 8px;
+  padding: 1rem;
+}
+
+.meli-specs-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: rgba(0,0,0,0.9);
+  margin: 0 0 0.75rem 0;
+}
+
+.meli-specs-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.meli-spec-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
+.meli-spec-label {
+  font-size: 0.85rem;
+  color: rgba(0,0,0,0.55);
+  flex-shrink: 0;
+}
+
+.meli-spec-value {
+  font-size: 0.85rem;
+  color: rgba(0,0,0,0.9);
+  font-weight: 500;
+  text-align: right;
+}
+
+.meli-details-section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.meli-header {
+  border-bottom: 1px solid #ededed;
+  padding-bottom: 1rem;
+}
+
+.meli-condition {
+  font-size: 0.875rem;
+  color: rgba(0,0,0,0.55);
+  margin: 0 0 0.5rem 0;
+}
+
+.meli-title {
+  font-size: 1.375rem;
+  font-weight: 400;
+  color: rgba(0,0,0,0.9);
+  margin: 0;
+  line-height: 1.35;
+}
+
+.meli-price-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.meli-price-original {
+  font-size: 1.125rem;
+  color: rgba(0,0,0,0.45);
+  text-decoration: line-through;
+  margin: 0;
+  font-weight: 300;
+}
+
+.meli-price-row {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.meli-price-main {
+  display: flex;
+  align-items: flex-start;
+  line-height: 1;
+}
+
+.meli-price-symbol {
+  font-size: 1.5rem;
+  font-weight: 300;
+  color: rgba(0,0,0,0.9);
+  margin-right: 0.25rem;
+  margin-top: 0.25rem;
+}
+
+.meli-price-int {
+  font-size: 2.75rem;
+  font-weight: 300;
+  color: rgba(0,0,0,0.9);
+  letter-spacing: -1px;
+}
+
+.meli-price-dec {
+  font-size: 1.5rem;
+  font-weight: 300;
+  color: rgba(0,0,0,0.9);
+  margin-top: 0.25rem;
+}
+
+.meli-discount-badge {
+  display: inline-block;
+  background: #00a650;
+  color: white;
+  padding: 0.35rem 0.6rem;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  height: fit-content;
+}
+
+.meli-savings {
+  font-size: 1rem;
+  color: #00a650;
+  margin: 0.25rem 0 0 0;
+  font-weight: 600;
+}
+
+.meli-promo-box {
+  display: flex;
+  gap: 0.75rem;
+  background: #fff4e6;
+  border: 1px solid #ffe4b3;
+  border-radius: 6px;
+  padding: 1rem;
+  margin-top: 0.5rem;
+}
+
+.meli-promo-icon {
+  flex-shrink: 0;
+  color: #f4a900;
+}
+
+.meli-promo-content {
+  flex: 1;
+}
+
+.meli-promo-text {
+  margin: 0 0 0.5rem 0;
+  font-size: 0.9rem;
+  color: rgba(0,0,0,0.8);
+  line-height: 1.5;
+}
+
+.meli-promo-validity {
+  margin: 0;
+  font-size: 0.8rem;
+  color: rgba(0,0,0,0.55);
+}
+
+.meli-attributes {
+  border-top: 1px solid #ededed;
+  padding-top: 1.5rem;
+}
+
+.meli-section-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: rgba(0,0,0,0.9);
+  margin: 0 0 1rem 0;
+}
+
+.meli-attribute-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.meli-attribute {
+  display: flex;
+  gap: 1rem;
+}
+
+.meli-attr-label {
+  flex: 0 0 120px;
+  font-size: 0.875rem;
+  color: rgba(0,0,0,0.55);
+}
+
+.meli-attr-value {
+  font-size: 0.875rem;
+  color: rgba(0,0,0,0.9);
+  font-weight: 400;
+}
+
+.meli-description {
+  border-top: 1px solid #ededed;
+  padding-top: 1.5rem;
+}
+
+.meli-desc-text {
+  font-size: 0.9375rem;
+  color: rgba(0,0,0,0.8);
+  line-height: 1.6;
+  margin: 0;
+}
+
+@media (max-width: 768px) {
+  .meli-container {
+    flex-direction: column;
+    gap: 1.5rem;
+    padding: 1rem;
+  }
+  
+  .meli-image-section {
+    flex: 1;
+  }
+  
+  .meli-price-int {
+    font-size: 2rem;
+  }
+  
+  .meli-specs-box {
+    order: 2;
+  }
+}
+
+/* Mantener estilos anteriores para compatibilidad */
 .product-info {
   flex: 1;
   display: flex;
@@ -410,6 +694,104 @@ button:disabled {
   opacity: 0.8;
 }
 
+.product-origin,
+.product-vintage {
+  font-size: 0.85rem;
+  color: var(--text-light);
+  margin: 0.4rem 0;
+  opacity: 0.9;
+}
+
+.product-promotion-box {
+  background: linear-gradient(135deg, #d4af37 0%, #f4d03f 100%);
+  color: #2D0810;
+  padding: 0.6rem 0.8rem;
+  border-radius: 4px;
+  margin: 0.75rem 0;
+  box-shadow: 0 2px 8px rgba(212, 175, 55, 0.3);
+}
+
+.product-promotion-box .promotion-badge {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  display: block;
+  margin-bottom: 0.3rem;
+}
+
+.product-promotion-box .promo-explanation {
+  color: #2D0810;
+  margin: 0.3rem 0;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.product-promotion-box .promotion-validity {
+  color: #2D0810;
+  opacity: 0.8;
+  margin: 0.3rem 0 0 0;
+  font-size: 0.75rem;
+}
+
+.promotion-section {
+  background: linear-gradient(135deg, #d4af37 0%, #f4d03f 100%);
+  color: #2D0810;
+  padding: 0.75rem 1rem;
+  border-radius: 4px;
+  margin: 0.75rem 0;
+  box-shadow: 0 2px 8px rgba(212, 175, 55, 0.3);
+}
+
+.promotion-badge-inline {
+  display: inline-block;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  margin-bottom: 0.5rem;
+  color: #2D0810;
+}
+
+.product-price-section {
+  margin: 0.5rem 0;
+}
+
+.price-label {
+  margin: 0.3rem 0;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #2D0810;
+}
+
+.price-original {
+  text-decoration: line-through;
+  opacity: 0.7;
+  font-weight: normal;
+}
+
+.price-promo,
+.price-normal {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #2D0810;
+}
+
+.promo-detail {
+  margin: 0.4rem 0 0 0;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #2D0810;
+}
+
+.promotion-validity-small {
+  margin: 0.5rem 0 0 0;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: #2D0810;
+  opacity: 0.85;
+}
+
 .product-promotion {
   background: linear-gradient(135deg, #d4af37 0%, #f4d03f 100%);
   color: #2D0810;
@@ -436,22 +818,53 @@ button:disabled {
   color: #2D0810;
 }
 
+.promotion-validity {
+  margin: 0.3rem 0 0 0;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #2D0810;
+  opacity: 0.85;
+}
+
 .product-description {
   font-size: 0.9rem;
-  color: var(--text);
+  color: var(--text-light);
   line-height: 1.5;
-  margin: 0.5rem 0;
-  padding: 0.6rem;
-  background: rgba(255, 255, 255, 0.02);
-  border-radius: 4px;
-  border-left: 2px solid var(--primary);
+  margin: 0.75rem 0;
+  font-style: italic;
 }
 
 .product-price {
-  font-size: 1.6rem;
+  font-size: 2rem;
   font-weight: 700;
-  color: var(--primary);
+  color: #2E7D42;
+  margin: 1rem 0 0.25rem 0;
+}
+
+.promo-explanation {
+  font-size: 0.9rem;
+  color: var(--text-light);
+  margin: 0.25rem 0 0.75rem 0;
+  line-height: 1.5;
+}
+
+.product-price-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
   margin: 0.5rem 0;
+}
+
+.product-price-original {
+  font-size: 1rem;
+  color: #999;
+  text-decoration: line-through;
+}
+
+.product-discount {
+  font-size: 0.9rem;
+  color: #d4af37;
+  font-weight: 600;
 }
 
 .product-footer {

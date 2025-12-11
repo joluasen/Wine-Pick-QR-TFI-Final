@@ -27,11 +27,45 @@ function renderSearchResults(resultEl, products) {
     const card = document.createElement('div');
     card.className = 'search-result-card';
     card.style.cursor = 'pointer';
+    // Calcular precio con promoción
+    let priceHtml = '';
+    let promoValidityHtml = '';
+    if (product.promotion) {
+      const basePrice = parseFloat(product.base_price);
+      let finalPrice = basePrice;
+      
+      if (product.promotion.type === 'porcentaje') {
+        const discount = parseFloat(product.promotion.value);
+        finalPrice = basePrice * (1 - discount / 100);
+        priceHtml = `<p><strong>Precio:</strong> <span style="text-decoration: line-through; color: #999;">$${basePrice.toFixed(2)}</span> <span style="color: #d4af37; font-weight: bold;">$${finalPrice.toFixed(2)}</span> <span style="color: #d4af37; font-size: 0.85em;">(${discount}% OFF)</span></p>`;
+      } else if (product.promotion.type === 'precio_fijo') {
+        finalPrice = parseFloat(product.promotion.value);
+        const savings = basePrice - finalPrice;
+        priceHtml = `<p><strong>Precio:</strong> <span style="text-decoration: line-through; color: #999;">$${basePrice.toFixed(2)}</span> <span style="color: #d4af37; font-weight: bold;">$${finalPrice.toFixed(2)}</span> <span style="color: #d4af37; font-size: 0.85em;">(Ahorrás $${savings.toFixed(2)})</span></p>`;
+      } else if (product.promotion.type === '2x1') {
+        finalPrice = basePrice / 2;
+        priceHtml = `<p><strong>Precio:</strong> <span style="text-decoration: line-through; color: #999;">$${basePrice.toFixed(2)}</span> <span style="color: #d4af37; font-weight: bold;">$${finalPrice.toFixed(2)} c/u</span> <span style="color: #d4af37; font-size: 0.85em;">(2x1: pagás 1, llevás 2)</span></p>`;
+      } else if (product.promotion.type === '3x2') {
+        finalPrice = basePrice * 2 / 3;
+        priceHtml = `<p><strong>Precio:</strong> <span style="text-decoration: line-through; color: #999;">$${basePrice.toFixed(2)}</span> <span style="color: #d4af37; font-weight: bold;">$${finalPrice.toFixed(2)} c/u</span> <span style="color: #d4af37; font-size: 0.85em;">(3x2: pagás 2, llevás 3)</span></p>`;
+      } else if (product.promotion.type === 'nxm') {
+        priceHtml = `<p><strong>Precio:</strong> <span style="color: #d4af37; font-weight: bold;">$${basePrice.toFixed(2)} c/u</span> <span style="color: #d4af37; font-size: 0.85em;">(Combo especial - Consultá condiciones)</span></p>`;
+      }
+      
+      // Agregar fechas de validez
+      const startDate = product.promotion.start_at ? new Date(product.promotion.start_at).toLocaleDateString('es-AR') : '';
+      const endDate = product.promotion.end_at ? new Date(product.promotion.end_at).toLocaleDateString('es-AR') : 'Sin vencimiento';
+      promoValidityHtml = `<p style="font-size: 0.8em; color: #d4af37; margin-top: 0.25rem;">⏰ Válido hasta: ${endDate}</p>`;
+    } else {
+      priceHtml = `<p><strong>Precio:</strong> $${product.base_price ?? '—'}</p>`;
+    }
+    
     card.innerHTML = `
       <h4>${product.name || 'Producto'}</h4>
       <p><strong>Bodega:</strong> ${product.winery_distillery || '—'}</p>
       <p><strong>Tipo:</strong> ${product.drink_type || '—'}${product.varietal ? ' · ' + product.varietal : ''}</p>
-      <p><strong>Precio:</strong> $${product.base_price ?? '—'}</p>
+      ${priceHtml}
+      ${promoValidityHtml}
       <p><small>Código: ${product.public_code}</small></p>
     `;
     
