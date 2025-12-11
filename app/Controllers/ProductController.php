@@ -215,7 +215,9 @@ class ProductController
             $data['promotion'] = [
                 'type' => $promotion['promotion_type'],
                 'value' => (float) $promotion['parameter_value'],
-                'text' => $promotion['visible_text'] ?? null,
+                'text' => htmlspecialchars($promotion['visible_text'] ?? '', ENT_QUOTES, 'UTF-8'),
+                'start_at' => $promotion['start_at'] ?? null,
+                'end_at' => $promotion['end_at'] ?? null,
             ];
         } else {
             $data['promotion'] = null;
