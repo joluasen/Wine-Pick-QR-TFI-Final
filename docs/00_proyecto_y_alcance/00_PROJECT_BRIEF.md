@@ -66,6 +66,7 @@ El **MVP de WINE-PICK-QR** incluye:
   - Gestión de promociones simples por producto:
     - Descuento porcentual.
     - Precio final promocional.
+    - Combos básicos (2x1, 3x2, NxM).
   - Visualización de métricas:
     - Productos más consultados (últimos 30 días).
     - Cantidad de consultas diarias segmentadas por canal (QR / búsqueda).
@@ -79,7 +80,7 @@ Quedan explícitamente fuera del alcance del MVP:
 - Gestión avanzada de stock (movimientos, compras, ventas, alertas automáticas).
 - Integración con sistemas de facturación, punto de venta o ERP.
 - Gestión de múltiples sucursales con sincronización en tiempo real.
-- Promociones complejas de tipo “combos” con múltiples productos (2x1, 3x2, etc.) implementadas a nivel de reglas de carrito.
+- Promociones complejas multi-producto con reglas de carrito avanzadas (ej: combos entre diferentes productos, compra producto A y llevate B con descuento).
 - Pasarela de pagos o e-commerce completo (carrito, checkout, pagos en línea).
 - Autenticación de clientes finales (no se crean cuentas de cliente, el acceso público es anónimo).
 - Integraciones con plataformas externas de delivery o marketplaces.

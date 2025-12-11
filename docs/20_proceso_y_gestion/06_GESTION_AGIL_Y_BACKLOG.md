@@ -75,7 +75,7 @@ A continuación se lista un backlog inicial basado en las historias de usuario y
 | HU-A1 | Admin crea producto                                     | Feature   | Must                |
 | HU-A2 | Admin edita producto                                    | Feature   | Must                |
 | HU-A3 | Admin desactiva producto                                | Feature   | Must                |
-| HU-A4 | Admin crea promoción simple                             | Feature   | Must                |
+| HU-A4 | Admin crea promoción (descuento/precio/combo)           | Feature   | Must                |
 | HU-A5 | Admin gestiona vigencia de promociones                  | Feature   | Must                |
 | HU-A6 | Admin ve productos más consultados (últimos 30 días)    | Feature   | Must                |
 | HU-A7 | Admin ve consultas diarias por canal                    | Feature   | Should              |

@@ -113,11 +113,12 @@ A continuación se listan los principales requerimientos funcionales (RF).
 
 ### 3.4. Gestión de promociones (administrador)
 
-- **RF10.** El sistema debe permitir al administrador crear promociones simples por producto:
+- **RF10.** El sistema debe permitir al administrador crear promociones por producto:
   - Descuento porcentual sobre el precio base.
   - Precio final promocional.
+  - Combos básicos (2x1, 3x2, NxM donde N unidades se llevan al precio de M).
 - **RF11.** El sistema debe permitir definir fechas de vigencia (inicio y fin) de cada promoción.
-- **RF12.** El sistema debe evitar que un mismo producto tenga más de una promoción simple vigente al mismo tiempo.
+- **RF12.** El sistema debe evitar que un mismo producto tenga más de una promoción vigente al mismo tiempo.
 - **RF13.** El sistema debe permitir desactivar o finalizar promociones.
 
 ### 3.5. Métricas y reportes

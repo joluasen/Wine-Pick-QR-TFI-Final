@@ -109,10 +109,10 @@ A continuación se listan las historias más relevantes del MVP. Se pueden desgl
 
 ### 3.5. Administrador – Gestión de promociones
 
-**HU-A4 – Crear promoción simple**
+**HU-A4 – Crear promoción**
 
 > Como **administrador**,  
-> quiero **definir una promoción simple para un producto (descuento o precio promocional)**,  
+> quiero **definir una promoción para un producto (descuento porcentual, precio fijo o combo básico)**,  
 > para **destacar ofertas vigentes en góndola y en la ficha**.
 
 **HU-A5 – Gestionar vigencia de promociones**
@@ -150,8 +150,9 @@ A continuación se listan las historias más relevantes del MVP. Se pueden desgl
    - Los productos desactivados conservan su información y los eventos de consulta históricos.
 
 2. **Promociones**
-   - Cada producto puede tener, como máximo, una promoción simple vigente a la vez.
-   - El precio mostrado en la ficha es el precio promocional si existe una promoción activa y vigente; de lo contrario, se muestra el precio base.
+   - Cada producto puede tener, como máximo, una promoción vigente a la vez.
+   - El precio mostrado en la ficha refleja la promoción activa (descuento, precio fijo o combo).
+   - Para combos (2x1, NxM), se muestra el precio unitario equivalente al aplicar la promoción.
    - Las promociones vencidas se consideran inactivas para la lógica de precios y listados, pero pueden conservarse como histórico.
 
 3. **Eventos de consulta**
