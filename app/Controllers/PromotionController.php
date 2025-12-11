@@ -63,8 +63,8 @@ class PromotionController
 
         // Validaciones específicas por tipo
         if ($type === 'porcentaje') {
-            if ($value > 100) {
-                ApiResponse::validationError('Un porcentaje no puede ser mayor a 100%.', 'parameter_value');
+            if ($value >= 100) {
+                ApiResponse::validationError('El porcentaje debe ser menor a 100% para que el precio final sea mayor a 0.', 'parameter_value');
             }
         } elseif ($type === 'precio_fijo') {
             if ($value >= (float)$product['base_price']) {

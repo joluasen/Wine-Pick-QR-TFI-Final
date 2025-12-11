@@ -81,8 +81,11 @@ class ProductController
 
         $results = $this->productModel->search($searchText, 20);
 
-        // Transformar cada resultado
-        $data = array_map([$this, 'formatProductResponse'], $results);
+        // Transformar cada resultado agregando promoción vigente (si existe)
+        $data = array_map(function ($product) {
+            $promotion = $this->productModel->getActivePromotion((int)$product['id']);
+            return $this->formatProductResponse($product, $promotion);
+        }, $results);
 
         ApiResponse::success([
             'count' => count($data),
