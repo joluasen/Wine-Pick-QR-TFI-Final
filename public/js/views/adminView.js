@@ -2,12 +2,21 @@
 /**
  * Controlador de la vista 'admin'
  *
- * - Verifica autenticación (requiere sesión admin)
- * - Envía POST /api/admin/productos para crear producto
- * - Muestra estados de carga, éxito y error
- * - Permite cerrar sesión
+ * Responsabilidades:
+ * - Verificar autenticación (requiere sesión admin válida)
+ * - Gestionar alta de productos (POST /api/admin/productos)
+ *   - Validación de campos requeridos
+ *   - Generación y visualización de código QR
+ *   - Manejo de errores y estados de carga
+ * - Gestionar alta de promociones (POST /api/admin/promociones)
+ *   - Soporte para tipos: porcentaje, precio_fijo, 2x1, 3x2, nxm
+ *   - Validación de rango de fechas
+ *   - Actualización dinámica del label según tipo seleccionado
+ * - Permitir cierre de sesión con redirección a login
+ * - Cargar y mantener lista de productos para seleccionar en promos
  */
-let lastQrData = null;
+
+let lastQrData = null; // Almacena datos del último QR generado
 
 function setStatus(el, message, type = 'info') {
   if (!el) return;
@@ -21,6 +30,11 @@ function buildQrLink(code) {
   return `${base}/#qr?code=${encodeURIComponent(code)}`;
 }
 
+/**
+ * Renderizar código QR usando librería QRCode.js
+ * @param {HTMLElement} qrRenderEl - Contenedor donde dibujar el QR
+ * @param {HTMLElement} qrTextEl - Elemento para mostrar texto descriptivo
+ */
 function renderQr(qrRenderEl, qrTextEl) {
   if (!qrRenderEl || !lastQrData || typeof QRCode === 'undefined') return;
 
@@ -42,11 +56,15 @@ function renderQr(qrRenderEl, qrTextEl) {
   }
 }
 
+/**
+ * Cerrar sesión y redirigir al login
+ * @param {HTMLElement} statusEl - Elemento donde mostrar confirmación
+ */
 async function logoutAndRedirect(statusEl) {
   try {
     await fetch('./api/admin/logout', { method: 'POST' });
   } catch (err) {
-    // Ignorar error de red en logout
+    // Ignorar error de red en logout (sesión ya se cierra server-side)
   }
   setStatus(statusEl, 'Sesión cerrada. Redirigiendo a login...', 'info');
   setTimeout(() => {
@@ -61,14 +79,14 @@ export async function initAdminView(container) {
   const qrRenderEl = container.querySelector('#product-qr-render');
   const qrTextEl = container.querySelector('#product-qr-text');
 
-  // Formulario de promociones
+  // Elementos del formulario de promociones
   const promoForm = container.querySelector('#promotion-create-form');
   const promoStatusEl = container.querySelector('#promotion-create-status');
   const promoProductSelect = container.querySelector('#promo_product_id');
   const promoStartInput = container.querySelector('#promo_start');
   const promoEndInput = container.querySelector('#promo_end');
 
-  // Botón de logout dinámico para no tocar la vista
+  // Crear botón de logout dinámicamente para mantener vista HTML sin cambios
   let logoutBtn = container.querySelector('#logout-btn');
   if (!logoutBtn) {
     logoutBtn = document.createElement('button');
@@ -96,7 +114,10 @@ export async function initAdminView(container) {
     return;
   }
 
-  // Cargar productos en el select de promociones
+  /**
+   * Cargar lista de productos desde API y poblar select de promociones
+   * Los productos se muestran con nombre y precio base
+   */
   const loadProducts = async () => {
     try {
       const res = await fetch('./api/public/productos?search=.', {
@@ -122,7 +143,11 @@ export async function initAdminView(container) {
     await loadProducts();
   }
 
-  // Convertir date (YYYY-MM-DD) a datetime SQL (YYYY-MM-DD 00:00:00)
+  /**
+   * Convertir fecha HTML (YYYY-MM-DD) a formato DateTime SQL (YYYY-MM-DD 00:00:00)
+   * @param {string} dateStr - Fecha en formato YYYY-MM-DD
+   * @returns {string|null} DateTime con hora 00:00:00 o null si vacío
+   */
   const dateToSQL = (dateStr) => {
     if (!dateStr) return null;
     return `${dateStr} 00:00:00`;
@@ -179,12 +204,16 @@ export async function initAdminView(container) {
     });
   }
 
-  // Manejador para cambios en tipo de promoción (actualizar label y placeholder dinámicamente)
+  /**
+   * Manejador dinámico para cambios de tipo de promoción
+   * Actualiza label, placeholder y step del input según tipo seleccionado
+   */
   const promoTypeSelect = container.querySelector('#promo_type');
   const promo_value_input = container.querySelector('#promo_value');
   const promo_value_label = container.querySelector('label[for="promo_value"]');
 
   if (promoTypeSelect && promo_value_input && promo_value_label) {
+    // Actualizar UI según tipo de promoción seleccionado
     const updateValueInputLabel = () => {
       const type = promoTypeSelect.value;
       const labelText = {
@@ -211,10 +240,13 @@ export async function initAdminView(container) {
     };
 
     promoTypeSelect.addEventListener('change', updateValueInputLabel);
-    updateValueInputLabel(); // Llamar al inicio
+    updateValueInputLabel(); // Inicializar con el valor por defecto
   }
 
-  // Manejador del formulario de promociones
+  /**
+   * Manejador del envío del formulario de promociones
+   * Valida datos, calcula fechas en formato SQL, y envía a API
+   */
   if (promoForm) {
     promoForm.addEventListener('submit', async (event) => {
       event.preventDefault();

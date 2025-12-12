@@ -2,13 +2,22 @@
 /**
  * Controlador de la vista 'qr'
  *
- * Responsabilidad:
- * - Permitir escaneo de QR con cámara usando html5-qrcode
- * - Permitir al usuario ingresar un código manualmente y consultar la API
- * - Mostrar estados de carga, error y resultado (ficha del producto)
+ * Responsabilidades:
+ * - Implementar lector de código QR usando librería Html5Qrcode
+ *   - Inicializar cámara (trasera en móviles)
+ *   - Decodificar códigos QR detectados
+ *   - Gestionar inicio/parada del escáner
+ * - Permitir entrada manual de código para búsqueda
+ * - Consultar API (GET /api/public/productos/{code})
+ * - Renderizar ficha de producto con estilo Mercado Libre
+ *   - Mostrar promoción vigente si existe
+ *   - Calcular precio final según tipo de promo
+ *   - Mostrar badge (descuento %, 2x1, etc.)
+ * - Manejo de modal para visualizar detalles del producto
+ * - Gestionar estados: carga, error, éxito
  */
 
-let html5QrCode = null;
+let html5QrCode = null; // Instancia global del lector QR
 
 function setStatus(el, message, type = 'info') {
   if (!el) return;
@@ -16,12 +25,21 @@ function setStatus(el, message, type = 'info') {
   el.dataset.type = type;
 }
 
+/**
+ * Extraer código del parámetro hash de URL (#qr?code=...)
+ * @returns {string} Código decodificado o vacío si no existe
+ */
 function getCodeFromHash() {
   const hash = window.location.hash || '';
   const match = hash.match(/code=([^&]+)/);
   return match ? decodeURIComponent(match[1]) : '';
 }
 
+/**
+ * Calcular precio final según tipo de promoción
+ * @param {Object} product - Objeto producto con base_price y promotion
+ * @returns {Object} Objeto con finalPrice, hasPromo, y datos específicos del tipo
+ */
 function calculatePrice(product) {
   const basePrice = parseFloat(product.base_price);
   
@@ -73,6 +91,12 @@ function calculatePrice(product) {
   }
 }
 
+/**
+ * Renderizar caja visual de promoción con badge y detalles
+ * @param {Object} product - Datos del producto
+ * @param {Object} priceData - Resultado de calculatePrice()
+ * @returns {string} HTML de la sección de promoción o vacío
+ */
 function renderPromotion(product, priceData) {
   if (!priceData.hasPromo) return '';
   
@@ -111,6 +135,12 @@ function renderPromotion(product, priceData) {
   `;
 }
 
+/**
+ * Renderizar ficha completa del producto en modal
+ * Incluye imagen, características, precio final, descuentos y promoción vigente
+ * @param {HTMLElement} resultEl - Elemento donde insertar la ficha
+ * @param {Object} product - Datos del producto desde API
+ */
 function renderProduct(resultEl, product) {
   if (!resultEl) return;
   
@@ -240,6 +270,10 @@ function renderProduct(resultEl, product) {
   resultEl.innerHTML = '';
 }
 
+/**
+ * Inicializar vista de lectura QR y búsqueda de productos
+ * @param {HTMLElement} container - Contenedor de la vista
+ */
 export function initQrView(container) {
   const form = container.querySelector('#qr-form');
   const codeInput = container.querySelector('#qr-code');
@@ -249,6 +283,10 @@ export function initQrView(container) {
   const stopScanBtn = container.querySelector('#stop-scan-btn');
   const qrReaderEl = container.querySelector('#qr-reader');
 
+  /**
+   * Buscar producto por código y renderizar ficha
+   * @param {string} code - Código público del producto
+   */
   const submitLookup = async (code) => {
     if (!code) {
       setStatus(statusEl, 'Ingresá un código para consultar.', 'error');
@@ -283,7 +321,7 @@ export function initQrView(container) {
     }
   };
 
-  // Manejar envío de formulario manual
+  // Manejador de búsqueda manual por código
   if (form) {
     form.addEventListener('submit', async (event) => {
       event.preventDefault();
@@ -292,7 +330,7 @@ export function initQrView(container) {
     });
   }
 
-  // Inicializar escáner QR
+  // Inicializar lector QR con acceso a cámara
   if (startScanBtn && stopScanBtn && qrReaderEl) {
     startScanBtn.addEventListener('click', async () => {
       try {

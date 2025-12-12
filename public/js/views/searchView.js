@@ -2,14 +2,20 @@
 /**
  * Controlador de la vista 'search'
  *
- * Responsabilidad:
- * - Gestionar el formulario de búsqueda de productos
- * - Mostrar indicador de carga durante la consulta
- * - Renderizar resultados como tarjetas clickeables
- * - Manejar estados: carga, sin resultados, error
- * - Permitir ver detalles del producto (redirige a QR con código)
+ * Responsabilidades:
+ * - Gestionar formulario de búsqueda por texto libre
+ *   - Busca en nombre, bodega, descripción, varietal, origen
+ * - Consultar API (GET /api/public/productos?search=...)
+ * - Renderizar resultados como tarjetas interactivas
+ *   - Mostrar información básica (nombre, bodega, tipo, precio)
+ *   - Mostrar promoción vigente si existe con badge y validez
+ *   - Efectos hover (elevación y sombra)
+ * - Navegar a ficha de producto al clickear tarjeta
+ * - Gestionar estados: vacío, carga, sin resultados, error, éxito
+ * - Indicadores visuales de carga y cantidad de resultados
  */
-let initialized = false;
+
+let initialized = false; // Flag para evitar inicialización múltiple
 
 function setStatus(el, message, type = 'info') {
   if (!el) return;
@@ -17,6 +23,11 @@ function setStatus(el, message, type = 'info') {
   el.dataset.type = type;
 }
 
+/**
+ * Renderizar grid de tarjetas con resultados de búsqueda
+ * @param {HTMLElement} resultEl - Contenedor para insertar resultados
+ * @param {Array} products - Array de productos desde API
+ */
 function renderSearchResults(resultEl, products) {
   if (!resultEl) return;
   
@@ -27,7 +38,8 @@ function renderSearchResults(resultEl, products) {
     const card = document.createElement('div');
     card.className = 'search-result-card';
     card.style.cursor = 'pointer';
-    // Calcular precio con promoción
+    
+    // Renderizar precio con o sin promoción
     let priceHtml = '';
     let promoValidityHtml = '';
     if (product.promotion) {
@@ -60,6 +72,7 @@ function renderSearchResults(resultEl, products) {
       priceHtml = `<p><strong>Precio:</strong> $${product.base_price ?? '—'}</p>`;
     }
     
+    // Renderizar tarjeta con información del producto
     card.innerHTML = `
       <h4>${product.name || 'Producto'}</h4>
       <p><strong>Bodega:</strong> ${product.winery_distillery || '—'}</p>
@@ -69,12 +82,12 @@ function renderSearchResults(resultEl, products) {
       <p><small>Código: ${product.public_code}</small></p>
     `;
     
-    // Click para ver detalles
+    // Navegar a ficha de producto al clickear
     card.addEventListener('click', () => {
       window.location.hash = `#qr?code=${encodeURIComponent(product.public_code)}`;
     });
     
-    // Hover effect
+    // Efectos visuales de interacción (elevación y sombra)
     card.addEventListener('mouseenter', () => {
       card.style.transform = 'translateY(-2px)';
       card.style.boxShadow = '0 4px 12px rgba(74, 14, 26, 0.15)';
@@ -92,14 +105,19 @@ function renderSearchResults(resultEl, products) {
   resultEl.appendChild(container);
 }
 
+/**
+ * Inicializar vista de búsqueda de productos
+ * @param {HTMLElement} container - Contenedor de la vista
+ */
 export function initSearchView(container) {
-  if (initialized) return;
+  if (initialized) return; // Evitar inicialización múltiple
 
   const form = container.querySelector('#search-form');
   const searchInput = container.querySelector('#search-input');
   const statusEl = container.querySelector('#search-status');
   const resultsEl = container.querySelector('#search-results');
   
+  // Manejador del envío del formulario de búsqueda
   if (form) {
     form.addEventListener('submit', async (event) => {
       event.preventDefault();
@@ -149,5 +167,5 @@ export function initSearchView(container) {
     });
   }
 
-  initialized = true;
+  initialized = true; // Marcar inicialización completada
 }

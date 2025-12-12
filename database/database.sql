@@ -1,6 +1,10 @@
 -- database.sql - WINE-PICK-QR
 -- Initial schema (Sprint 1) for local MySQL/MariaDB (XAMPP)
 -- Tables: admin_users, products, promotions, consult_events
+--
+-- Schema Evolution:
+-- - promotion_type ENUM incluye: porcentaje, precio_fijo, 2x1, 3x2, nxm
+-- - Soporta promociones simples y combos en MVP
 
 DROP DATABASE IF EXISTS wine_pick_qr;
 CREATE DATABASE wine_pick_qr CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
