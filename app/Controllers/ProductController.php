@@ -258,8 +258,37 @@ class ProductController
                 'start_at' => $promotion['start_at'] ?? null,
                 'end_at' => $promotion['end_at'] ?? null,
             ];
+
+            // Calcular precio final según tipo de promoción
+            $base = (float) $product['base_price'];
+            $final = $base;
+            $type = $data['promotion']['type'];
+            $val = $data['promotion']['value'];
+
+            if ($type === 'porcentaje') {
+                $final = $base * (1 - ($val / 100));
+            } elseif ($type === 'precio_fijo') {
+                $final = $val;
+            } elseif ($type === '2x1') {
+                $final = $base / 2.0;
+            } elseif ($type === '3x2') {
+                $final = ($base * 2.0) / 3.0;
+            } elseif ($type === 'nxm') {
+                // Para combos NXM, mantener precio unitario; condiciones en texto
+                $final = $base;
+            }
+
+            // Asegurar no negativo/0
+            if ($final <= 0) {
+                $final = $base;
+            }
+
+            $data['final_price'] = (float) round($final, 2);
+            $data['original_price'] = (float) $base;
         } else {
             $data['promotion'] = null;
+            $data['final_price'] = (float) $product['base_price'];
+            $data['original_price'] = (float) $product['base_price'];
         }
 
         return $data;
