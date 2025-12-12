@@ -17,6 +17,42 @@ declare(strict_types=1);
 class ProductController
 {
     private \Product $productModel;
+    
+    /**
+     * GET /api/public/promociones
+     * 
+     * Listar productos con promociones vigentes y activas.
+     * Devuelve datos del producto + promoción formateados.
+     */
+    public function listActivePromotions(): void
+    {
+        // Obtener lista de productos con promos vigentes
+        $rows = $this->productModel->getProductsWithActivePromotions(100, 0);
+
+        // Transformar filas en respuesta con promoción embebida
+        $data = array_map(function (array $row) {
+            $promotion = [
+                'promotion_type' => $row['promo_type'] ?? null,
+                'parameter_value' => isset($row['promo_value']) ? (float)$row['promo_value'] : null,
+                'visible_text' => $row['promo_text'] ?? null,
+                'start_at' => $row['promo_start'] ?? null,
+                'end_at' => $row['promo_end'] ?? null,
+            ];
+
+            return $this->formatProductResponse($row, [
+                'promotion_type' => $promotion['promotion_type'],
+                'parameter_value' => $promotion['parameter_value'],
+                'visible_text' => $promotion['visible_text'],
+                'start_at' => $promotion['start_at'],
+                'end_at' => $promotion['end_at'],
+            ]);
+        }, $rows);
+
+        ApiResponse::success([
+            'count' => count($data),
+            'products' => $data,
+        ], 200);
+    }
 
     public function __construct()
     {

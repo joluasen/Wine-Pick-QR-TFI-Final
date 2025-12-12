@@ -143,6 +143,54 @@ class Product
     }
 
     /**
+     * Listar productos con promociones vigentes activas.
+     *
+     * Devuelve filas con datos del producto y campos de promoción con prefijo `promo_`.
+     * Se filtra por vigencia: start_at <= NOW() y (end_at IS NULL o end_at >= NOW()).
+     *
+     * @param int $limit Máximo de resultados a devolver.
+     * @param int $offset Desplazamiento.
+     * @return array
+     */
+    public function getProductsWithActivePromotions(int $limit = 50, int $offset = 0): array
+    {
+        $query = "
+            SELECT
+                p.id,
+                p.public_code,
+                p.name,
+                p.drink_type,
+                p.winery_distillery,
+                p.varietal,
+                p.origin,
+                p.vintage_year,
+                p.short_description,
+                p.base_price,
+                p.visible_stock,
+                p.image_url,
+                p.is_active,
+                p.created_at,
+                p.updated_at,
+                pr.id AS promo_id,
+                pr.promotion_type AS promo_type,
+                pr.parameter_value AS promo_value,
+                pr.visible_text AS promo_text,
+                pr.start_at AS promo_start,
+                pr.end_at AS promo_end
+            FROM promotions pr
+            INNER JOIN products p ON p.id = pr.product_id
+            WHERE p.is_active = 1
+              AND pr.is_active = 1
+              AND pr.start_at <= NOW()
+              AND (pr.end_at IS NULL OR pr.end_at >= NOW())
+            ORDER BY pr.start_at DESC
+            LIMIT ? OFFSET ?
+        ";
+
+        return $this->db->fetchAll($query, [$limit, $offset], 'ii') ?: [];
+    }
+
+    /**
      * Crear un nuevo producto.
      * 
      * @param array $data Datos del producto (public_code, name, drink_type, winery_distillery, base_price, etc.)
