@@ -22,17 +22,27 @@ const routes = {
   '#login': 'login',
   '#qr': 'qr',
   '#search': 'search',
-  '#admin': 'admin',
   '#promos': 'promotions',
   '#promotions': 'promotions',
+  // Rutas de Admin
+  '#admin': 'admin',
+  '#admin/products': 'admin', // Ejemplo, podría tener su propia vista
+  '#admin/create': 'admin',   // Ejemplo
+  '#admin/metrics': 'admin',  // Ejemplo
 };
 
-// Rutas que requieren autenticación
-const protectedRoutes = ['admin'];
+// Rutas que se consideran parte del panel de administración
+const adminRoutes = ['admin'];
 
 function getViewFromHash() {
   const hash = window.location.hash || '#home';
   const baseHash = hash.split('?')[0];
+  
+  // Simplificamos la lógica: si la ruta empieza con #admin, es 'admin'.
+  if (baseHash.startsWith('#admin')) {
+    return 'admin';
+  }
+  
   return routes[baseHash] || 'home';
 }
 
@@ -41,9 +51,46 @@ async function checkAuthentication() {
     const res = await fetch('./api/admin/me', {
       headers: { Accept: 'application/json' }
     });
-    return res.ok; // true si está autenticado, false si no
+    return res.ok;
   } catch (err) {
+    console.error('Error de autenticación:', err);
     return false;
+  }
+}
+
+/**
+ * Carga la barra de navegación apropiada (pública o admin)
+ * @param {boolean} isAdminView - True si la vista es de administrador
+ */
+async function loadNavigation(isAdminView) {
+  const navContainer = document.getElementById('app-nav-container');
+  if (!navContainer) return;
+
+  const navPartial = isAdminView ? './views/partials/nav-admin.html' : './views/partials/nav-public.html';
+
+  try {
+    const res = await fetch(navPartial, { cache: 'no-store' });
+    if (res.ok) {
+      navContainer.innerHTML = await res.text();
+      
+      // Añadir listener para el botón de logout si es la nav de admin
+      if (isAdminView) {
+        const logoutBtn = document.getElementById('logout-btn');
+        if (logoutBtn) {
+          logoutBtn.addEventListener('click', async (e) => {
+            e.preventDefault();
+            try {
+              await fetch('./api/admin/logout', { method: 'POST' });
+              window.location.hash = '#login';
+            } catch (err) {
+              console.error('Error al cerrar sesión:', err);
+            }
+          });
+        }
+      }
+    }
+  } catch (err) {
+    console.error('Error cargando la navegación:', err);
   }
 }
 
@@ -51,32 +98,41 @@ async function showView(viewName) {
   const root = document.getElementById('app-root');
   if (!root) return;
 
+  const isAdminView = adminRoutes.includes(viewName);
+  
+  // Cargar la navegación correcta ANTES de proteger la ruta
+  await loadNavigation(isAdminView);
+
   // Proteger rutas que requieren autenticación
-  if (protectedRoutes.includes(viewName)) {
+  if (isAdminView) {
     const isAuthenticated = await checkAuthentication();
     if (!isAuthenticated) {
-      // Redirigir a login
       window.location.hash = '#login';
       return;
     }
   }
 
-  // Cargar parcial correspondiente
+  // Cargar parcial de la vista correspondiente
   try {
+    // La vista de login no necesita nav, podríamos ocultarla
+    if (viewName === 'login') {
+        const navContainer = document.getElementById('app-nav-container');
+        if (navContainer) navContainer.innerHTML = '';
+    }
+
     const res = await fetch(`./views/${viewName}.html`, { cache: 'no-store' });
     if (!res.ok) {
-      root.innerHTML = `<p>Error cargando la vista ${viewName} (HTTP ${res.status})</p>`;
+      root.innerHTML = `<div class="container mt-4"><div class="alert alert-danger">Error cargando la vista ${viewName} (HTTP ${res.status})</div></div>`;
       return;
     }
 
-    const html = await res.text();
-    root.innerHTML = html;
+    root.innerHTML = await res.text();
   } catch (err) {
-    root.innerHTML = `<p>Error al cargar la vista: ${err.message}</p>`;
+    root.innerHTML = `<div class="container mt-4"><div class="alert alert-danger">Error al cargar la vista: ${err.message}</div></div>`;
     return;
   }
 
-  // Inicializar la vista cargada pasando el contenedor raíz
+  // Inicializar el controlador de la vista cargada
   switch (viewName) {
     case 'home':
       initHomeView(root);
@@ -99,6 +155,14 @@ async function showView(viewName) {
     default:
       initHomeView(root);
       break;
+  }
+  
+  // Marcar el ítem de navegación activo
+  const currentHash = window.location.hash || '#home';
+  const activeLink = document.querySelector(`.nav-item[data-link="${currentHash.split('?')[0]}"]`);
+  if (activeLink) {
+    document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+    activeLink.classList.add('active');
   }
 }
 

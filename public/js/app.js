@@ -10,14 +10,21 @@
 import { initRouter } from './router.js';
 
 function setupNavigation() {
-  const navButtons = document.querySelectorAll('[data-link]');
-  navButtons.forEach((btn) => {
-    btn.addEventListener('click', (event) => {
-      event.preventDefault();
-      const targetHash = btn.getAttribute('data-link') || '#home';
-      window.location.hash = targetHash;
+  // La navegación ahora es dinámica, los listeners se deben añadir después de cargar el parcial.
+  // Usamos delegación de eventos en un contenedor estático.
+  const navContainer = document.getElementById('app-nav-container');
+  if (navContainer) {
+    navContainer.addEventListener('click', (event) => {
+      const target = event.target.closest('[data-link]');
+      if (target) {
+        event.preventDefault();
+        const targetHash = target.getAttribute('data-link');
+        if (targetHash && window.location.hash !== targetHash) {
+          window.location.hash = targetHash;
+        }
+      }
     });
-  });
+  }
 }
 
 function registerServiceWorker() {
