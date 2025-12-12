@@ -14,6 +14,7 @@ import { initQrView } from './views/qrView.js';
 import { initSearchView } from './views/searchView.js';
 import { initAdminView } from './views/adminView.js';
 import { initLoginView } from './views/loginView.js';
+import { initPromotionsView } from './views/promotionsView.js';
 
 const routes = {
   '': 'home',
@@ -22,6 +23,8 @@ const routes = {
   '#qr': 'qr',
   '#search': 'search',
   '#admin': 'admin',
+  '#promos': 'promotions',
+  '#promotions': 'promotions',
 };
 
 // Rutas que requieren autenticación
@@ -86,6 +89,9 @@ async function showView(viewName) {
       break;
     case 'search':
       initSearchView(root);
+      break;
+    case 'promotions':
+      initPromotionsView(root);
       break;
     case 'admin':
       initAdminView(root);
