@@ -1,6 +1,6 @@
 <?php
-// app/Controllers/ProductController.php
 declare(strict_types=1);
+// app/Controllers/ProductController.php
 
 /**
  * Controlador de Productos
@@ -14,8 +14,45 @@ declare(strict_types=1);
  * - GET /api/public/productos?search=.. - Buscar productos
  * - POST /api/admin/productos           - Crear producto
  */
-class ProductController
-{
+
+class ProductController {
+
+    /**
+     * POST /api/public/productos/buscar
+     * Buscar productos por texto libre (body JSON: search, limit, offset)
+     * @return void Devuelve JSON con lista de productos y total.
+     */
+    public function postSearch(): void
+    {
+        $body = file_get_contents('php://input');
+        $data = json_decode($body, true);
+        if (!is_array($data)) {
+            ApiResponse::validationError('El cuerpo debe ser JSON válido.');
+        }
+        $searchText = trim($data['search'] ?? '');
+        $field = isset($data['field']) ? $data['field'] : null;
+        $limit = isset($data['limit']) ? (int)$data['limit'] : 20;
+        $offset = isset($data['offset']) ? (int)$data['offset'] : 0;
+        if ($limit <= 0) $limit = 20;
+        if ($limit > 100) $limit = 100;
+        if ($offset < 0) $offset = 0;
+        if ($searchText === '') {
+            ApiResponse::validationError('El campo "search" es requerido.', 'search');
+        }
+        // Limitar longitud de búsqueda
+        $searchText = mb_substr($searchText, 0, 100);
+        $results = $this->productModel->search($searchText, $limit, $offset, $field);
+        // Transformar cada resultado agregando promoción vigente (si existe)
+        $data = array_map(function ($product) {
+            $promotion = $this->productModel->getActivePromotion((int)$product['id']);
+            return $this->formatProductResponse($product, $promotion);
+        }, $results['products']);
+        ApiResponse::success([
+            'count' => count($data),
+            'total' => $results['total'],
+            'products' => $data,
+        ], 200);
+    }
     private \Product $productModel;
     
     /**

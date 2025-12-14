@@ -100,6 +100,14 @@ async function loadSearchHeader() {
       const html = await res.text();
       if (mobileSearch) mobileSearch.innerHTML = html;
       if (desktopSearch) desktopSearch.innerHTML = html;
+      // Inicializar listeners del buscador tras inyectar
+      if (window.initSearchBarListeners) {
+        window.initSearchBarListeners();
+      }
+      // Restaurar el valor del input tras inyección
+      if (window.restoreSearchInput) {
+        window.restoreSearchInput();
+      }
     }
   } catch (err) {
     console.error('Error cargando buscador:', err);

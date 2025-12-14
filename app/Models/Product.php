@@ -65,10 +65,37 @@ class Product
      * 
      * @return array Lista de productos coincidentes.
      */
-    public function search(string $searchText, int $limit = 20): array
-    {
-        $searchPattern = '%' . $searchText . '%';
 
+    public function search(string $searchText, int $limit = 20, int $offset = 0, ?string $field = null): array
+    {
+        $allowedFields = ['name', 'drink_type', 'varietal', 'origin', 'public_code'];
+        $where = '';
+        $params = [];
+        $types = '';
+        if (!empty($field) && in_array($field, $allowedFields, true)) {
+            // Precisión: beginsWith para name, exacto para public_code, contiene para otros
+            if ($field === 'name') {
+                $where = "name LIKE ?";
+                $params[] = $searchText . '%'; // beginsWith
+                $types .= 's';
+            } elseif ($field === 'public_code') {
+                $where = "public_code = ?";
+                $params[] = $searchText;
+                $types .= 's';
+            } else {
+                $where = "{$field} LIKE ?";
+                $params[] = '%' . $searchText . '%';
+                $types .= 's';
+            }
+        } else {
+            // Búsqueda por defecto: solo en public_code, name y drink_type
+            $searchPattern = '%' . $searchText . '%';
+            $where = 'public_code LIKE ? OR name LIKE ? OR drink_type LIKE ?';
+            $params = array_fill(0, 3, $searchPattern);
+            $types = 'sss';
+        }
+
+        // Query para resultados paginados
         $query = "
             SELECT
                 id,
@@ -88,22 +115,47 @@ class Product
                 updated_at
             FROM products
             WHERE is_active = 1
-            AND (
-                name LIKE ?
-                OR short_description LIKE ?
-                OR winery_distillery LIKE ?
-                OR varietal LIKE ?
-                OR origin LIKE ?
-            )
+            AND ($where)
             ORDER BY name ASC
-            LIMIT ?
+            LIMIT ? OFFSET ?
         ";
+        $params[] = $limit;
+        $params[] = $offset;
+        $types .= 'ii';
+        $products = $this->db->fetchAll($query, $params, $types);
 
-        // Preparar parámetros: 4 LIKE (strings) + 1 LIMIT (int)
-        $params = [$searchPattern, $searchPattern, $searchPattern, $searchPattern, $searchPattern, $limit];
-        $types = 'sssssi';
+        // Query para total
+        $countQuery = "
+            SELECT COUNT(*) as total
+            FROM products
+            WHERE is_active = 1
+            AND ($where)
+        ";
+        if (!empty($field) && in_array($field, $allowedFields, true)) {
+            // Usar el mismo patrón y tipos que arriba
+            if ($field === 'name') {
+                $countParams = [$searchText . '%'];
+                $countTypes = 's';
+            } elseif ($field === 'public_code') {
+                $countParams = [$searchText];
+                $countTypes = 's';
+            } else {
+                $countParams = ['%' . $searchText . '%'];
+                $countTypes = 's';
+            }
+        } else {
+            // Por defecto: solo 3 campos
+            $searchPattern = '%' . $searchText . '%';
+            $countParams = array_fill(0, 3, $searchPattern);
+            $countTypes = 'sss';
+        }
+        $row = $this->db->fetchOne($countQuery, $countParams, $countTypes);
+        $total = $row ? (int)$row['total'] : 0;
 
-        return $this->db->fetchAll($query, $params, $types);
+        return [
+            'products' => $products,
+            'total' => $total
+        ];
     }
 
     /**

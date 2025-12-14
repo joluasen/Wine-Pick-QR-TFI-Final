@@ -51,6 +51,8 @@ class Router
 
         // GET /api/public/productos?search=...
         $this->get('/api/public/productos', 'ProductController@search');
+        // POST /api/public/productos/buscar
+        $this->post('/api/public/productos/buscar', 'ProductController@postSearch');
 
         // GET /api/public/promociones - Listar productos con promociones vigentes
         $this->get('/api/public/promociones', 'ProductController@listActivePromotions');

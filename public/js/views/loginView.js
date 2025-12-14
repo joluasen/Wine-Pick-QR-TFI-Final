@@ -63,13 +63,13 @@ export function initLoginView(container) {
 
 // Inicializar modal de login
 export function initLoginModal() {
-  console.log('Iniciando login modal...');
+  // console.log('Iniciando login modal...');
   
   const modalForm = document.getElementById('login-form-modal');
-  console.log('Formulario encontrado:', !!modalForm);
+  // console.log('Formulario encontrado:', !!modalForm);
   
   if (!modalForm) {
-    console.warn('No se encontró el formulario de login modal');
+    // console.warn('No se encontró el formulario de login modal');
     return;
   }
 
@@ -79,59 +79,59 @@ export function initLoginModal() {
   const loginModalEl = document.getElementById('loginModal');
   const submitBtn = modalForm.querySelector('button[type="submit"]');
 
-  console.log('Elementos encontrados:', {
-    statusEl: !!statusEl,
-    userInput: !!userInput,
-    passInput: !!passInput,
-    loginModalEl: !!loginModalEl,
-    submitBtn: !!submitBtn
-  });
+  // console.log('Elementos encontrados:', {
+  //   statusEl: !!statusEl,
+  //   userInput: !!userInput,
+  //   passInput: !!passInput,
+  //   loginModalEl: !!loginModalEl,
+  //   submitBtn: !!submitBtn
+  // });
 
   // Debug: logs en inputs
-  if (userInput) {
-    userInput.addEventListener('input', (e) => {
-      console.log('Input usuario:', e.target.value);
-    });
-  }
+  // if (userInput) {
+  //   userInput.addEventListener('input', (e) => {
+  //     console.log('Input usuario:', e.target.value);
+  //   });
+  // }
   
-  if (passInput) {
-    passInput.addEventListener('input', (e) => {
-      console.log('Input contraseña ingresado');
-    });
-  }
+  // if (passInput) {
+  //   passInput.addEventListener('input', (e) => {
+  //     console.log('Input contraseña ingresado');
+  //   });
+  // }
 
   // Debug: log en click del botón
-  if (submitBtn) {
-    submitBtn.addEventListener('click', (e) => {
-      console.log('Botón Ingresar clickeado');
-    });
-  }
+  // if (submitBtn) {
+  //   submitBtn.addEventListener('click', (e) => {
+  //     console.log('Botón Ingresar clickeado');
+  //   });
+  // }
 
   modalForm.addEventListener('submit', async (event) => {
-    console.log('✓ EVENTO SUBMIT CAPTURADO');
+    // console.log('✓ EVENTO SUBMIT CAPTURADO');
     event.preventDefault();
     
     const username = userInput?.value?.trim() || '';
     const password = passInput?.value || '';
     
-    console.log('Intentando login con usuario:', username);
+    // console.log('Intentando login con usuario:', username);
     
     await handleLogin(username, password, statusEl, () => {
-      console.log('Login exitoso, cerrando modal');
+      // console.log('Login exitoso, cerrando modal');
       // Cerrar modal al éxito usando Bootstrap API
       if (loginModalEl && window.bootstrap) {
         try {
           const modal = window.bootstrap.Modal.getInstance(loginModalEl);
           if (modal) {
             modal.hide();
-            console.log('Modal cerrado');
+            // console.log('Modal cerrado');
           }
         } catch (err) {
-          console.error('Error cerrando modal:', err);
+          // console.error('Error cerrando modal:', err);
         }
       }
     });
   });
 
-  console.log('Login modal inicializado correctamente');
+  // console.log('Login modal inicializado correctamente');
 }

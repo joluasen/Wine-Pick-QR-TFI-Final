@@ -1,35 +1,14 @@
 <!-- public/views/partials/search-header.html -->
 <!-- Buscador para el header (mobile y desktop) -->
 
-<form id="searchFormMobile" class="search-header-form d-md-none mb-0">
+<form id="searchForm" class="search-header-form mb-0">
   <div class="input-group search-header-input rounded-pill">
     <span class="input-group-text border-0">
       <i class="fas fa-search"></i>
     </span>
     <input
       type="search"
-      id="searchInputMobile"
-      class="form-control border-0"
-      placeholder="Buscar productos..."
-      required
-    />
-    <button type="button" class="btn-filters" data-bs-toggle="modal" data-bs-target="#filtersModal">
-      <i class="fas fa-sliders-h"></i>
-    </button>
-    <button type="submit" class="btn btn-winepick">
-      <i class="fas fa-search"></i>
-    </button>
-  </div>
-</form>
-
-<form id="searchFormDesktop" class="search-header-form d-none d-md-block mb-0">
-  <div class="input-group search-header-input rounded-pill">
-    <span class="input-group-text border-0">
-      <i class="fas fa-search"></i>
-    </span>
-    <input
-      type="search"
-      id="searchInputDesktop"
+      id="searchInput"
       class="form-control border-0"
       placeholder="Buscar productos..."
       required
