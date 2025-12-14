@@ -136,12 +136,11 @@ function setupNavigation() {
     }
   });
 
-  // Inicializar tooltips de Bootstrap (solo para sidebar)
+  // Inicializar tooltips de Bootstrap (solo sidebar)
   const sidebarTooltips = document.querySelectorAll('#sidebar-container [data-bs-toggle="tooltip"]');
-  sidebarTooltips.forEach((tooltipTriggerEl) => {
-    new window.bootstrap.Tooltip(tooltipTriggerEl, {
-      trigger: 'hover',
-      delay: { show: 0, hide: 200 }
+  sidebarTooltips.forEach((el) => {
+    new window.bootstrap.Tooltip(el, {
+      trigger: 'hover'
     });
   });
 }
