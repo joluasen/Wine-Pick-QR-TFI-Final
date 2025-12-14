@@ -26,8 +26,16 @@ class ProductController
      */
     public function listActivePromotions(): void
     {
+        $limit = isset($_GET['limit']) ? (int)$_GET['limit'] : 100;
+        $offset = isset($_GET['offset']) ? (int)$_GET['offset'] : 0;
+
+        // Validaciones básicas
+        if ($limit <= 0) $limit = 10;
+        if ($limit > 100) $limit = 100;
+        if ($offset < 0) $offset = 0;
+
         // Obtener lista de productos con promos vigentes
-        $rows = $this->productModel->getProductsWithActivePromotions(100, 0);
+        $rows = $this->productModel->getProductsWithActivePromotions($limit, $offset);
 
         // Transformar filas en respuesta con promoción embebida
         $data = array_map(function (array $row) {

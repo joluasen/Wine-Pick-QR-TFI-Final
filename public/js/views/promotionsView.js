@@ -122,14 +122,18 @@ function renderPromotions(resultEl, products) {
   resultEl.appendChild(container);
 }
 
-export function initPromotionsView(container) {
+function loadPage(container, page = 0) {
   const statusEl = container.querySelector('#promos-status');
   const resultEl = container.querySelector('#promos-results');
+  const paginationEl = container.querySelector('#promos-pagination');
+  const pageSize = 10;
+  const offset = page * pageSize;
 
   setStatus(statusEl, 'Cargando promociones...', 'info');
   if (resultEl) resultEl.innerHTML = '';
+  if (paginationEl) paginationEl.innerHTML = '';
 
-  fetch('./api/public/promociones', { headers: { Accept: 'application/json' } })
+  fetch(`./api/public/promociones?limit=${pageSize}&offset=${offset}`, { headers: { Accept: 'application/json' } })
     .then((res) => res.json().then((json) => ({ ok: res.ok, status: res.status, json })))
     .then(({ ok, status, json }) => {
       if (!ok || !json?.ok) {
@@ -139,17 +143,93 @@ export function initPromotionsView(container) {
       }
 
       const products = json.data?.products || [];
-      if (products.length === 0) {
+      if (products.length === 0 && page === 0) {
         setStatus(statusEl, 'No hay promociones disponibles.', 'info');
         if (resultEl) resultEl.innerHTML = '<p style="text-align:center;color:var(--text-light);">Vuelve más tarde para ver nuevas ofertas.</p>';
         return;
       }
 
-      setStatus(statusEl, `Se encontraron ${products.length} promoción(es).`, 'success');
+      if (products.length === 0) {
+        setStatus(statusEl, 'No hay más promociones.', 'info');
+        if (resultEl) resultEl.innerHTML = '<p style="text-align:center;color:var(--text-light);">Has llegado al final de la lista.</p>';
+        renderPaginationControls(container, page, false);
+        return;
+      }
+
+      const totalShown = (page + 1) * pageSize;
+      setStatus(statusEl, `Mostrando promociones ${page * pageSize + 1} al ${totalShown}.`, 'success');
       renderPromotions(resultEl, products);
+      renderPaginationControls(container, page, products.length === pageSize);
     })
     .catch((err) => {
       setStatus(statusEl, `Error de conexión: ${err.message}`, 'error');
       if (resultEl) resultEl.innerHTML = '';
     });
+}
+
+function renderPaginationControls(container, currentPage, hasMore) {
+  const paginationEl = container.querySelector('#promos-pagination');
+  if (!paginationEl) return;
+
+  const controls = document.createElement('div');
+  controls.style.display = 'flex';
+  controls.style.gap = '0.5rem';
+  controls.style.justifyContent = 'center';
+  controls.style.alignItems = 'center';
+
+  if (currentPage > 0) {
+    const prevBtn = document.createElement('button');
+    prevBtn.textContent = '← Anterior';
+    prevBtn.style.padding = '0.75rem 1.5rem';
+    prevBtn.style.backgroundColor = 'var(--primary)';
+    prevBtn.style.color = 'var(--text-inverse)';
+    prevBtn.style.border = 'none';
+    prevBtn.style.borderRadius = '4px';
+    prevBtn.style.cursor = 'pointer';
+    prevBtn.style.fontSize = '0.95rem';
+    prevBtn.style.fontWeight = '600';
+    prevBtn.addEventListener('click', () => loadPage(container, currentPage - 1));
+    prevBtn.addEventListener('mouseenter', () => {
+      prevBtn.style.backgroundColor = 'var(--primary-dark, #6d0a1a)';
+    });
+    prevBtn.addEventListener('mouseleave', () => {
+      prevBtn.style.backgroundColor = 'var(--primary)';
+    });
+    controls.appendChild(prevBtn);
+  }
+
+  const pageIndicator = document.createElement('span');
+  pageIndicator.textContent = `Página ${currentPage + 1}`;
+  pageIndicator.style.color = 'var(--text-light)';
+  pageIndicator.style.fontSize = '0.9rem';
+  pageIndicator.style.fontWeight = '500';
+  controls.appendChild(pageIndicator);
+
+  if (hasMore) {
+    const nextBtn = document.createElement('button');
+    nextBtn.textContent = 'Siguiente →';
+    nextBtn.style.padding = '0.75rem 1.5rem';
+    nextBtn.style.backgroundColor = 'var(--primary)';
+    nextBtn.style.color = 'var(--text-inverse)';
+    nextBtn.style.border = 'none';
+    nextBtn.style.borderRadius = '4px';
+    nextBtn.style.cursor = 'pointer';
+    nextBtn.style.fontSize = '0.95rem';
+    nextBtn.style.fontWeight = '600';
+    nextBtn.addEventListener('click', () => loadPage(container, currentPage + 1));
+    nextBtn.addEventListener('mouseenter', () => {
+      nextBtn.style.backgroundColor = 'var(--primary-dark, #6d0a1a)';
+    });
+    nextBtn.addEventListener('mouseleave', () => {
+      nextBtn.style.backgroundColor = 'var(--primary)';
+    });
+    controls.appendChild(nextBtn);
+  }
+
+  paginationEl.innerHTML = '';
+  paginationEl.appendChild(controls);
+}
+
+export function initPromotionsView(container) {
+  loadPage(container, 0);
 }
