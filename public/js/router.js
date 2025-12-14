@@ -1,12 +1,12 @@
 // public/js/router.js
 /**
- * Router cliente (SPA)
+ * Router cliente (SPA) con inyección dinámica de navegación
  *
  * Responsabilidad:
  * - Resolver la vista actual basada en el hash de la URL.
- * - Cargar la vista parcial correspondiente (`/views/{view}.html`) mediante fetch
- *   e inyectarla en el contenedor `#app-root`.
- * - Invocar el inicializador de la vista (controlador) para enlazar eventos.
+ * - Cargar la vista parcial correspondiente (`/views/{view}.html`).
+ * - Inyectar dinámicamente la navegación correcta (pública o admin).
+ * - Inyectar el buscador en el header.
  * - Proteger rutas admin (requiere autenticación).
  */
 import { initHomeView } from './views/homeView.js';
@@ -22,27 +22,20 @@ const routes = {
   '#login': 'login',
   '#qr': 'qr',
   '#search': 'search',
+  '#admin': 'admin',
   '#promos': 'promotions',
   '#promotions': 'promotions',
-  // Rutas de Admin
-  '#admin': 'admin',
-  '#admin/products': 'admin', // Ejemplo, podría tener su propia vista
-  '#admin/create': 'admin',   // Ejemplo
-  '#admin/metrics': 'admin',  // Ejemplo
 };
 
-// Rutas que se consideran parte del panel de administración
-const adminRoutes = ['admin'];
+// Rutas que requieren autenticación
+const protectedRoutes = ['admin'];
+
+// Rutas públicas
+const publicRoutes = ['home', 'login', 'qr', 'search', 'promotions'];
 
 function getViewFromHash() {
   const hash = window.location.hash || '#home';
   const baseHash = hash.split('?')[0];
-  
-  // Simplificamos la lógica: si la ruta empieza con #admin, es 'admin'.
-  if (baseHash.startsWith('#admin')) {
-    return 'admin';
-  }
-  
   return routes[baseHash] || 'home';
 }
 
@@ -53,58 +46,112 @@ async function checkAuthentication() {
     });
     return res.ok;
   } catch (err) {
-    console.error('Error de autenticación:', err);
     return false;
   }
 }
 
 /**
- * Carga la barra de navegación apropiada (pública o admin)
- * @param {boolean} isAdminView - True si la vista es de administrador
+ * Inyecta dinámicamente la navegación correcta (pública o admin)
+ * en ambos contenedores: sidebar (desktop) y nav-container (mobile)
  */
-async function loadNavigation(isAdminView) {
-  const navContainer = document.getElementById('app-nav-container');
-  if (!navContainer) return;
+async function loadNavigation(viewName) {
+  const navContainer = document.getElementById('nav-container'); // Mobile bottom-nav
+  const sidebarContainer = document.getElementById('sidebar-container'); // Desktop sidebar
 
-  const navPartial = isAdminView ? './views/partials/nav-admin.html' : './views/partials/nav-public.html';
+  const isPublic = publicRoutes.includes(viewName);
+  const navFile = isPublic ? 'nav-public.html' : 'nav-admin.html';
 
   try {
-    const res = await fetch(navPartial, { cache: 'no-store' });
+    const res = await fetch(`./views/partials/${navFile}`, { cache: 'no-store' });
     if (res.ok) {
-      navContainer.innerHTML = await res.text();
+      const html = await res.text();
       
-      // Añadir listener para el botón de logout si es la nav de admin
-      if (isAdminView) {
-        const logoutBtn = document.getElementById('logout-btn');
-        if (logoutBtn) {
-          logoutBtn.addEventListener('click', async (e) => {
-            e.preventDefault();
-            try {
-              await fetch('./api/admin/logout', { method: 'POST' });
-              window.location.hash = '#login';
-            } catch (err) {
-              console.error('Error al cerrar sesión:', err);
-            }
-          });
-        }
+      // Inyectar en mobile bottom-nav
+      if (navContainer) {
+        navContainer.innerHTML = html;
       }
+      
+      // Inyectar en desktop sidebar
+      if (sidebarContainer) {
+        sidebarContainer.innerHTML = html;
+      }
+      
+      setupNavigation();
     }
   } catch (err) {
-    console.error('Error cargando la navegación:', err);
+    console.error('Error cargando navegación:', err);
   }
+}
+
+/**
+ * Inyecta el buscador en el header
+ */
+async function loadSearchHeader() {
+  const mobileSearch = document.getElementById('mobile-search-header');
+  const desktopSearch = document.getElementById('desktop-search-header');
+  
+  if (!mobileSearch && !desktopSearch) return;
+
+  try {
+    const res = await fetch('./views/partials/search-header.html', { cache: 'no-store' });
+    if (res.ok) {
+      const html = await res.text();
+      if (mobileSearch) mobileSearch.innerHTML = html;
+      if (desktopSearch) desktopSearch.innerHTML = html;
+    }
+  } catch (err) {
+    console.error('Error cargando buscador:', err);
+  }
+}
+
+/**
+ * Configura los listeners de navegación después de inyectar
+ */
+function setupNavigation() {
+  const navItems = document.querySelectorAll('[data-link]');
+  navItems.forEach((item) => {
+    item.addEventListener('click', (e) => {
+      e.preventDefault();
+      const target = item.getAttribute('data-link');
+      window.location.hash = target;
+    });
+  });
+
+  // Marcar item activo
+  const currentHash = window.location.hash || '#home';
+  const baseHash = currentHash.split('?')[0];
+  document.querySelectorAll('[data-link]').forEach((item) => {
+    if (item.getAttribute('data-link') === baseHash) {
+      item.classList.add('active');
+    } else {
+      item.classList.remove('active');
+    }
+  });
+
+  // Destruir tooltips anteriores antes de crear nuevos
+  document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach((el) => {
+    const tooltip = window.bootstrap?.Tooltip?.getInstance(el);
+    if (tooltip) {
+      tooltip.dispose();
+    }
+  });
+
+  // Inicializar tooltips de Bootstrap (solo para sidebar)
+  const sidebarTooltips = document.querySelectorAll('#sidebar-container [data-bs-toggle="tooltip"]');
+  sidebarTooltips.forEach((tooltipTriggerEl) => {
+    new window.bootstrap.Tooltip(tooltipTriggerEl, {
+      trigger: 'hover',
+      delay: { show: 0, hide: 200 }
+    });
+  });
 }
 
 async function showView(viewName) {
   const root = document.getElementById('app-root');
   if (!root) return;
 
-  const isAdminView = adminRoutes.includes(viewName);
-  
-  // Cargar la navegación correcta ANTES de proteger la ruta
-  await loadNavigation(isAdminView);
-
   // Proteger rutas que requieren autenticación
-  if (isAdminView) {
+  if (protectedRoutes.includes(viewName)) {
     const isAuthenticated = await checkAuthentication();
     if (!isAuthenticated) {
       window.location.hash = '#login';
@@ -112,27 +159,28 @@ async function showView(viewName) {
     }
   }
 
-  // Cargar parcial de la vista correspondiente
-  try {
-    // La vista de login no necesita nav, podríamos ocultarla
-    if (viewName === 'login') {
-        const navContainer = document.getElementById('app-nav-container');
-        if (navContainer) navContainer.innerHTML = '';
-    }
+  // Inyectar navegación dinámica
+  await loadNavigation(viewName);
 
+  // Inyectar buscador en header
+  await loadSearchHeader();
+
+  // Cargar vista parcial
+  try {
     const res = await fetch(`./views/${viewName}.html`, { cache: 'no-store' });
     if (!res.ok) {
-      root.innerHTML = `<div class="container mt-4"><div class="alert alert-danger">Error cargando la vista ${viewName} (HTTP ${res.status})</div></div>`;
+      root.innerHTML = `<p>Error cargando la vista ${viewName} (HTTP ${res.status})</p>`;
       return;
     }
 
-    root.innerHTML = await res.text();
+    const html = await res.text();
+    root.innerHTML = html;
   } catch (err) {
-    root.innerHTML = `<div class="container mt-4"><div class="alert alert-danger">Error al cargar la vista: ${err.message}</div></div>`;
+    root.innerHTML = `<p>Error al cargar la vista: ${err.message}</p>`;
     return;
   }
 
-  // Inicializar el controlador de la vista cargada
+  // Inicializar la vista
   switch (viewName) {
     case 'home':
       initHomeView(root);
@@ -146,23 +194,15 @@ async function showView(viewName) {
     case 'search':
       initSearchView(root);
       break;
-    case 'promotions':
-      initPromotionsView(root);
-      break;
     case 'admin':
       initAdminView(root);
+      break;
+    case 'promotions':
+      initPromotionsView(root);
       break;
     default:
       initHomeView(root);
       break;
-  }
-  
-  // Marcar el ítem de navegación activo
-  const currentHash = window.location.hash || '#home';
-  const activeLink = document.querySelector(`.nav-item[data-link="${currentHash.split('?')[0]}"]`);
-  if (activeLink) {
-    document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
-    activeLink.classList.add('active');
   }
 }
 

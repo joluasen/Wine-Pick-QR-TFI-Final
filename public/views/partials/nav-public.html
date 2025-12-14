@@ -1,24 +1,57 @@
-<!-- Barra de Navegación Pública -->
-<nav class="bottom-nav">
-  <a class="nav-item" href="#home" data-link="#home">
-    <i class="bi bi-house"></i>
+<!-- public/views/partials/nav-public.html -->
+<!-- Navegación para usuarios públicos -->
+
+<!-- MOBILE BOTTOM NAV -->
+<nav class="bottom-nav d-md-none">
+  <button class="bottom-nav-item active" data-link="#home" aria-label="Inicio">
+    <i class="fas fa-home"></i>
+    <span>Inicio</span>
+  </button>
+  
+  <button class="bottom-nav-item" data-link="#search" aria-label="Búsqueda">
+    <i class="fas fa-search"></i>
+    <span>Buscar</span>
+  </button>
+
+  <!-- Botón central flotante para QR -->
+  <button class="bottom-nav-scan" data-link="#qr" aria-label="Escanear QR" title="Escanear QR">
+    <i class="fas fa-qrcode"></i>
+  </button>
+
+  <button class="bottom-nav-item" data-link="#promos" aria-label="Promociones">
+    <i class="fas fa-tag"></i>
+    <span>Promos</span>
+  </button>
+
+  <button class="bottom-nav-item" data-bs-toggle="modal" data-bs-target="#loginModal" aria-label="Ingresar">
+    <i class="fas fa-user"></i>
+    <span>Ingresar</span>
+  </button>
+</nav>
+
+<!-- DESKTOP SIDEBAR NAV -->
+<nav class="sidebar-nav d-none d-md-flex">
+  <a href="#home" class="sidebar-nav-item active" data-link="#home" title="Inicio" data-bs-toggle="tooltip" data-bs-placement="right">
+    <i class="fas fa-home"></i>
     <span>Inicio</span>
   </a>
-  <a class="nav-item" href="#search" data-link="#search">
-    <i class="bi bi-search"></i>
-    <span>Buscar</span>
+
+  <a href="#search" class="sidebar-nav-item" data-link="#search" title="Buscar Vinos" data-bs-toggle="tooltip" data-bs-placement="right">
+    <i class="fas fa-search"></i>
+    <span>Buscar Vinos</span>
   </a>
-  
-  <a href="#qr" class="fab" data-link="#qr" aria-label="Escanear QR">
-    <i class="bi bi-qr-code-scan"></i>
+
+  <a href="#promos" class="sidebar-nav-item" data-link="#promos" title="Promociones" data-bs-toggle="tooltip" data-bs-placement="right">
+    <i class="fas fa-tag"></i>
+    <span>Promociones</span>
   </a>
-  
-  <a class="nav-item" href="#promos" data-link="#promos">
-    <i class="bi bi-tags"></i>
-    <span>Promos</span>
-  </a>
-  <a class="nav-item" href="#admin" data-link="#admin">
-    <i class="bi bi-person-circle"></i>
-    <span>Admin</span>
+
+  <div class="sidebar-divider"></div>
+
+  <div class="sidebar-divider"></div>
+
+  <a href="#" class="sidebar-nav-item" data-bs-toggle="modal" data-bs-target="#loginModal" title="Ingresar" data-bs-toggle="tooltip" data-bs-placement="right">
+    <i class="fas fa-user"></i>
+    <span>Ingresar</span>
   </a>
 </nav>

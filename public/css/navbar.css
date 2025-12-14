@@ -1,0 +1,226 @@
+/* =========================================
+   NAVBAR.CSS - Estilos de Navegación
+   ========================================= */
+/* Variables definidas en layout.css - no duplicar */
+
+/* =========================================
+   MOBILE BOTTOM NAV (Solo visible en móvil)
+   ========================================= */
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 64px;
+  padding: 0.25rem 0.75rem calc(0.35rem + env(safe-area-inset-bottom, 0px));
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  z-index: 1030;
+}
+
+/* Items laterales */
+.bottom-nav-item {
+  flex: 1;
+  text-align: center;
+  font-size: 0.72rem;
+  color: var(--winepick-muted);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  position: relative;
+  min-width: 0;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  border: none;
+  background: transparent;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.16s ease-out;
+}
+
+.bottom-nav-item:hover {
+  color: var(--winepick-muted);
+}
+
+/* Icono y Texto */
+.bottom-nav-item i {
+  font-size: 1.25rem;
+  margin-bottom: 0;
+  transition: transform 0.16s ease-out, color 0.16s ease-out;
+}
+
+.bottom-nav-item span {
+  line-height: 1.1;
+  white-space: nowrap;
+}
+
+/* Barrita superior activa */
+.bottom-nav-item::before {
+  content: "";
+  position: absolute;
+  top: -3px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 22px;
+  height: 3px;
+  border-radius: 999px;
+  background-color: var(--winepick-primary);
+  opacity: 0;
+  transition: opacity 0.16s ease-out;
+}
+
+/* Estado Activo Mobile */
+.bottom-nav-item.active {
+  color: var(--winepick-primary);
+  font-weight: 500;
+}
+
+.bottom-nav-item.active::before {
+  opacity: 1;
+}
+
+.bottom-nav-item.active i {
+  transform: translateY(-1px);
+}
+
+.bottom-nav-item:active i {
+  transform: translateY(1px) scale(0.96);
+}
+
+/* Botón central flotante (Mobile) */
+.bottom-nav-scan {
+  position: relative;
+  top: -20px;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: var(--winepick-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.25);
+  color: #ffffff;
+  border: 3px solid #ffffff;
+  transition: box-shadow 0.16s ease-out, transform 0.16s ease-out;
+  padding: 0;
+  cursor: pointer;
+}
+
+.bottom-nav-scan:active {
+  transform: translateY(2px) scale(0.97);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.25);
+}
+
+.bottom-nav-scan i {
+  font-size: 1.7rem;
+}
+
+/* =========================================
+   DESKTOP SIDEBAR (Visible en PC)
+   ========================================= */
+#sidebar-container {
+  position: sticky;
+  top: 80px; /* Altura del header */
+  height: calc(100vh - 80px);
+  overflow-y: auto;
+  padding: 0.5rem 0;
+  width: 70px;
+}
+
+/* Navegación vertical en sidebar */
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.sidebar-nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  padding: 1rem 0.5rem;
+  color: var(--winepick-muted);
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 0.75rem;
+  border-left: 3px solid transparent;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  width: 100%;
+  text-align: center;
+}
+
+.sidebar-nav-item i {
+  font-size: 1.5rem;
+  min-width: 24px;
+}
+
+.sidebar-nav-item span {
+  display: none;
+}
+
+.sidebar-nav-item:hover {
+  background-color: var(--winepick-primary-soft);
+  color: var(--winepick-primary);
+}
+
+.sidebar-nav-item.active {
+  background-color: var(--winepick-primary-soft);
+  color: var(--winepick-primary);
+  border-left-color: var(--winepick-primary);
+  font-weight: 600;
+}
+
+/* Separador en sidebar */
+.sidebar-divider {
+  height: 1px;
+  background: #EEEEEE;
+  margin: 0.75rem 0;
+}
+
+/* Sección de botones en sidebar */
+.sidebar-actions {
+  padding: 1.5rem;
+  border-top: 1px solid #EEEEEE;
+  margin-top: auto;
+}
+
+.sidebar-actions .btn {
+  width: 100%;
+  margin-bottom: 0.75rem;
+}
+
+.sidebar-actions .btn:last-child {
+  margin-bottom: 0;
+}
+
+/* =========================================
+   RESPONSIVE
+   ========================================= */
+
+@media (max-width: 767.98px) {
+  body {
+    padding-bottom: 80px;
+  }
+  
+  #sidebar-container {
+    display: none;
+  }
+}
+
+@media (min-width: 768px) {
+  #nav-container {
+    display: none;
+  }
+}
+

@@ -1,17 +1,13 @@
 <!--
   Vista parcial: promotions.html
   Propósito: Listado de productos con promociones vigentes.
+  Muestra tarjetas con nombre, bodega, precio original, precio promocional, texto y vigencia.
 -->
-<section data-view="promotions" class="container py-4">
-  <div class="d-flex justify-content-between align-items-center mb-3">
-    <h2 class="h2 mb-0">Promociones Vigentes</h2>
-  </div>
-  <p class="text-muted">Encontrá las ofertas activas de hoy y ahorrá en tus vinos favoritos.</p>
+<section data-view="promotions">
+  <h2>Promociones Vigentes</h2>
+  <p>Encontrá las ofertas activas de hoy.</p>
 
   <div id="promos-status" aria-live="polite"></div>
 
-  <!-- Contenedor para los resultados con el grid de Bootstrap -->
-  <div id="promos-results" class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 row-cols-xl-4 g-4">
-    <!-- Las tarjetas de promoción se insertarán aquí dinámicamente -->
-  </div>
+  <div id="promos-results"></div>
 </section>

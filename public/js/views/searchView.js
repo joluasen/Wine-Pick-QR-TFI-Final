@@ -3,138 +3,169 @@
  * Controlador de la vista 'search'
  *
  * Responsabilidades:
- * - Gestionar formulario de búsqueda.
- * - Consultar API (GET /api/public/productos?search=...).
- * - Renderizar resultados como tarjetas Bootstrap.
- * - Navegar a la ficha de producto al hacer clic en una tarjeta.
- * - Gestionar estados: carga, sin resultados, error.
+ * - Gestionar formulario de búsqueda por texto libre
+ *   - Busca en nombre, bodega, descripción, varietal, origen
+ * - Consultar API (GET /api/public/productos?search=...)
+ * - Renderizar resultados como tarjetas interactivas
+ *   - Mostrar información básica (nombre, bodega, tipo, precio)
+ *   - Mostrar promoción vigente si existe con badge y validez
+ *   - Efectos hover (elevación y sombra)
+ * - Navegar a ficha de producto al clickear tarjeta
+ * - Gestionar estados: vacío, carga, sin resultados, error, éxito
+ * - Indicadores visuales de carga y cantidad de resultados
  */
+
+let initialized = false; // Flag para evitar inicialización múltiple
 
 function setStatus(el, message, type = 'info') {
   if (!el) return;
-  const alertType = type === 'error' ? 'danger' : (type === 'success' ? 'success' : 'info');
-  el.innerHTML = `
-    <div class="alert alert-${alertType} small p-2 mt-2" role="alert">
-      ${message}
-    </div>
-  `;
+  el.textContent = message;
+  el.dataset.type = type;
 }
 
 /**
- * Renderiza las tarjetas de resultados de búsqueda usando Bootstrap.
- * @param {HTMLElement} resultEl - El elemento contenedor para los resultados.
- * @param {Array<object>} products - La lista de productos desde la API.
+ * Renderizar grid de tarjetas con resultados de búsqueda
+ * @param {HTMLElement} resultEl - Contenedor para insertar resultados
+ * @param {Array} products - Array de productos desde API
  */
 function renderSearchResults(resultEl, products) {
   if (!resultEl) return;
-  resultEl.innerHTML = ''; // Limpiar resultados anteriores
-
+  
+  const container = document.createElement('div');
+  container.className = 'search-results-grid';
+  
   products.forEach((product) => {
-    const finalPrice = parseFloat(product.final_price);
-    const basePrice = parseFloat(product.base_price);
-    let priceHTML = '';
-    let badgeHTML = '';
-
+    const card = document.createElement('div');
+    card.className = 'search-result-card';
+    card.style.cursor = 'pointer';
+    
+    // Renderizar precio con o sin promoción
+    let priceHtml = '';
+    let promoValidityHtml = '';
     if (product.promotion) {
-      const promoType = product.promotion.promotion_type;
-      const promoValue = parseFloat(product.promotion.parameter_value);
-
-      priceHTML = `
-        <p class="card-text small text-decoration-line-through text-muted mb-1">
-          $${basePrice.toFixed(2)}
-        </p>
-        <p class="card-text h5 fw-bold text-primary mb-0">
-          $${finalPrice.toFixed(2)}
-        </p>
-      `;
-
-      if (promoType === 'porcentaje') {
-        badgeHTML = `<span class="badge bg-success">${promoValue.toFixed(0)}% OFF</span>`;
-      } else if (promoType === 'precio_fijo') {
-        const discount = ((basePrice - finalPrice) / basePrice) * 100;
-        badgeHTML = `<span class="badge bg-success">${discount.toFixed(0)}% OFF</span>`;
-      } else {
-        badgeHTML = `<span class="badge bg-warning text-dark">${promoType.toUpperCase()}</span>`;
+      const basePrice = parseFloat(product.base_price);
+      let finalPrice = basePrice;
+      
+      if (product.promotion.type === 'porcentaje') {
+        const discount = parseFloat(product.promotion.value);
+        finalPrice = basePrice * (1 - discount / 100);
+        priceHtml = `<p><strong>Precio:</strong> <span style="text-decoration: line-through; color: #999;">$${basePrice.toFixed(2)}</span> <span style="color: #d4af37; font-weight: bold;">$${finalPrice.toFixed(2)}</span> <span style="color: #d4af37; font-size: 0.85em;">(${discount}% OFF)</span></p>`;
+      } else if (product.promotion.type === 'precio_fijo') {
+        finalPrice = parseFloat(product.promotion.value);
+        const savings = basePrice - finalPrice;
+        priceHtml = `<p><strong>Precio:</strong> <span style="text-decoration: line-through; color: #999;">$${basePrice.toFixed(2)}</span> <span style="color: #d4af37; font-weight: bold;">$${finalPrice.toFixed(2)}</span> <span style="color: #d4af37; font-size: 0.85em;">(Ahorrás $${savings.toFixed(2)})</span></p>`;
+      } else if (product.promotion.type === '2x1') {
+        finalPrice = basePrice / 2;
+        priceHtml = `<p><strong>Precio:</strong> <span style="text-decoration: line-through; color: #999;">$${basePrice.toFixed(2)}</span> <span style="color: #d4af37; font-weight: bold;">$${finalPrice.toFixed(2)} c/u</span> <span style="color: #d4af37; font-size: 0.85em;">(2x1: pagás 1, llevás 2)</span></p>`;
+      } else if (product.promotion.type === '3x2') {
+        finalPrice = basePrice * 2 / 3;
+        priceHtml = `<p><strong>Precio:</strong> <span style="text-decoration: line-through; color: #999;">$${basePrice.toFixed(2)}</span> <span style="color: #d4af37; font-weight: bold;">$${finalPrice.toFixed(2)} c/u</span> <span style="color: #d4af37; font-size: 0.85em;">(3x2: pagás 2, llevás 3)</span></p>`;
+      } else if (product.promotion.type === 'nxm') {
+        priceHtml = `<p><strong>Precio:</strong> <span style="color: #d4af37; font-weight: bold;">$${basePrice.toFixed(2)} c/u</span> <span style="color: #d4af37; font-size: 0.85em;">(Combo especial - Consultá condiciones)</span></p>`;
       }
+      
+      // Agregar fechas de validez
+      const startDate = product.promotion.start_at ? new Date(product.promotion.start_at).toLocaleDateString('es-AR') : '';
+      const endDate = product.promotion.end_at ? new Date(product.promotion.end_at).toLocaleDateString('es-AR') : 'Sin vencimiento';
+      promoValidityHtml = `<p style="font-size: 0.8em; color: #d4af37; margin-top: 0.25rem;">⏰ Válido hasta: ${endDate}</p>`;
     } else {
-      priceHTML = `
-        <p class="card-text h5 fw-bold text-primary mb-0">
-          $${finalPrice.toFixed(2)}
-        </p>
-      `;
+      priceHtml = `<p><strong>Precio:</strong> $${product.base_price ?? '—'}</p>`;
     }
-
-    const col = document.createElement('div');
-    col.className = 'col';
-    col.innerHTML = `
-      <div class="card h-100 shadow-sm product-card-search" data-product-code="${product.public_code}" style="cursor: pointer;">
-        <div class="card-body d-flex flex-column">
-          <h5 class="card-title h6">${product.name}</h5>
-          <p class="card-text text-muted small mb-2">${product.winery_distillery}</p>
-          <p class="card-text text-muted small">${product.drink_type} ${product.varietal ? `· ${product.varietal}` : ''}</p>
-          
-          <div class="mt-auto pt-3">
-            <div class="d-flex justify-content-between align-items-center">
-              <div>${priceHTML}</div>
-              ${badgeHTML}
-            </div>
-          </div>
-        </div>
-      </div>
+    
+    // Renderizar tarjeta con información del producto
+    card.innerHTML = `
+      <h4>${product.name || 'Producto'}</h4>
+      <p><strong>Bodega:</strong> ${product.winery_distillery || '—'}</p>
+      <p><strong>Tipo:</strong> ${product.drink_type || '—'}${product.varietal ? ' · ' + product.varietal : ''}</p>
+      ${priceHtml}
+      ${promoValidityHtml}
+      <p><small>Código: ${product.public_code}</small></p>
     `;
-
-    col.querySelector('.product-card-search').addEventListener('click', () => {
+    
+    // Navegar a ficha de producto al clickear
+    card.addEventListener('click', () => {
       window.location.hash = `#qr?code=${encodeURIComponent(product.public_code)}`;
     });
-
-    resultEl.appendChild(col);
+    
+    // Efectos visuales de interacción (elevación y sombra)
+    card.addEventListener('mouseenter', () => {
+      card.style.transform = 'translateY(-2px)';
+      card.style.boxShadow = '0 4px 12px rgba(74, 14, 26, 0.15)';
+    });
+    
+    card.addEventListener('mouseleave', () => {
+      card.style.transform = 'translateY(0)';
+      card.style.boxShadow = '0 1px 3px rgba(74, 14, 26, 0.08)';
+    });
+    
+    container.appendChild(card);
   });
+  
+  resultEl.innerHTML = '';
+  resultEl.appendChild(container);
 }
 
-async function searchView(params, viewEl) {
-  const form = viewEl.querySelector('#search-form');
-  const input = viewEl.querySelector('#search-input');
-  const statusEl = viewEl.querySelector('#search-status');
-  const resultsEl = viewEl.querySelector('#search-results');
+/**
+ * Inicializar vista de búsqueda de productos
+ * @param {HTMLElement} container - Contenedor de la vista
+ */
+export function initSearchView(container) {
+  if (initialized) return; // Evitar inicialización múltiple
 
-  if (!form || !input || !statusEl || !resultsEl) {
-    console.error('Elementos requeridos no encontrados en search.html');
-    return;
+  const form = container.querySelector('#search-form');
+  const searchInput = container.querySelector('#search-input');
+  const statusEl = container.querySelector('#search-status');
+  const resultsEl = container.querySelector('#search-results');
+  
+  // Manejador del envío del formulario de búsqueda
+  if (form) {
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const query = searchInput?.value?.trim() || '';
+
+      // Validación
+      if (query.length === 0) {
+        setStatus(statusEl, 'Ingresá un texto de búsqueda.', 'error');
+        if (resultsEl) resultsEl.innerHTML = '';
+        return;
+      }
+
+      // Mostrar indicador de carga
+      setStatus(statusEl, 'Buscando productos...', 'info');
+      if (resultsEl) resultsEl.innerHTML = '';
+
+      try {
+        const res = await fetch(`./api/public/productos?search=${encodeURIComponent(query)}`, {
+          headers: { Accept: 'application/json' },
+        });
+
+        const json = await res.json().catch(() => null);
+
+        // Error de validación o sin parámetro
+        if (!res.ok || !json?.ok) {
+          const msg = json?.error?.message || 'Error en la búsqueda';
+          setStatus(statusEl, `${msg}`, 'error');
+          if (resultsEl) resultsEl.innerHTML = '';
+          return;
+        }
+
+        const products = json.data?.products || [];
+        if (products.length === 0) {
+          setStatus(statusEl, `No se encontraron productos para "${query}".`, 'info');
+          if (resultsEl) {
+            resultsEl.innerHTML = '<p style="text-align: center; color: var(--text-light);">Intenta con otras palabras clave.</p>';
+          }
+          return;
+        }
+
+        setStatus(statusEl, `Se encontraron ${products.length} producto(s).`, 'success');
+        renderSearchResults(resultsEl, products);
+      } catch (err) {
+        setStatus(statusEl, `Error de conexión: ${err.message}`, 'error');
+        if (resultsEl) resultsEl.innerHTML = '';
+      }
+    });
   }
 
-  // Evitar añadir listeners múltiples veces
-  if (form.dataset.initialized) return;
-  form.dataset.initialized = 'true';
-
-  form.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const query = input.value.trim();
-    if (query.length < 2) {
-      setStatus(statusEl, 'Por favor, ingresa al menos 2 caracteres.', 'warning');
-      return;
-    }
-
-    setStatus(statusEl, 'Buscando...', 'info');
-    resultsEl.innerHTML = '';
-
-    try {
-      const response = await fetch(`/api/public/productos?search=${encodeURIComponent(query)}`);
-      if (!response.ok) {
-        throw new Error(`Error del servidor: ${response.status}`);
-      }
-      const products = await response.json();
-
-      if (products.length === 0) {
-        setStatus(statusEl, `No se encontraron resultados para "${query}".`, 'info');
-      } else {
-        statusEl.innerHTML = ''; // Limpiar mensaje de "buscando"
-        renderSearchResults(resultsEl, products);
-      }
-    } catch (error) {
-      console.error('Error en la búsqueda:', error);
-      setStatus(statusEl, 'Ocurrió un error al realizar la búsqueda.', 'error');
-    }
-  });
+  initialized = true; // Marcar inicialización completada
 }
-
-export default searchView;

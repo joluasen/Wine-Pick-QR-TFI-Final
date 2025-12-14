@@ -1,228 +1,18 @@
 /*
    Archivo: public/css/styles.css
-   Propósito: Estilos personalizados y overrides que complementan a Bootstrap y theme.css.
-   
-   Aquí van los estilos que son muy específicos de un componente y no pertenecen
-   al tema general, o ajustes finos que Bootstrap no cubre por defecto.
+   Propósito: Estilos visuales complementarios (cards, productos, etc.)
+   NOTA: Variables principales en layout.css y theme.css
 */
 
-/*
-  NOTA: La mayoría de los estilos base (colores, fuentes, botones, formularios)
-  fueron migrados a un sistema de theming sobre Bootstrap.
-
-  - `bootstrap.min.css`: Framework base.
-  - `theme.css`: Personalización de variables de Bootstrap (colores, bordes, etc.)
-                 y estilos del layout principal (App Shell).
-
-  Este archivo se mantiene para estilos específicos que no encajan en el tema.
-*/
-
-/* Ajustes para que las vistas se integren bien con el nuevo layout */
-section[data-view] {
-  /* Eliminamos el fondo y la sombra, ya que el layout principal lo maneja.
-     Usamos las clases de Bootstrap como .container o .p-3 en su lugar. */
-  background: none;
-  padding: 0;
-  border: none;
-  box-shadow: none;
-}
-
-section[data-view] h2 {
-  /* Usar clases de display de Bootstrap como .display-5 o .h2 */
-  color: var(--bs-primary);
-  font-size: 1.75rem;
-  font-weight: 600;
-  margin-bottom: 1rem;
-  padding-bottom: 0.5rem;
-  border-bottom: 1px solid var(--bs-border-color);
-}
-
-section[data-view] h3 {
-  font-size: 1.25rem;
-  font-weight: 600;
-  margin-top: 1.5rem;
-  margin-bottom: 0.75rem;
-}
-
-/*
- * Estilos para la ficha de producto (Modal y Tarjetas)
- * Estos son más específicos y pueden mantenerse aquí.
- */
-
-/* Estilo Mercado Libre para la ficha de producto */
-.meli-container {
-  display: flex;
-  gap: 2.5rem;
-  padding: 1.5rem;
-  background: white;
-  max-width: 1200px;
-  margin: 0 auto;
-}
-
-.meli-image-section {
-  flex: 0 0 350px;
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.meli-image-wrapper {
-  width: 100%;
-  aspect-ratio: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #fafafa;
-  border-radius: var(--bs-border-radius);
-  overflow: hidden;
-  border: 1px solid var(--bs-border-color);
-}
-
-.meli-image {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-}
-
-.meli-image-placeholder {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  height: 100%;
-  gap: 0.75rem;
-  color: #999;
-}
-
-.meli-image-placeholder span {
-  font-size: 0.9rem;
-  color: #999;
-}
-
-.meli-details-section {
-  flex: 1;
-}
-
-.meli-header {
-  border-bottom: 1px solid var(--bs-border-color);
-  padding-bottom: 1rem;
-  margin-bottom: 1rem;
-}
-
-.meli-title {
-  font-size: 1.5rem;
-  font-weight: 400;
-}
-
-.meli-price-original {
-  font-size: 1rem;
-  color: var(--bs-secondary);
-  text-decoration: line-through;
-}
-
-.meli-price-main {
-  font-size: 2.25rem;
-  font-weight: 300;
-}
-
-.meli-discount-badge {
-  font-size: 0.8rem;
-  font-weight: 600;
-  padding: 0.25rem 0.5rem;
-}
-
-.meli-savings {
-  color: var(--bs-success);
-  font-weight: 600;
-}
-
-.meli-promo-box {
-  background-color: rgba(var(--bs-warning-rgb), 0.1);
-  border: 1px solid rgba(var(--bs-warning-rgb), 0.3);
-}
-
-/* Grid de resultados de búsqueda */
-.search-results-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 1.5rem;
-  margin-top: 1.5rem;
-}
-
-/*
-  Se recomienda reemplazar .search-result-card por el componente .card de Bootstrap
-  para mayor consistencia. Por ahora, se mantiene para no romper la funcionalidad existente.
-*/
-.search-result-card {
-  background: var(--bs-card-bg);
-  padding: 1.25rem;
-  border: 1px solid var(--bs-border-color);
-  border-radius: var(--bs-border-radius);
-  transition: all 0.15s ease;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-  cursor: pointer;
-}
-
-.search-result-card:hover {
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-  transform: translateY(-2px);
-}
-
-.search-result-card h4 {
-  color: var(--bs-primary);
-  margin: 0 0 0.75rem 0;
-  font-size: 1rem;
-  font-weight: 600;
-}
-
-/* QR Scanner */
-#qr-reader {
-  margin-top: 1rem;
-  border: 2px solid var(--bs-primary);
-  border-radius: var(--bs-border-radius);
-  overflow: hidden;
-  max-width: 100%;
-}
-
-
-/* Reset y base */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
+/* Variables locales para este archivo (no conflictivas) */
 :root {
-  --primary: #4A0E1A;
-  --primary-light: #6B0F2A;
-  --primary-dark: #2D0810;
-  --accent: #721C2E;
-  --bg: #FAFAFA;
-  --bg-card: #FFFFFF;
-  --text: #1A1A1A;
-  --text-light: #5A5A5A;
-  --border: #DDDDDD;
-  --border-light: #EEEEEE;
-  --success: #2E7D42;
-  --error: #C62828;
-  --info: #0277BD;
   --shadow: rgba(74, 14, 26, 0.08);
   --shadow-hover: rgba(74, 14, 26, 0.12);
 }
 
-body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-  background: var(--bg);
-  color: var(--text);
-  line-height: 1.65;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  font-size: 15px;
-}
+/* Estilos de vista heredados (layout principal en layout.css) */
 
-/* Header */
+/* Header heredado (solo para vistas legacy) */
 .app-header {
   background: var(--primary);
   color: white;
@@ -264,8 +54,8 @@ body {
   transform: scale(0.98);
 }
 
-/* Main content */
-#app-root {
+/* Main content (usado solo en vistas legacy sin layout.css) */
+#app-root.legacy-view {
   flex: 1;
   padding: 2rem;
   max-width: 1200px;
@@ -455,18 +245,8 @@ button:disabled {
   margin-top: 2rem;
 }
 
-#qr-result > div,
-/* Modal */
-.modal {
-  display: none;
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 1000;
-  align-items: center;
-  justify-content: center;
+#qr-result > div {
+  /* Modal custom styles removed - using Bootstrap modals instead */
 }
 
 .modal-overlay {
@@ -476,18 +256,6 @@ button:disabled {
   width: 100%;
   height: 100%;
   background: rgba(0, 0, 0, 0.85);
-}
-
-.modal-content {
-  position: relative;
-  background: var(--bg-card);
-  border-radius: 8px;
-  max-width: 700px;
-  width: 90%;
-  max-height: 90vh;
-  overflow-y: auto;
-  z-index: 1001;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
 }
 
 .modal-close {

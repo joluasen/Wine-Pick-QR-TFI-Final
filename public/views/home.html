@@ -1,51 +1,29 @@
 <!--
   Vista parcial: home.html
-  Descripción: Vista de inicio de la aplicación.
+  Descripción: fragmento HTML que representa la vista de inicio. Se carga
+  dinámicamente por `public/js/router.js` dentro del contenedor `#app-root`.
+  Mantener aquí solo marcado semántico; la presentación (estilos) se gestiona
+  de forma central si se decide reintroducir CSS.
 -->
-<section data-view="home" class="container py-4">
-  <div class="text-center">
-    <h1 class="display-5 fw-bold text-primary">Wine-Pick QR</h1>
-    <p class="lead text-muted">
-      Tu asistente digital para explorar y gestionar nuestro catálogo de vinos.
-    </p>
-  </div>
-
-  <div class="row g-4 mt-4">
-    <div class="col-md-4">
-      <div class="card h-100 text-center shadow-sm">
-        <div class="card-body">
-          <i class="bi bi-upc-scan fs-1 text-primary"></i>
-          <h5 class="card-title mt-3">Escaneo Rápido</h5>
-          <p class="card-text">Escanea el código QR de un producto para acceder a su ficha detallada, incluyendo precios, notas de cata y promociones.</p>
-        </div>
-        <div class="card-footer">
-          <a href="#qr" class="btn btn-primary">Escanear ahora</a>
-        </div>
-      </div>
+<section data-view="home">
+  <h2>Wine-Pick-QR</h2>
+  <p>Sistema de gestión y consulta de productos con códigos QR.</p>
+  
+  <h3>Funcionalidades</h3>
+  <div style="margin-top: 1.5rem;">
+    <div class="feature-card" style="margin-bottom: 1rem; padding: 1.25rem; background: var(--bg); border-left: 3px solid var(--primary); border-radius: 2px; border: 1px solid var(--border);">
+      <h4 style="margin: 0 0 0.5rem 0; color: var(--primary); font-size: 1rem; font-weight: 600;">Consulta por Código</h4>
+      <p style="margin: 0; color: var(--text-light); font-size: 0.9rem;">Ingresa el código de un producto para ver su información detallada, precios y disponibilidad.</p>
     </div>
-    <div class="col-md-4">
-      <div class="card h-100 text-center shadow-sm">
-        <div class="card-body">
-          <i class="bi bi-search fs-1 text-primary"></i>
-          <h5 class="card-title mt-3">Búsqueda Inteligente</h5>
-          <p class="card-text">Encuentra productos por nombre, bodega, varietal o cualquier característica. Nuestro buscador te ayudará a localizarlo.</p>
-        </div>
-        <div class="card-footer">
-          <a href="#search" class="btn btn-secondary">Ir a Búsqueda</a>
-        </div>
-      </div>
+    
+    <div class="feature-card" style="margin-bottom: 1rem; padding: 1.25rem; background: var(--bg); border-left: 3px solid var(--primary); border-radius: 2px; border: 1px solid var(--border);">
+      <h4 style="margin: 0 0 0.5rem 0; color: var(--primary); font-size: 1rem; font-weight: 600;">Búsqueda</h4>
+      <p style="margin: 0; color: var(--text-light); font-size: 0.9rem;">Encuentra productos por nombre, bodega, varietal o cualquier texto relacionado.</p>
     </div>
-    <div class="col-md-4">
-      <div class="card h-100 text-center shadow-sm">
-        <div class="card-body">
-          <i class="bi bi-tags-fill fs-1 text-primary"></i>
-          <h5 class="card-title mt-3">Promociones</h5>
-          <p class="card-text">Descubre todas las ofertas y descuentos especiales vigentes. Ahorra en tus compras y disfruta de los mejores precios.</p>
-        </div>
-        <div class="card-footer">
-          <a href="#promotions" class="btn btn-secondary">Ver Ofertas</a>
-        </div>
-      </div>
+    
+    <div class="feature-card" style="margin-bottom: 1rem; padding: 1.25rem; background: var(--bg); border-left: 3px solid var(--primary); border-radius: 2px; border: 1px solid var(--border);">
+      <h4 style="margin: 0 0 0.5rem 0; color: var(--primary); font-size: 1rem; font-weight: 600;">Panel Admin</h4>
+      <p style="margin: 0; color: var(--text-light); font-size: 0.9rem;">Gestiona el catálogo: crea productos, genera códigos QR y administra promociones.</p>
     </div>
   </div>
 </section>
