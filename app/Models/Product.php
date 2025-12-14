@@ -341,5 +341,47 @@ class Product
 
         return $this->db->fetchOne($query, [$productId, $now, $now], 'iss');
     }
+
+    /**
+     * Obtener los productos más buscados (consultados).
+     * 
+     * Agrupa por product_id y cuenta los eventos de consulta (QR y BÚSQUEDA).
+     * Retorna los datos del producto junto con su contador de consultas.
+     * 
+     * @param int $limit Número máximo de productos a retornar.
+     * @param int $offset Offset para paginación.
+     * 
+     * @return array Lista de productos más buscados.
+     */
+    public function getMostSearchedProducts(int $limit = 10, int $offset = 0): array
+    {
+        $query = "
+            SELECT
+                p.id,
+                p.public_code,
+                p.name,
+                p.drink_type,
+                p.winery_distillery,
+                p.varietal,
+                p.origin,
+                p.vintage_year,
+                p.short_description,
+                p.base_price,
+                p.visible_stock,
+                p.image_url,
+                p.is_active,
+                p.created_at,
+                p.updated_at,
+                COUNT(ce.id) as search_count
+            FROM products p
+            LEFT JOIN consult_events ce ON p.id = ce.product_id
+            WHERE p.is_active = 1
+            GROUP BY p.id
+            ORDER BY search_count DESC, p.name ASC
+            LIMIT ? OFFSET ?
+        ";
+
+        return $this->db->fetchAll($query, [$limit, $offset], 'ii');
+    }
 }
 ?>

@@ -55,6 +55,9 @@ class Router
         // GET /api/public/promociones - Listar productos con promociones vigentes
         $this->get('/api/public/promociones', 'ProductController@listActivePromotions');
 
+        // GET /api/public/mas-buscados - Listar productos más buscados
+        $this->get('/api/public/mas-buscados', 'ProductController@listMostSearched');
+
         // Auth
         $this->post('/api/admin/login', 'AuthController@login');
         $this->post('/api/admin/logout', 'AuthController@logout');

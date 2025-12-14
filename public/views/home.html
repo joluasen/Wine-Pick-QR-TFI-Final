@@ -1,29 +1,15 @@
 <!--
   Vista parcial: home.html
-  Descripción: fragmento HTML que representa la vista de inicio. Se carga
-  dinámicamente por `public/js/router.js` dentro del contenedor `#app-root`.
-  Mantener aquí solo marcado semántico; la presentación (estilos) se gestiona
-  de forma central si se decide reintroducir CSS.
+  Descripción: fragmento HTML que representa la vista de inicio.
+  Muestra los productos más buscados como tarjetas interactivas con paginación.
 -->
 <section data-view="home">
-  <h2>Wine-Pick-QR</h2>
-  <p>Sistema de gestión y consulta de productos con códigos QR.</p>
-  
-  <h3>Funcionalidades</h3>
-  <div style="margin-top: 1.5rem;">
-    <div class="feature-card" style="margin-bottom: 1rem; padding: 1.25rem; background: var(--bg); border-left: 3px solid var(--primary); border-radius: 2px; border: 1px solid var(--border);">
-      <h4 style="margin: 0 0 0.5rem 0; color: var(--primary); font-size: 1rem; font-weight: 600;">Consulta por Código</h4>
-      <p style="margin: 0; color: var(--text-light); font-size: 0.9rem;">Ingresa el código de un producto para ver su información detallada, precios y disponibilidad.</p>
-    </div>
-    
-    <div class="feature-card" style="margin-bottom: 1rem; padding: 1.25rem; background: var(--bg); border-left: 3px solid var(--primary); border-radius: 2px; border: 1px solid var(--border);">
-      <h4 style="margin: 0 0 0.5rem 0; color: var(--primary); font-size: 1rem; font-weight: 600;">Búsqueda</h4>
-      <p style="margin: 0; color: var(--text-light); font-size: 0.9rem;">Encuentra productos por nombre, bodega, varietal o cualquier texto relacionado.</p>
-    </div>
-    
-    <div class="feature-card" style="margin-bottom: 1rem; padding: 1.25rem; background: var(--bg); border-left: 3px solid var(--primary); border-radius: 2px; border: 1px solid var(--border);">
-      <h4 style="margin: 0 0 0.5rem 0; color: var(--primary); font-size: 1rem; font-weight: 600;">Panel Admin</h4>
-      <p style="margin: 0; color: var(--text-light); font-size: 0.9rem;">Gestiona el catálogo: crea productos, genera códigos QR y administra promociones.</p>
-    </div>
-  </div>
+  <h2>Catálogo Destacado</h2>
+  <p>Explorá nuestra selección de vinos y bebidas más consultadas.</p>
+
+  <div id="home-status" aria-live="polite"></div>
+
+  <div id="home-results"></div>
+
+  <div id="home-pagination" style="display: flex; gap: 1rem; justify-content: center; margin-top: 2rem;"></div>
 </section>

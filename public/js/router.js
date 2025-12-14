@@ -27,6 +27,8 @@ const routes = {
   '#promotions': 'promotions',
 };
 
+const defaultRoute = 'home';
+
 // Rutas que requieren autenticación
 const protectedRoutes = ['admin'];
 
@@ -155,6 +157,14 @@ async function showView(viewName) {
     if (!isAuthenticated) {
       window.location.hash = '#login';
       return;
+    }
+  }
+
+  // Si no hay hash y no está autenticado, redirigir a home
+  if (!window.location.hash || window.location.hash === '#') {
+    const isAuthenticated = await checkAuthentication();
+    if (!isAuthenticated) {
+      viewName = defaultRoute;
     }
   }
 

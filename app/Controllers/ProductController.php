@@ -54,6 +54,37 @@ class ProductController
         ], 200);
     }
 
+    /**
+     * GET /api/public/mas-buscados
+     * 
+     * Listar los productos más buscados/consultados.
+     * Se cuenta por eventos de consulta (QR y BÚSQUEDA).
+     */
+    public function listMostSearched(): void
+    {
+        $limit = isset($_GET['limit']) ? (int)$_GET['limit'] : 10;
+        $offset = isset($_GET['offset']) ? (int)$_GET['offset'] : 0;
+
+        // Validaciones básicas
+        if ($limit <= 0) $limit = 10;
+        if ($limit > 100) $limit = 100;
+        if ($offset < 0) $offset = 0;
+
+        // Obtener lista de productos más buscados
+        $rows = $this->productModel->getMostSearchedProducts($limit, $offset);
+
+        // Transformar cada resultado agregando promoción vigente (si existe)
+        $data = array_map(function ($product) {
+            $promotion = $this->productModel->getActivePromotion((int)$product['id']);
+            return $this->formatProductResponse($product, $promotion);
+        }, $rows);
+
+        ApiResponse::success([
+            'count' => count($data),
+            'products' => $data,
+        ], 200);
+    }
+
     public function __construct()
     {
         try {
