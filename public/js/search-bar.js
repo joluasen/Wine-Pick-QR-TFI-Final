@@ -146,7 +146,7 @@ document.addEventListener('DOMContentLoaded', function() {
   });
   // Restaurar el valor del input tras reinyección del header
   function restoreSearchInput() {
-    // Si el hash tiene query, sincronizar el input con el hash
+    // Siempre sincronizar el input con el valor de query en el hash
     const input = document.getElementById(INPUT_ID);
     const hash = window.location.hash || '';
     let query = '';
@@ -162,7 +162,7 @@ document.addEventListener('DOMContentLoaded', function() {
       // Si no hay hash, usar sessionStorage solo como fallback
       query = sessionStorage.getItem('lastSearchValue') || '';
     }
-    if (input && query && input.value !== query) {
+    if (input) {
       input.value = query;
     }
   }
