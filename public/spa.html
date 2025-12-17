@@ -39,6 +39,53 @@
     <link rel="stylesheet" href="./css/styles.css">
 </head>
 <body class="d-flex flex-column">
+        <!-- Modal de filtros (siempre arriba, lo primero que se carga) -->
+        <div class="modal fade" id="filtersModal" tabindex="-1" aria-labelledby="filtersModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header border-0 pb-0">
+                        <h5 class="modal-title small text-uppercase text-muted" id="filtersModalLabel">
+                            Filtros de búsqueda
+                        </h5>
+                        <button type="button" class="btn-close-custom" data-bs-dismiss="modal" aria-label="Cerrar">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <div class="modal-body pt-2">
+                        <!-- Código público destacado -->
+                        <div class="mb-3">
+                            <label for="filterPublicCode" class="form-label fw-semibold">Buscar por código público</label>
+                            <input type="text" class="form-control" id="filterPublicCode" placeholder="Ej: WINE-123-456">
+                        </div>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="checkbox" id="filterVarietal">
+                            <label class="form-check-label" for="filterVarietal">Filtrar por varietal</label>
+                        </div>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="checkbox" id="filterOrigin">
+                            <label class="form-check-label" for="filterOrigin">Filtrar por origen</label>
+                        </div>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="checkbox" id="filterWinery">
+                            <label class="form-check-label" for="filterWinery">Filtrar por bodega/destilería</label>
+                        </div>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="checkbox" id="filterDrinkType">
+                            <label class="form-check-label" for="filterDrinkType">Filtrar por tipo de bebida</label>
+                        </div>
+                        <div class="mb-3">
+                            <label for="filterYearInput" class="form-label">Año</label>
+                            <input type="number" class="form-control" id="filterYearInput" min="1900" max="2100" placeholder="Ej: 2020">
+                        </div>
+                    </div>
+                    <div class="modal-footer border-0 pt-0">
+                        <button type="button" class="btn btn-primary btn-sm" id="applyFiltersBtn" data-bs-dismiss="modal">
+                            Aplicar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
     <!-- HEADER: Logo, buscador y login -->
     <header class="bg-white border-bottom sticky-top" style="z-index: 1025;">
         <div class="py-3">
@@ -146,8 +193,34 @@
     <!-- Bootstrap 5.3 JS Bundle (con Popper) -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-    <!-- Lógica de búsqueda -->
-    <script src="./js/search-bar.js"></script>
+
+        <!-- Modal de filtros (solo desktop, fuera del header) -->
+        <div class="modal fade" id="filtersModal" tabindex="-1" aria-labelledby="filtersModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header border-0 pb-0">
+                        <h5 class="modal-title small text-uppercase text-muted" id="filtersModalLabel">
+                            Filtros de búsqueda
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    </div>
+                    <div class="modal-body pt-2">
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="checkbox" id="filterOrigin">
+                            <label class="form-check-label" for="filterOrigin">Filtrar por origen</label>
+                        </div>
+                    </div>
+                    <div class="modal-footer border-0 pt-0">
+                        <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">
+                            Cerrar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Lógica de búsqueda -->
+        <script src="./js/search-bar.js"></script>
 
     <!-- JS principal (módulos ES) -->
     <script type="module" src="./js/app.js"></script>

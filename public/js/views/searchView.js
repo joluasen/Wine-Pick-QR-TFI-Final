@@ -58,10 +58,26 @@ function loadResults(container, query, page = 0) {
 	lastQuery = query;
 	currentPage = page;
 	container.innerHTML = '<p style="text-align:center;color:var(--text-light);padding:2rem;">Buscando...</p>';
+	// Detectar filtros activos en el hash
+	let field = undefined;
+	const hash = window.location.hash || '';
+	const params = {};
+	if (hash.includes('varietal=1')) field = 'varietal';
+	else if (hash.includes('origin=1')) field = 'origin';
+	else if (hash.includes('winery_distillery=1')) field = 'winery_distillery';
+	else if (hash.includes('drink_type=1')) field = 'drink_type';
+	// Inputs: año y precio
+	if (hash.includes('vintage_year=')) {
+		const match = hash.match(/vintage_year=([^&]+)/);
+		if (match) params.vintage_year = decodeURIComponent(match[1]);
+	}
+	const body = { search: query, limit: PAGE_SIZE, offset: page * PAGE_SIZE };
+	if (field) body.field = field;
+	if (params.vintage_year) body.vintage_year = params.vintage_year;
 	fetch('./api/public/productos/buscar', {
 		method: 'POST',
 		headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-		body: JSON.stringify({ search: query, limit: PAGE_SIZE, offset: page * PAGE_SIZE })
+		body: JSON.stringify(body)
 	})
 		.then(res => res.json())
 		.then(json => {

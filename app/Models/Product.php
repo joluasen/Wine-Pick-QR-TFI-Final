@@ -66,7 +66,7 @@ class Product
      * @return array Lista de productos coincidentes.
      */
 
-    public function search(string $searchText, int $limit = 20, int $offset = 0, ?string $field = null): array
+    public function search(string $searchText, int $limit = 20, int $offset = 0, ?string $field = null, ?float $minPrice = null, ?float $maxPrice = null, ?int $vintageYear = null): array
     {
         $allowedFields = ['name', 'drink_type', 'varietal', 'origin', 'public_code'];
         $where = '';
@@ -95,6 +95,24 @@ class Product
             $types = 'sss';
         }
 
+        // Filtros de precio y año
+        $extraWhere = '';
+        if ($minPrice !== null) {
+            $extraWhere .= ' AND base_price >= ?';
+            $params[] = $minPrice;
+            $types .= 'd';
+        }
+        if ($maxPrice !== null) {
+            $extraWhere .= ' AND base_price <= ?';
+            $params[] = $maxPrice;
+            $types .= 'd';
+        }
+        if ($vintageYear !== null) {
+            $extraWhere .= ' AND vintage_year = ?';
+            $params[] = $vintageYear;
+            $types .= 'i';
+        }
+
         // Query para resultados paginados
         $query = "
             SELECT
@@ -116,6 +134,7 @@ class Product
             FROM products
             WHERE is_active = 1
             AND ($where)
+            $extraWhere
             ORDER BY name ASC
             LIMIT ? OFFSET ?
         ";
@@ -125,30 +144,47 @@ class Product
         $products = $this->db->fetchAll($query, $params, $types);
 
         // Query para total
+        $countExtraWhere = '';
+        $countParams = [];
+        $countTypes = '';
+        if (!empty($field) && in_array($field, $allowedFields, true)) {
+            if ($field === 'name') {
+                $countParams[] = $searchText . '%';
+                $countTypes .= 's';
+            } elseif ($field === 'public_code') {
+                $countParams[] = $searchText;
+                $countTypes .= 's';
+            } else {
+                $countParams[] = '%' . $searchText . '%';
+                $countTypes .= 's';
+            }
+        } else {
+            $searchPattern = '%' . $searchText . '%';
+            $countParams = array_fill(0, 3, $searchPattern);
+            $countTypes = 'sss';
+        }
+        if ($minPrice !== null) {
+            $countExtraWhere .= ' AND base_price >= ?';
+            $countParams[] = $minPrice;
+            $countTypes .= 'd';
+        }
+        if ($maxPrice !== null) {
+            $countExtraWhere .= ' AND base_price <= ?';
+            $countParams[] = $maxPrice;
+            $countTypes .= 'd';
+        }
+        if ($vintageYear !== null) {
+            $countExtraWhere .= ' AND vintage_year = ?';
+            $countParams[] = $vintageYear;
+            $countTypes .= 'i';
+        }
         $countQuery = "
             SELECT COUNT(*) as total
             FROM products
             WHERE is_active = 1
             AND ($where)
+            $countExtraWhere
         ";
-        if (!empty($field) && in_array($field, $allowedFields, true)) {
-            // Usar el mismo patrón y tipos que arriba
-            if ($field === 'name') {
-                $countParams = [$searchText . '%'];
-                $countTypes = 's';
-            } elseif ($field === 'public_code') {
-                $countParams = [$searchText];
-                $countTypes = 's';
-            } else {
-                $countParams = ['%' . $searchText . '%'];
-                $countTypes = 's';
-            }
-        } else {
-            // Por defecto: solo 3 campos
-            $searchPattern = '%' . $searchText . '%';
-            $countParams = array_fill(0, 3, $searchPattern);
-            $countTypes = 'sss';
-        }
         $row = $this->db->fetchOne($countQuery, $countParams, $countTypes);
         $total = $row ? (int)$row['total'] : 0;
 

@@ -176,11 +176,11 @@ async function showView(viewName) {
     }
   }
 
+  // Inyectar buscador en header (primero)
+  await loadSearchHeader();
+
   // Inyectar navegación dinámica
   await loadNavigation(viewName);
-
-  // Inyectar buscador en header
-  await loadSearchHeader();
 
   // Cargar vista parcial
   try {

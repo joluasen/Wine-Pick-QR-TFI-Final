@@ -41,8 +41,10 @@ class ProductController {
         }
         // Limitar longitud de búsqueda
         $searchText = mb_substr($searchText, 0, 100);
-        $results = $this->productModel->search($searchText, $limit, $offset, $field);
-        // Transformar cada resultado agregando promoción vigente (si existe)
+        $minPrice = isset($data['min_price']) ? (float)$data['min_price'] : null;
+        $maxPrice = isset($data['max_price']) ? (float)$data['max_price'] : null;
+        $vintageYear = isset($data['vintage_year']) ? (int)$data['vintage_year'] : null;
+        $results = $this->productModel->search($searchText, $limit, $offset, $field, $minPrice, $maxPrice, $vintageYear);
         $data = array_map(function ($product) {
             $promotion = $this->productModel->getActivePromotion((int)$product['id']);
             return $this->formatProductResponse($product, $promotion);

@@ -13,71 +13,38 @@
       placeholder="Buscar productos..."
       required
     />
-    <button type="button" class="btn-filters" data-bs-toggle="modal" data-bs-target="#filtersModal">
+    <button type="button" class="btn-filters" data-bs-toggle="modal" data-bs-target="#filtersModal" title="Filtros de búsqueda">
       <i class="fas fa-sliders-h"></i>
     </button>
     <button type="submit" class="btn btn-winepick">
       <i class="fas fa-search"></i>
     </button>
-  </div>
-</form>
+  </form>
 
-<!-- Modal de filtros (se usa en búsqueda) -->
-<div class="modal fade" id="filtersModal" tabindex="-1" aria-labelledby="filtersModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header border-0 pb-0">
-        <h5 class="modal-title small text-uppercase text-muted" id="filtersModalLabel">
-          Filtros de búsqueda
-        </h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-      </div>
-
-      <div class="modal-body pt-2">
-        <div class="mb-3">
-          <label class="form-label small text-muted">Buscar en:</label>
-          <div class="d-flex flex-wrap gap-3 small">
-            <div class="form-check">
-              <input class="form-check-input" type="checkbox" id="searchNombre" checked />
-              <label class="form-check-label" for="searchNombre">Nombre</label>
-            </div>
-            <div class="form-check">
-              <input class="form-check-input" type="checkbox" id="searchBodega" checked />
-              <label class="form-check-label" for="searchBodega">Bodega</label>
-            </div>
-            <div class="form-check">
-              <input class="form-check-input" type="checkbox" id="searchVarietal" checked />
-              <label class="form-check-label" for="searchVarietal">Varietal</label>
-            </div>
+  <!-- Modal de filtros (solo desktop) -->
+  <div class="modal fade" id="filtersModal" tabindex="-1" aria-labelledby="filtersModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header border-0 pb-0">
+          <h5 class="modal-title small text-uppercase text-muted" id="filtersModalLabel">
+            Filtros de búsqueda
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body pt-2">
+          <div class="form-check mb-2">
+            <input class="form-check-input" type="checkbox" id="filterOrigin">
+            <label class="form-check-label" for="filterOrigin">Filtrar por origen</label>
           </div>
         </div>
-
-        <div class="row g-2">
-          <div class="col-6">
-            <label for="minPrice" class="form-label small">Precio mínimo</label>
-            <input id="minPrice" type="number" step="0.01" class="form-control form-control-sm" />
-          </div>
-          <div class="col-6">
-            <label for="maxPrice" class="form-label small">Precio máximo</label>
-            <input id="maxPrice" type="number" step="0.01" class="form-control form-control-sm" />
-          </div>
-          <div class="col-12">
-            <div class="form-check mt-2">
-              <input id="onlyPromo" type="checkbox" class="form-check-input" />
-              <label class="form-check-label small" for="onlyPromo">Solo con promo</label>
-            </div>
-          </div>
+        <div class="modal-footer border-0 pt-0">
+          <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">
+            Cerrar
+          </button>
         </div>
-      </div>
-
-      <div class="modal-footer border-0 pt-0">
-        <button type="button" class="btn btn-outline-secondary btn-sm" id="clearFiltersBtn" data-bs-dismiss="modal">
-          Limpiar filtros
-        </button>
-        <button type="button" class="btn btn-primary btn-sm" id="applyFiltersBtn" data-bs-dismiss="modal">
-          Aplicar
-        </button>
       </div>
     </div>
   </div>
-</div>
+  </div>
+</form>
+

@@ -1,13 +1,50 @@
+// Definir FORM_ID globalmente para que esté disponible en todo el archivo
+const FORM_ID = "searchForm";
+
+// Lógica para aplicar filtros desde el modal
+document.addEventListener('DOMContentLoaded', function() {
+  const applyBtn = document.getElementById('applyFiltersBtn');
+  if (applyBtn) {
+    applyBtn.addEventListener('click', function() {
+      // Leer el valor del input de búsqueda principal
+      const input = document.getElementById('searchInput');
+      const query = input ? input.value.trim() : '';
+      // Leer los filtros del modal
+      const filters = [
+        { id: 'filterVarietal', param: 'varietal' },
+        { id: 'filterOrigin', param: 'origin' },
+        { id: 'filterWinery', param: 'winery_distillery' },
+        { id: 'filterDrinkType', param: 'drink_type' }
+      ];
+      let hash = '#search?query=' + encodeURIComponent(query);
+      for (const f of filters) {
+        const el = document.getElementById(f.id);
+        if (el && el.checked) {
+          hash += `&${f.param}=1`;
+        }
+      }
+      // Filtro de año
+      const yearInput = document.getElementById('filterYearInput');
+      if (yearInput && yearInput.value) {
+        hash += `&vintage_year=${encodeURIComponent(yearInput.value)}`;
+      }
+      // Actualizar el hash de la URL para disparar la búsqueda
+      window.location.hash = hash;
+      // Quitar foco del input
+      if (input) input.blur();
+    });
+  }
+});
 /**
  * public/js/search-bar.js
  * Maneja la interacción de las barras de búsqueda (Mobile y Desktop).
  * Sincroniza los inputs y delega la búsqueda al router.
  */
 
+
 (function (window, document) {
   "use strict";
 
-  const FORM_ID = "searchForm";
   const INPUT_ID = "searchInput";
 
   /**
@@ -63,8 +100,22 @@
     if (typeof sessionStorage !== 'undefined') {
       sessionStorage.removeItem('lastSearchValue');
     }
-    // Navegar a la vista de buscador con el query en la URL
-    window.location.hash = '#search?query=' + encodeURIComponent(query);
+    // Detectar filtros por checkbox
+    const filters = [
+      { id: 'filterVarietal', param: 'varietal' },
+      { id: 'filterOrigin', param: 'origin' },
+      { id: 'filterWinery', param: 'winery_distillery' },
+      { id: 'filterDrinkType', param: 'drink_type' }
+    ];
+    let hash = '#search?query=' + encodeURIComponent(query);
+    for (const f of filters) {
+      const el = document.getElementById(f.id);
+      if (el && el.checked) {
+        hash += `&${f.param}=1`;
+      }
+    }
+    // Navegar a la vista de buscador con el query y los filtros en la URL
+    window.location.hash = hash;
     // Log para depuración del hash final
     setTimeout(() => {
       console.log('[HASH FINAL]', window.location.hash);
