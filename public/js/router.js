@@ -61,7 +61,7 @@ async function loadNavigation(viewName) {
   const sidebarContainer = document.getElementById('sidebar-container'); // Desktop sidebar
 
   const isPublic = publicRoutes.includes(viewName);
-  const navFile = isPublic ? 'nav-public.html' : 'nav-admin.html';
+  const navFile = isPublic ? 'nav-public.php' : 'nav-admin.html';
 
   try {
     const res = await fetch(`./views/partials/${navFile}`, { cache: 'no-store' });
@@ -158,6 +158,16 @@ function setupNavigation() {
 async function showView(viewName) {
   const root = document.getElementById('app-root');
   if (!root) return;
+
+  // Si la vista es 'scan', abrir el modal QR y no cargar vista
+  if (window.location.hash === '#scan') {
+    if (window.showQrModal) {
+      window.showQrModal();
+    } else if (typeof showQrModal === 'function') {
+      showQrModal();
+    }
+    return;
+  }
 
   // Proteger rutas que requieren autenticación
   if (protectedRoutes.includes(viewName)) {

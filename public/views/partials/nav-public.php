@@ -1,4 +1,8 @@
-<!-- public/views/partials/nav-public.html -->
+<?php
+// views/partials/nav-public.php
+header('Content-Type: text/html; charset=utf-8');
+?>
+<!-- public/views/partials/nav-public.php -->
 <!-- Navegación para usuarios públicos -->
 
 <!-- MOBILE BOTTOM NAV -->
@@ -14,7 +18,7 @@
   </a>
 
   <!-- Botón central flotante para QR -->
-  <a href="#qr" class="bottom-nav-scan" data-link="#qr" aria-label="Escanear QR" title="Escanear QR">
+  <a href="#scan" class="bottom-nav-scan" data-link="#scan" aria-label="Escanear QR" title="Escanear QR">
     <i class="fas fa-qrcode"></i>
   </a>
 

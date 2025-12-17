@@ -96,8 +96,9 @@ function renderProducts(resultEl, products) {
       <p><small>Código: ${product.public_code}</small></p>
     `;
 
-    card.addEventListener('click', () => {
-      window.location.hash = `#qr?code=${encodeURIComponent(product.public_code)}`;
+    card.addEventListener('click', async () => {
+      const { showProductModal } = await import('./productModal.js');
+      showProductModal(product);
     });
 
     card.addEventListener('mouseenter', () => {

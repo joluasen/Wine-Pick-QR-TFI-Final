@@ -10,15 +10,33 @@
 import { initRouter } from './router.js';
 import { initLoginModal } from './views/loginView.js';
 
+import { showQrModal } from './views/qrModal.js';
+window.showQrModal = showQrModal;
+
 function setupNavigation() {
-  const navButtons = document.querySelectorAll('[data-link]');
-  navButtons.forEach((btn) => {
-    btn.addEventListener('click', (event) => {
-      event.preventDefault();
-      const targetHash = btn.getAttribute('data-link') || '#home';
-      window.location.hash = targetHash;
+  // Botón QR: siempre abrir modal y nunca debe tener data-link
+  const qrBtn = document.querySelector('.bottom-nav-scan');
+  if (qrBtn) {
+    qrBtn.removeAttribute('data-link'); // Refuerzo: nunca debe tener data-link
+      // Limpia listeners previos y agrega uno único
+      const cleanQrBtn = qrBtn.cloneNode(true);
+      qrBtn.parentNode.replaceChild(cleanQrBtn, qrBtn);
+      cleanQrBtn.addEventListener('click', (event) => {
+        event.preventDefault();
+        window.location.hash = '#scan';
+      });
+  }
+  // Otros botones de navegación
+    const navButtons = document.querySelectorAll('[data-link]:not(.bottom-nav-scan)');
+    navButtons.forEach((btn) => {
+      const cleanBtn = btn.cloneNode(true);
+      btn.parentNode.replaceChild(cleanBtn, btn);
+      cleanBtn.addEventListener('click', (event) => {
+        event.preventDefault();
+        const targetHash = cleanBtn.getAttribute('data-link') || '#home';
+        window.location.hash = targetHash;
+      });
     });
-  });
 }
 
 function registerServiceWorker() {
