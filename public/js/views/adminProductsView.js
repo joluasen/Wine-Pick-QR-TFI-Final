@@ -1,5 +1,6 @@
 // public/js/views/adminProductsView.js
 import { setupLogout } from './adminView.js';
+import { modalManager } from '../core/modalManager.js';
 
 async function fetchAdminProducts({ limit = 20, offset = 0 } = {}) {
   const res = await fetch('./api/admin/productos/listar', {
@@ -26,7 +27,10 @@ function renderProductsTable(products) {
       <td>${p.winery_distillery}</td>
       <td>${p.base_price.toFixed(2)}</td>
       <td>${p.is_active ? 'Sí' : 'No'}</td>
-      <td><button class="btn btn-sm btn-primary" data-edit-product="${p.id}">Editar</button></td>
+      <td>
+        <button class="btn btn-sm btn-primary" data-edit-product="${p.id}">Editar</button>
+        <button class="btn btn-sm btn-info ms-1" data-view-product="${p.id}">Ver</button>
+      </td>
     </tr>
   `).join('');
 }
@@ -78,6 +82,14 @@ export async function initAdminProductsView(container) {
       total = totalCount || count || 0;
       tbody.innerHTML = renderProductsTable(products);
       container.querySelector('#admin-products-page').textContent = `Página ${page} (${products.length} de ${total})`;
+      // Asignar evento a los botones Ver
+      tbody.querySelectorAll('[data-view-product]').forEach(btn => {
+        btn.onclick = () => {
+          const id = btn.getAttribute('data-view-product');
+          const product = products.find(p => String(p.id) === String(id));
+          if (product) modalManager.showProduct(product);
+        };
+      });
     } catch (err) {
       status.textContent = 'Error al cargar productos: ' + err.message;
       tbody.innerHTML = `<tr><td colspan='8'>Error al cargar productos</td></tr>`;
