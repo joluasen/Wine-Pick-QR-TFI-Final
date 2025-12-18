@@ -13,12 +13,14 @@ const ROUTES = {
   '#login': 'login',
   '#search': 'search',
   '#admin': 'admin',
+  '#admin-products': 'adminProducts',
+  '#admin-metrics': 'adminMetrics',
   '#promos': 'promotions',
   '#promotions': 'promotions',
   '#scan': 'scan'
 };
 
-const PROTECTED_ROUTES = ['admin'];
+const PROTECTED_ROUTES = ['admin', 'admin-products', 'admin-metrics'];
 const PUBLIC_ROUTES = ['home', 'login', 'search', 'promotions', 'scan'];
 const DEFAULT_ROUTE = 'home';
 
@@ -287,17 +289,19 @@ async function initializeView(viewName, container) {
     login: () => import('../views/loginView.js'),
     search: () => import('../views/searchView.js'),
     admin: () => import('../views/adminView.js'),
+    adminProducts: () => import('../views/adminProductsView.js'),
+    adminMetrics: () => import('../views/adminMetricsView.js'),
     promotions: () => import('../views/promotionsView.js')
   };
-  
+
   const moduleLoader = viewModules[viewName];
-  
+
   if (moduleLoader) {
     try {
       const module = await moduleLoader();
       const initFnName = `init${viewName.charAt(0).toUpperCase() + viewName.slice(1)}View`;
       const initFn = module[initFnName];
-      
+
       if (typeof initFn === 'function') {
         await initFn(container);
       }

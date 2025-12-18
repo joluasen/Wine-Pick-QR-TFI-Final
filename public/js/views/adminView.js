@@ -56,7 +56,7 @@ async function logout(statusEl) {
   setStatus(statusEl, 'Sesión cerrada. Redirigiendo...', 'info');
   
   setTimeout(() => {
-    window.location.hash = '#login';
+      window.location.hash = '#home';
   }, 300);
 }
 
@@ -293,9 +293,8 @@ function setupPromoForm(container, selectEl) {
 /**
  * Configura los botones de logout
  */
-function setupLogout(container, statusEl) {
+export function setupLogout(container, statusEl) {
   const logoutBtns = document.querySelectorAll('#logout-btn, #logout-btn-mobile');
-  
   logoutBtns.forEach(btn => {
     btn.addEventListener('click', (e) => {
       e.preventDefault();
