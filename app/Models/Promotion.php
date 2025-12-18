@@ -1,13 +1,7 @@
 <?php
-// app/Models/Promotion.php
 declare(strict_types=1);
+// app/Models/Promotion.php
 
-/**
- * Modelo de Promoción (Data Access Layer)
- * 
- * Encapsula la lógica de acceso a datos para la tabla 'promotions'.
- * Proporciona métodos para crear, obtener y listar promociones.
- */
 class Promotion
 {
     private \Database $db;
@@ -18,17 +12,38 @@ class Promotion
     }
 
     /**
+     * Listar todas las promociones con datos de producto (paginado).
+     *
+     * @param int $limit
+     * @param int $offset
+     * @return array
+     */
+    public function findAllWithProduct(int $limit = 10, int $offset = 0): array
+    {
+        $sql = "
+            SELECT p.*, pr.name AS product_name
+            FROM promotions p
+            JOIN products pr ON p.product_id = pr.id
+            ORDER BY p.id ASC
+            LIMIT ? OFFSET ?
+        ";
+        return $this->db->fetchAll($sql, [$limit, $offset], 'ii') ?: [];
+    }
+
+    /**
+     * Contar todas las promociones.
+     *
+     * @return int
+     */
+    public function countAll(): int
+    {
+        $sql = "SELECT COUNT(*) as total FROM promotions";
+        $row = $this->db->fetchOne($sql);
+        return $row ? (int)$row['total'] : 0;
+    }
+
+    /**
      * Crear una nueva promoción.
-     * 
-     * @param int $productId ID del producto.
-     * @param string $type Tipo de promoción (porcentaje, precio_fijo, etc).
-     * @param float $value Valor de la promoción.
-     * @param string $text Texto visible de la promoción.
-     * @param string $startAt Fecha de inicio (Y-m-d H:i:s).
-     * @param string|null $endAt Fecha de fin (Y-m-d H:i:s) o null para abierto.
-     * @param int $adminId ID del admin que creó.
-     * 
-     * @return int ID de la promoción creada.
      */
     public function create(
         int $productId,
@@ -55,8 +70,6 @@ class Promotion
             $adminId,
         ];
 
-        // Tipos: i=int, s=string, d=double
-        // Orden: product_id(i), promotion_type(s), parameter_value(d), visible_text(s), start_at(s), end_at(s), created_by_admin_id(i)
         $types = 'isdsssi';
 
         $this->db->execute($sql, $params, $types);
@@ -65,10 +78,6 @@ class Promotion
 
     /**
      * Obtener todas las promociones de un producto.
-     * 
-     * @param int $productId ID del producto.
-     * 
-     * @return array Lista de promociones.
      */
     public function findByProductId(int $productId): array
     {
@@ -84,10 +93,6 @@ class Promotion
 
     /**
      * Obtener promoción activa vigente de un producto.
-     * 
-     * @param int $productId ID del producto.
-     * 
-     * @return array|null Promoción activa o null.
      */
     public function getActiveByProductId(int $productId): ?array
     {
@@ -109,15 +114,6 @@ class Promotion
 
     /**
      * Actualizar una promoción.
-     * 
-     * @param int $id ID de la promoción.
-     * @param string $type Tipo.
-     * @param float $value Valor.
-     * @param string $text Texto visible.
-     * @param string $startAt Inicio.
-     * @param string|null $endAt Fin.
-     * 
-     * @return bool Éxito.
      */
     public function update(
         int $id,
@@ -139,10 +135,6 @@ class Promotion
 
     /**
      * Desactivar una promoción.
-     * 
-     * @param int $id ID de la promoción.
-     * 
-     * @return bool Éxito.
      */
     public function deactivate(int $id): bool
     {
@@ -153,10 +145,6 @@ class Promotion
 
     /**
      * Obtener promoción por ID.
-     * 
-     * @param int $id ID de la promoción.
-     * 
-     * @return array|null Datos de la promoción.
      */
     public function findById(int $id): ?array
     {
