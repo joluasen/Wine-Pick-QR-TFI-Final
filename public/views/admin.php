@@ -1,8 +1,10 @@
-<!--
-  Vista parcial: admin.html
-  Descripción: formulario de alta de producto para administradores. El manejo
-  de eventos y validaciones se implementa en `public/js/views/adminView.js`.
--->
+<?php
+/**
+ * Vista parcial: admin.php
+ * Descripción: formulario de alta de producto para administradores.
+ */
+header('Content-Type: text/html; charset=utf-8');
+?>
 <section data-view="admin">
   <h2>Alta de Producto</h2>
   <p>Completa los campos obligatorios (*) para registrar un nuevo producto en el sistema.</p>

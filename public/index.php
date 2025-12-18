@@ -8,11 +8,8 @@ declare(strict_types=1);
  * Responsabilidad:
  * - Delegar solicitudes cuyo path comienza con `/api/` al enrutador del backend.
  * - Servir archivos estáticos desde `public/` cuando existan (manifest, JS, CSS, imágenes).
- * - Para cualquier otra ruta, devolver la SPA estática `public/spa.html`.
- *
- * Notas:
- * - Diseñado para uso en desarrollo local con la aplicación PWA y la API coexistiendo
- *   en el mismo host y directorio `public/`.
+ * - Ejecutar archivos PHP de vistas cuando se soliciten.
+ * - Para cualquier otra ruta, devolver la SPA `public/spa.php`.
  */
 
 ini_set('display_errors', '1');
@@ -75,17 +72,30 @@ $candidate = realpath($publicDir . $requestedPath);
 if ($candidate !== false && strpos($candidate, $publicDir) === 0 && is_file($candidate)) {
     // Determinar tipo MIME básico por extensión
     $ext = strtolower(pathinfo($candidate, PATHINFO_EXTENSION));
+    
+    // Si es un archivo PHP, ejecutarlo
+    if ($ext === 'php') {
+        header('Content-Type: text/html; charset=utf-8');
+        include $candidate;
+        exit;
+    }
+    
     $mimeMap = [
         'html' => 'text/html; charset=utf-8',
         'htm'  => 'text/html; charset=utf-8',
         'json' => 'application/json; charset=utf-8',
         'js'   => 'application/javascript; charset=utf-8',
+        'mjs'  => 'application/javascript; charset=utf-8',
         'css'  => 'text/css; charset=utf-8',
         'png'  => 'image/png',
         'jpg'  => 'image/jpeg',
         'jpeg' => 'image/jpeg',
+        'gif'  => 'image/gif',
         'svg'  => 'image/svg+xml',
         'ico'  => 'image/x-icon',
+        'webp' => 'image/webp',
+        'woff' => 'font/woff',
+        'woff2'=> 'font/woff2',
         'map'  => 'application/json; charset=utf-8',
         'txt'  => 'text/plain; charset=utf-8'
     ];
@@ -96,11 +106,20 @@ if ($candidate !== false && strpos($candidate, $publicDir) === 0 && is_file($can
     exit;
 }
 
-// Si no es un archivo estático, servir la SPA (public/spa.html)
-$spa = $publicDir . '/spa.html';
-if (file_exists($spa)) {
+// Si no es un archivo estático, servir la SPA
+// Primero intentar spa.php, luego spa.html como fallback
+$spaPhp = $publicDir . '/spa.php';
+$spaHtml = $publicDir . '/spa.html';
+
+if (file_exists($spaPhp)) {
     header('Content-Type: text/html; charset=utf-8', true, 200);
-    readfile($spa);
+    include $spaPhp;
+    exit;
+}
+
+if (file_exists($spaHtml)) {
+    header('Content-Type: text/html; charset=utf-8', true, 200);
+    readfile($spaHtml);
     exit;
 }
 
@@ -108,4 +127,3 @@ if (file_exists($spa)) {
 header('Content-Type: text/plain; charset=utf-8', true, 200);
 echo "Wine-Pick-QR - API / PWA\n";
 exit;
-

@@ -1,4 +1,9 @@
-<!-- Vista de Login de Administrador -->
+<?php
+/**
+ * Vista de Login de Administrador
+ */
+header('Content-Type: text/html; charset=utf-8');
+?>
 <section data-view="login" class="d-flex align-items-center justify-content-center" style="min-height: 100%; background-color: #fafafa;">
   <div class="card shadow-sm" style="width: 100%; max-width: 420px; border: none; border-radius: 12px;">
     <div class="card-body p-4 p-md-5">

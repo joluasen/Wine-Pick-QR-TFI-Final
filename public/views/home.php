@@ -1,8 +1,11 @@
-<!--
-  Vista parcial: home.html
-  Descripción: fragmento HTML que representa la vista de inicio.
-  Muestra los productos más buscados como tarjetas interactivas con paginación.
--->
+<?php
+/**
+ * Vista parcial: home.php
+ * Descripción: fragmento HTML que representa la vista de inicio.
+ * Muestra los productos más buscados como tarjetas interactivas con paginación.
+ */
+header('Content-Type: text/html; charset=utf-8');
+?>
 <section data-view="home">
   <h2>Catálogo Destacado</h2>
   <p>Explorá nuestra selección de vinos y bebidas más consultadas.</p>

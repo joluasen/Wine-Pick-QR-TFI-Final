@@ -1,8 +1,10 @@
-<!--
-  Vista parcial: promotions.html
-  Propósito: Listado de productos con promociones vigentes.
-  Muestra tarjetas con nombre, bodega, precio original, precio promocional, texto y vigencia.
--->
+<?php
+/**
+ * Vista parcial: promotions.php
+ * Propósito: Listado de productos con promociones vigentes.
+ */
+header('Content-Type: text/html; charset=utf-8');
+?>
 <section data-view="promotions">
   <h2>Ofertas Exclusivas</h2>
   <p>Aprovechá los mejores descuentos y promociones en vinos y bebidas.</p>
