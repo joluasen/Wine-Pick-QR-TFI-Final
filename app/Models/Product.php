@@ -1,8 +1,8 @@
 <?php
-// app/Models/Product.php
 declare(strict_types=1);
+// app/Models/Product.php
 
-/**
+/* 
  * Modelo de Producto (Data Access Layer)
  * 
  * Encapsula toda la lógica de acceso a datos para la tabla 'products'.
@@ -13,7 +13,7 @@ declare(strict_types=1);
  * - Binding de parámetros preparados
  * - Transformación de resultados a arrays asociativos
  * - Validación de datos antes de inserción
- */
+*/
 class Product
 {
     private \Database $db;
@@ -194,15 +194,14 @@ class Product
         ];
     }
 
+
     /**
-     * Obtener todos los productos activos (para futuro listado general).
-     * 
+     * Obtener todos los productos activos con paginación y total.
      * @param int $limit
      * @param int $offset
-     * 
-     * @return array
+     * @return array ['products' => [...], 'total' => int]
      */
-    public function getAll(int $limit = 20, int $offset = 0): array
+    public function getAllWithTotal(int $limit = 20, int $offset = 0): array
     {
         $query = "
             SELECT
@@ -226,8 +225,16 @@ class Product
             ORDER BY created_at DESC
             LIMIT ? OFFSET ?
         ";
+        $products = $this->db->fetchAll($query, [$limit, $offset], 'ii');
 
-        return $this->db->fetchAll($query, [$limit, $offset], 'ii');
+        $countQuery = "SELECT COUNT(*) as total FROM products WHERE is_active = 1";
+        $row = $this->db->fetchOne($countQuery, [], '');
+        $total = $row ? (int)$row['total'] : 0;
+
+        return [
+            'products' => $products,
+            'total' => $total
+        ];
     }
 
     /**

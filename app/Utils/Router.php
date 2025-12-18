@@ -68,6 +68,9 @@ class Router
         // POST /api/admin/productos (protegido)
         $this->post('/api/admin/productos', 'ProductController@create');
 
+        // POST /api/admin/productos/listar (protegido)
+        $this->post('/api/admin/productos/listar', 'ProductController@listAllAdmin');
+
         // POST /api/admin/promociones (protegido)
         $this->post('/api/admin/promociones', 'PromotionController@create');
 

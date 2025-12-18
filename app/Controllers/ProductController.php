@@ -371,5 +371,39 @@ class ProductController {
 
         return $data;
     }
+
+    /**
+     * POST /api/admin/productos/listar
+     * Listar todos los productos para el panel de administración (paginado).
+     * Body JSON: { limit, offset }
+     * Solo para administradores autenticados.
+     */
+    public function listAllAdmin(): void
+    {
+        // Proteger endpoint: requiere sesión de admin
+        if (empty($_SESSION['admin_user_id'])) {
+            ApiResponse::unauthorized('No autenticado. Inicia sesión para continuar.');
+        }
+
+        $body = file_get_contents('php://input');
+        $data = json_decode($body, true);
+        $limit = isset($data['limit']) ? (int)$data['limit'] : 20;
+        $offset = isset($data['offset']) ? (int)$data['offset'] : 0;
+        if ($limit <= 0) $limit = 20;
+        if ($limit > 100) $limit = 100;
+        if ($offset < 0) $offset = 0;
+
+        $results = $this->productModel->getAllWithTotal($limit, $offset);
+        $data = array_map(function ($product) {
+            $promotion = $this->productModel->getActivePromotion((int)$product['id']);
+            return $this->formatProductResponse($product, $promotion);
+        }, $results['products']);
+
+        ApiResponse::success([
+            'count' => count($data),
+            'total' => $results['total'],
+            'products' => $data,
+        ], 200);
+    }
 }
 ?>
