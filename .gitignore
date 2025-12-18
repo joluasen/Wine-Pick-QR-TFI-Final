@@ -1,2 +1,5 @@
 # Ignorar archivos de logs
 logs/debug.log
+
+# Ignorar archivos zip
+*.zip
