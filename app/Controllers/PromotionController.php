@@ -162,6 +162,27 @@ class PromotionController
     }
 
     /**
+     * POST /api/admin/promociones/listar
+     * Listar promociones paginadas para admin (con datos de producto)
+     * Body: { limit, offset }
+     */
+    public function listAll(): void
+    {
+        $body = json_decode(file_get_contents('php://input'), true) ?? [];
+        $limit = isset($body['limit']) ? (int)$body['limit'] : 10;
+        $offset = isset($body['offset']) ? (int)$body['offset'] : 0;
+        if ($limit <= 0) $limit = 10;
+        if ($limit > 100) $limit = 100;
+        if ($offset < 0) $offset = 0;
+        $promos = $this->promotionModel->findAllWithProduct($limit, $offset);
+        $total = $this->promotionModel->countAll();
+        ApiResponse::success([
+            'promotions' => $promos,
+            'total' => $total,
+        ]);
+    }
+
+    /**
      * Validar formato de fecha Y-m-d H:i:s
      */
     private function isValidDate(string $date): bool

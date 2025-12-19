@@ -15,12 +15,13 @@ const ROUTES = {
   '#admin': 'admin',
   '#admin-products': 'adminProducts',
   '#admin-metrics': 'adminMetrics',
+  '#admin-promotions': 'adminPromotions',
   '#promos': 'promotions',
   '#promotions': 'promotions',
   '#scan': 'scan'
 };
 
-const PROTECTED_ROUTES = ['admin', 'admin-products', 'admin-metrics'];
+const PROTECTED_ROUTES = ['admin', 'admin-products', 'admin-metrics', 'admin-promotions'];
 const PUBLIC_ROUTES = ['home', 'login', 'search', 'promotions', 'scan'];
 const DEFAULT_ROUTE = 'home';
 
@@ -291,6 +292,7 @@ async function initializeView(viewName, container) {
     admin: () => import('../views/adminView.js'),
     adminProducts: () => import('../views/adminProductsView.js'),
     adminMetrics: () => import('../views/adminMetricsView.js'),
+    adminPromotions: () => import('../views/adminPromotionsView.js'),
     promotions: () => import('../views/promotionsView.js')
   };
 

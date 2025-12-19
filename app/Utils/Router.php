@@ -76,6 +76,9 @@ class Router
 
         // GET /api/admin/promociones?product_id=... (protegido)
         $this->get('/api/admin/promociones', 'PromotionController@listByProduct');
+
+        // POST /api/admin/promociones/listar (protegido, paginado)
+        $this->post('/api/admin/promociones/listar', 'PromotionController@listAll');
     }
 
     /**
