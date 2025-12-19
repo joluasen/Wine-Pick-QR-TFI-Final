@@ -6,9 +6,6 @@ header('Content-Type: text/html; charset=utf-8');
 ?>
 <section data-view="admin-promotions">
 	<h2>Gestión de Promociones</h2>
-	<div class="d-none d-md-block mb-4">
-		<button id="btn-new-promo" class="btn btn-primary">Crear nueva promoción</button>
-	</div>
 	<div id="admin-promos-status" aria-live="polite"></div>
 	<div class="table-responsive d-none d-md-block">
 		<table class="table align-middle shadow rounded-4 overflow-hidden" id="admin-promos-table" style="background: #fff; border-radius: 1.2rem; font-size: 0.97rem;">
