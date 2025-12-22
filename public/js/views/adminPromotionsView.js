@@ -112,21 +112,59 @@ function setupPromoForm(container, selectEl) {
 }
 
 export async function initAdminPromotionsView(container) {
-  const promoSelect = container.querySelector('#promo_product_id');
-  await loadProducts(promoSelect);
-  setupPromoForm(container, promoSelect);
+  container.innerHTML = `
+    <div class="table-responsive d-none d-md-block">
+      <table class="table table-bordered align-middle shadow" id="admin-promos-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Producto</th>
+            <th>Tipo</th>
+            <th>Valor</th>
+            <th>Texto</th>
+            <th>Inicio</th>
+            <th>Fin</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody><tr><td colspan='9'>Cargando...</td></tr></tbody>
+      </table>
+    </div>
+  <div class="d-flex justify-content-center align-items-center mt-2">
+    <button class="btn btn-secondary btn-sm mx-1" id="admin-promos-prev" disabled>Anterior</button>
+    <span id="admin-promos-page" class="mx-2"></span>
+    <button class="btn btn-secondary btn-sm mx-1" id="admin-promos-next" disabled>Siguiente</button>
+  </div>
+  `;
 
-  // Tabla de promociones
   const tableBody = container.querySelector('#admin-promos-table tbody');
-  const statusEl = container.querySelector('#admin-promos-status');
-  const paginationEl = container.querySelector('#admin-promos-pagination');
-  const PAGE_SIZE = 10;
+  const paginationEl = container.querySelector('#admin-promos-page');
+  const prevBtn = container.querySelector('#admin-promos-prev');
+  const nextBtn = container.querySelector('#admin-promos-next');
+  const PAGE_SIZE = 20;
   let currentPage = 0;
+  let totalPromos = 0;
+
+  function updatePagination(page, total) {
+    const totalPages = Math.ceil(total / PAGE_SIZE) || 1;
+    paginationEl.textContent = `Página ${page + 1} de ${totalPages}`;
+    prevBtn.disabled = page <= 0;
+    nextBtn.disabled = page >= totalPages - 1;
+  }
 
   async function loadPromos(page = 0) {
-    setStatus(statusEl, 'Cargando promociones...', 'info');
-    if (tableBody) tableBody.innerHTML = `<tr><td colspan='9'>Cargando...</td></tr>`;
+    tableBody.innerHTML = `<tr><td colspan='9'>Cargando...</td></tr>`;
     try {
+      // Obtener el total de promociones solo la primera vez o cuando sea necesario
+      if (page === 0 || totalPromos === 0) {
+        const countData = await fetchJSON('./api/admin/promociones/listar', {
+          method: 'POST',
+          body: JSON.stringify({ count: true }),
+          headers: { 'Content-Type': 'application/json' }
+        });
+        totalPromos = countData?.data?.total || 0;
+      }
       const offset = page * PAGE_SIZE;
       const data = await fetchJSON('./api/admin/promociones/listar', {
         method: 'POST',
@@ -134,12 +172,7 @@ export async function initAdminPromotionsView(container) {
         headers: { 'Content-Type': 'application/json' }
       });
       const promos = data?.data?.promotions || [];
-      if (!promos.length) {
-        tableBody.innerHTML = `<tr><td colspan='9'>No hay promociones para mostrar.</td></tr>`;
-        setStatus(statusEl, 'No hay promociones.', 'info');
-        return;
-      }
-      tableBody.innerHTML = promos.map(p => `
+      let rows = promos.map(p => `
         <tr>
           <td>${p.id}</td>
           <td>${p.product_name || ''}</td>
@@ -150,35 +183,43 @@ export async function initAdminPromotionsView(container) {
           <td>${p.end_at ? p.end_at.split(' ')[0] : ''}</td>
           <td>${p.is_active ? 'Activa' : 'Inactiva'}</td>
           <td>
-            <button class="btn btn-sm btn-primary" data-edit-promo="${p.id}">Editar</button>
-            <button class="btn btn-sm btn-danger ms-1" data-delete-promo="${p.id}">Borrar</button>
-            <button class="btn btn-sm btn-secondary ms-1" data-toggle-promo="${p.id}">${p.is_active ? 'Deshabilitar' : 'Habilitar'}</button>
+            <button class="btn btn-xs btn-primary px-2 py-1" data-edit-promo="${p.id}">Editar</button>
+            <button class="btn btn-xs btn-danger ms-1 px-2 py-1" data-delete-promo="${p.id}">Borrar</button>
+            <button class="btn btn-xs btn-secondary ms-1 px-2 py-1" data-toggle-promo="${p.id}">${p.is_active ? 'Deshabilitar' : 'Habilitar'}</button>
           </td>
         </tr>
-      `).join('');
-      setStatus(statusEl, `Mostrando ${promos.length} promociones`, 'success');
-      // Paginación básica
-      paginationEl.innerHTML = '';
-      if (page > 0) {
-        const prev = document.createElement('button');
-        prev.className = 'btn btn-outline-secondary btn-sm me-2';
-        prev.textContent = 'Anterior';
-        prev.onclick = () => loadPromos(page - 1);
-        paginationEl.appendChild(prev);
+      `);
+      // Si hay menos de PAGE_SIZE, rellenar con filas vacías
+      for (let i = promos.length; i < PAGE_SIZE; i++) {
+        rows.push('<tr>' + '<td>&nbsp;</td>'.repeat(9) + '</tr>');
       }
-      if (promos.length === PAGE_SIZE) {
-        const next = document.createElement('button');
-        next.className = 'btn btn-outline-secondary btn-sm';
-        next.textContent = 'Siguiente';
-        next.onclick = () => loadPromos(page + 1);
-        paginationEl.appendChild(next);
+      // Si no hay promociones en toda la tabla
+      if (promos.length === 0 && totalPromos === 0) {
+        tableBody.innerHTML = `<tr><td colspan='9'>No hay promociones para mostrar.</td></tr>`;
+      } else {
+        tableBody.innerHTML = rows.join('');
       }
+      updatePagination(page, totalPromos);
     } catch (err) {
-      setStatus(statusEl, `Error: ${err.message}`, 'error');
       tableBody.innerHTML = `<tr><td colspan='9'>Error al cargar promociones</td></tr>`;
+      updatePagination(page, totalPromos);
     }
   }
 
-  // Cargar promociones al iniciar
-  if (tableBody) loadPromos(0);
+  prevBtn.onclick = () => {
+    if (currentPage > 0) {
+      currentPage--;
+      loadPromos(currentPage);
+    }
+  };
+  nextBtn.onclick = () => {
+    const totalPages = Math.ceil(totalPromos / PAGE_SIZE) || 1;
+    if (currentPage < totalPages - 1) {
+      currentPage++;
+      loadPromos(currentPage);
+    }
+  };
+
+  // Inicializar la vista
+  loadPromos(0);
 }

@@ -28,9 +28,9 @@ function renderProductsTable(products) {
       <td>${p.base_price.toFixed(2)}</td>
       <td>${p.is_active ? 'Sí' : 'No'}</td>
       <td>
-        <button class="btn btn-sm btn-primary" data-edit-product="${p.id}">Editar</button>
-        <button class="btn btn-sm btn-info ms-1" data-view-product="${p.id}">Ver</button>
-        <button class="btn btn-sm btn-success ms-1" data-new-promo="${p.id}">Nueva Promoción</button>
+        <button class="btn btn-xs btn-primary px-2 py-1" style="font-size:0.85rem;min-width:40px;" data-edit-product="${p.id}">Editar</button>
+        <button class="btn btn-xs btn-info ms-1 px-2 py-1" style="font-size:0.85rem;min-width:40px;" data-view-product="${p.id}">Ver</button>
+        <button class="btn btn-xs btn-success ms-1 px-2 py-1" style="font-size:0.85rem;min-width:40px;" data-new-promo="${p.id}">Nueva Promoción</button>
       </td>
     </tr>
   `).join('');
@@ -38,10 +38,9 @@ function renderProductsTable(products) {
 
 export async function initAdminProductsView(container) {
   container.innerHTML = `
-    <h2>Gestión de Productos</h2>
     <div class="table-responsive d-none d-md-block">
-      <table class="table align-middle shadow" id="admin-products-table" style="background: #fff; font-size: 0.97rem;">
-        <thead style="background: #f8f8f8; color: #333;">
+      <table class="table table-bordered align-middle shadow" id="admin-products-table">
+        <thead>
           <tr>
             <th>ID</th>
             <th>Código</th>
@@ -56,52 +55,11 @@ export async function initAdminProductsView(container) {
         <tbody><tr><td colspan='8'>Cargando...</td></tr></tbody>
       </table>
     </div>
-    <style>
-    #admin-products-table th, #admin-products-table td {
-      vertical-align: middle;
-      text-align: center;
-      padding: 0.45rem 0.4rem;
-      border-right: 1px solid #e5e5e5;
-    }
-    #admin-products-table th:last-child, #admin-products-table td:last-child {
-      border-right: none;
-    }
-    #admin-products-table tbody tr {
-      transition: background 0.15s;
-    }
-    #admin-products-table tbody tr:hover {
-      background: #f3f3f3;
-    }
-    #admin-products-table td {
-      border-bottom: 1px solid #e5e5e5;
-    }
-    #admin-products-table th {
-      font-weight: 600;
-      letter-spacing: 0.03em;
-      font-size: 1rem;
-      background: #f8f8f8;
-      color: #333;
-    }
-    #admin-products-table .btn {
-      font-size: 0.92rem;
-      padding: 0.25rem 0.7rem;
-      border-radius: 0.3rem;
-      margin: 0 0.1rem 0.1rem 0;
-      min-width: 60px;
-      box-shadow: none;
-    }
-    #admin-products-table .btn-primary, #admin-products-table .btn-danger, #admin-products-table .btn-secondary, #admin-products-table .btn-success, #admin-products-table .btn-info {
-      font-weight: 500;
-    }
-    #admin-products-table td:last-child {
-      white-space: nowrap;
-    }
-    </style>
-    <div class="d-flex justify-content-between align-items-center mt-2">
-      <button class="btn btn-secondary" id="admin-products-prev">Anterior</button>
-      <span id="admin-products-page"></span>
-      <button class="btn btn-secondary" id="admin-products-next">Siguiente</button>
-    </div>
+  <div class="d-flex justify-content-center align-items-center mt-2">
+    <button class="btn btn-secondary btn-sm mx-1" id="admin-products-prev" disabled>Anterior</button>
+    <span id="admin-products-page" class="mx-2"></span>
+    <button class="btn btn-secondary btn-sm mx-1" id="admin-products-next" disabled>Siguiente</button>
+  </div>
   `;
 
   setupLogout(container);
@@ -109,6 +67,10 @@ export async function initAdminProductsView(container) {
   let page = 1;
   let limit = 20;
   let total = 0;
+
+  const prevBtn = container.querySelector('#admin-products-prev');
+  const nextBtn = container.querySelector('#admin-products-next');
+  const pageSpan = container.querySelector('#admin-products-page');
 
   // Toast container global para mensajes
   let toastContainer = document.getElementById('toast-container');
@@ -119,6 +81,17 @@ export async function initAdminProductsView(container) {
     toastContainer.style.zIndex = 1080;
     document.body.appendChild(toastContainer);
   }
+
+  function renderPagination(currentPage, totalPages) {
+  const prevBtn = document.getElementById('admin-promos-prev');
+  const nextBtn = document.getElementById('admin-promos-next');
+  const pageSpan = document.getElementById('admin-promos-page');
+
+  pageSpan.textContent = `Página ${currentPage} de ${totalPages}`;
+
+  prevBtn.disabled = currentPage <= 1;
+  nextBtn.disabled = currentPage >= totalPages;
+}
 
   function showToast(message, type = 'info') {
     const icon = type === 'success' ? 'bi-check-circle-fill' : type === 'error' ? 'bi-x-circle-fill' : 'bi-info-circle-fill';
@@ -151,8 +124,37 @@ export async function initAdminProductsView(container) {
       const count = data.count || 0;
       const totalCount = data.total || 0;
       total = totalCount || count || 0;
-      tbody.innerHTML = renderProductsTable(products);
-      container.querySelector('#admin-products-page').textContent = `Página ${page} (${products.length} de ${total})`;
+        let rows = [];
+        if (products.length === 0 && total === 0) {
+          rows.push(`<tr><td colspan='8'>No hay productos para mostrar.</td></tr>`);
+        } else {
+          rows = products.map(p => `
+            <tr>
+              <td>${p.id}</td>
+              <td>${p.public_code}</td>
+              <td>${p.name}</td>
+              <td>${p.drink_type}</td>
+              <td>${p.winery_distillery}</td>
+              <td>${p.base_price.toFixed(2)}</td>
+              <td>${p.is_active ? 'Sí' : 'No'}</td>
+              <td>
+                <button class="btn btn-xs btn-primary px-2 py-1" style="font-size:0.85rem;min-width:40px;" data-edit-product="${p.id}">Editar</button>
+                <button class="btn btn-xs btn-info ms-1 px-2 py-1" style="font-size:0.85rem;min-width:40px;" data-view-product="${p.id}">Ver</button>
+                <button class="btn btn-xs btn-danger ms-1 px-2 py-1" style="font-size:0.85rem;min-width:40px;" data-delete-product="${p.id}">Borrar</button>
+                <button class="btn btn-xs btn-success ms-1 px-2 py-1" style="font-size:0.85rem;min-width:40px;" data-new-promo="${p.id}">Nueva Promoción</button>
+              </td>
+            </tr>
+          `);
+          // Rellenar con filas vacías si faltan
+          for (let i = products.length; i < limit; i++) {
+            rows.push('<tr>' + '<td>&nbsp;</td>'.repeat(8) + '</tr>');
+          }
+        }
+        tbody.innerHTML = rows.join('');
+      pageSpan.textContent = `Página ${page} (${products.length} de ${total})`;
+      // Habilitar/deshabilitar botones de paginación
+      prevBtn.disabled = page <= 1;
+      nextBtn.disabled = (page * limit) >= total;
       // Asignar evento a los botones Ver
       tbody.querySelectorAll('[data-view-product]').forEach(btn => {
         btn.onclick = () => {
@@ -164,17 +166,19 @@ export async function initAdminProductsView(container) {
     } catch (err) {
       showToast('Error al cargar productos: ' + err.message, 'error');
       tbody.innerHTML = `<tr><td colspan='8'>Error al cargar productos</td></tr>`;
+      prevBtn.disabled = true;
+      nextBtn.disabled = true;
     }
   }
 
-  container.querySelector('#admin-products-prev').onclick = () => {
+  prevBtn.onclick = () => {
     if (page > 1) {
       page--;
       loadProducts();
     }
   };
-  container.querySelector('#admin-products-next').onclick = () => {
-    if (page * limit < total) {
+  nextBtn.onclick = () => {
+    if ((page * limit) < total) {
       page++;
       loadProducts();
     }
