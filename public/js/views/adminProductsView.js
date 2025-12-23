@@ -52,7 +52,7 @@ export async function initAdminProductsView(container) {
             <th>Acciones</th>
           </tr>
         </thead>
-        <tbody><tr><td colspan='8'>Cargando...</td></tr></tbody>
+        <tbody></tbody>
       </table>
     </div>
   <div class="d-flex justify-content-center align-items-center mt-2">
@@ -171,16 +171,27 @@ export async function initAdminProductsView(container) {
     }
   }
 
+  function scrollToPagination() {
+    const pagDiv = container.querySelector('.d-flex.justify-content-center.align-items-center.mt-2');
+    if (pagDiv) {
+      pagDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }
+
   prevBtn.onclick = () => {
     if (page > 1) {
+      const tbody = container.querySelector('#admin-products-table tbody');
+      tbody.innerHTML = `<tr><td colspan='8'>Cargando...</td></tr>`;
       page--;
-      loadProducts();
+      loadProducts().then(scrollToPagination);
     }
   };
   nextBtn.onclick = () => {
     if ((page * limit) < total) {
+      const tbody = container.querySelector('#admin-products-table tbody');
+      tbody.innerHTML = `<tr><td colspan='8'>Cargando...</td></tr>`;
       page++;
-      loadProducts();
+      loadProducts().then(scrollToPagination);
     }
   };
 
