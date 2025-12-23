@@ -16,20 +16,21 @@ header('Content-Type: text/html; charset=utf-8');
     <span>Buscar</span>
   </a>
 
-  <!-- Botón central flotante para QR -->
-  <button type="button" class="bottom-nav-scan" data-link="#scan" aria-label="Escanear QR" title="Escanear QR">
+
+  <!-- Enlace central flotante para QR -->
+  <a href="#scan" class="bottom-nav-item bottom-nav-scan" data-link="#scan" aria-label="Escanear QR" title="Escanear QR">
     <i class="fas fa-qrcode"></i>
-  </button>
+  </a>
 
   <a href="#promos" class="bottom-nav-item" data-link="#promos" aria-label="Promociones">
     <i class="fas fa-tag"></i>
     <span>Promos</span>
   </a>
 
-  <button type="button" class="bottom-nav-item" data-bs-toggle="modal" data-bs-target="#loginModal" aria-label="Ingresar">
+  <a href="#" class="bottom-nav-item bottom-nav-login" data-bs-toggle="modal" data-bs-target="#loginModal" aria-label="Ingresar">
     <i class="fas fa-user"></i>
     <span>Ingresar</span>
-  </button>
+  </a>
 </nav>
 
 <!-- DESKTOP SIDEBAR NAV -->
@@ -44,11 +45,6 @@ header('Content-Type: text/html; charset=utf-8');
     <span>Buscar</span>
   </a>
 
-  <button type="button" class="sidebar-nav-item" data-link="#scan" title="Escanear QR" data-bs-toggle="tooltip" data-bs-placement="right">
-    <i class="fas fa-qrcode"></i>
-    <span>Escanear</span>
-  </button>
-
   <a href="#promos" class="sidebar-nav-item" data-link="#promos" title="Promociones" data-bs-toggle="tooltip" data-bs-placement="right">
     <i class="fas fa-tag"></i>
     <span>Promos</span>
@@ -56,8 +52,8 @@ header('Content-Type: text/html; charset=utf-8');
 
   <div class="sidebar-divider"></div>
 
-  <button type="button" class="sidebar-nav-item" data-bs-toggle="modal" data-bs-target="#loginModal" title="Ingresar">
+  <a href="#" class="sidebar-nav-item" data-bs-toggle="modal" data-bs-target="#loginModal" title="Ingresar">
     <i class="fas fa-user"></i>
     <span>Ingresar</span>
-  </button>
+  </a>
 </nav>
