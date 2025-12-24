@@ -13,15 +13,17 @@ const ROUTES = {
   '#login': 'login',
   '#search': 'search',
   '#admin': 'admin',
+  '#admin-scan': 'adminScan',
+  '#admin-search': 'adminSearch',  // buscador exclusivo admin
   '#admin-products': 'adminProducts',
   '#admin-metrics': 'adminMetrics',
   '#admin-promotions': 'adminPromotions',
-  '#promos': 'promotions',
+  //'#promos': 'promotions', //porque hay dos rutas para promociones?
   '#promotions': 'promotions',
   '#scan': 'scan'
 };
 
-const PROTECTED_ROUTES = ['admin', 'admin-products', 'admin-metrics', 'admin-promotions'];
+const PROTECTED_ROUTES = ['admin', '#admin-scan', '#admin-search', 'admin-products', 'admin-metrics', 'admin-promotions'];
 const PUBLIC_ROUTES = ['home', 'login', 'search', 'promotions', 'scan'];
 const DEFAULT_ROUTE = 'home';
 
@@ -204,6 +206,17 @@ function initSearchListeners() {
  * Carga e inicializa una vista
  */
 async function loadView(viewName) {
+  // Interceptar búsqueda QR admin: si venimos de adminScan y hay query, mostrar ficha admin
+  if (viewName === 'search') {
+    const params = getHashParams();
+    // Si el usuario es admin y viene de adminScan, mostrar ficha admin
+    if (window.sessionStorage.getItem('adminScanActive') === '1' && params.query) {
+      window.sessionStorage.removeItem('adminScanActive');
+      const { editProductByCode } = await import('../views/adminView.js');
+      await editProductByCode(params.query);
+      return;
+    }
+  }
   const root = document.getElementById('app-root');
   if (!root) return;
   
@@ -217,6 +230,15 @@ async function loadView(viewName) {
       isNavigating = false;
       return;
     }
+      // Ruta especial #admin-scan (modal QR admin)
+      if (viewName === 'adminScan') {
+        // Marcar que el próximo #search?query=... es por adminScan
+        window.sessionStorage.setItem('adminScanActive', '1');
+        const { showAdminQrScanner } = await import('./modalAdmin.js');
+        await showAdminQrScanner();
+        isNavigating = false;
+        return;
+      }
     
     // Verificar autenticación para rutas protegidas
     if (PROTECTED_ROUTES.includes(viewName)) {

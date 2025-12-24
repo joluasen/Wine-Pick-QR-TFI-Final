@@ -14,8 +14,8 @@ header('Content-Type: text/html; charset=utf-8');
     <i class="fas fa-boxes"></i>
     <span>Productos</span>
   </a>
-  <!-- Enlace central flotante para QR -->
-  <a href="#admin-scan" class="bottom-nav-item bottom-nav-scan" data-link="#scan" aria-label="Escanear QR" title="Escanear QR">
+  <!-- Enlace central flotante para QR admin -->
+  <a href="#admin-scan" class="bottom-nav-item bottom-nav-scan" data-link="#admin-scan" aria-label="Escanear QR" title="Escanear QR">
     <i class="fas fa-qrcode"></i>
   </a>
   <a href="#admin-promotions" class="bottom-nav-item" data-link="#admin-promotions" aria-label="Promociones">

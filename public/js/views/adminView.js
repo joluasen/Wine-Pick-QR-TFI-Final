@@ -1,3 +1,87 @@
+import { renderAdminProductCard } from './adminProductCard.js';
+import { renderAdminProductModalView } from './adminProductModalView.js';
+import { modalManager } from '../core/modalManager.js';
+/**
+ * Muestra la ficha editable de un producto dado su código público
+ * Usado por el flujo de escaneo QR en admin
+ * @param {string} code - Código público del producto
+ */
+export async function editProductByCode(code) {
+  // Verificar autenticación
+  const isAuth = await checkAuth();
+  if (!isAuth) {
+    alert('Sesión expirada. Redirigiendo a login.');
+    window.location.hash = '#login';
+    return;
+  }
+
+  // Cargar datos del producto por código público
+  let product = null;
+  let errorMsg = '';
+  try {
+    const data = await fetchJSON('./api/public/productos/buscar', {
+      method: 'POST',
+      body: JSON.stringify({ search: code, limit: 10 })
+    });
+    const products = Array.isArray(data?.data?.products) ? data.data.products : [];
+    // Buscar coincidencia exacta (case-insensitive)
+    product = products.find(p => (p.public_code || '').toUpperCase() === code.toUpperCase());
+    if (!product) {
+      errorMsg = 'No se encontró ningún producto con ese código.';
+    }
+  } catch (err) {
+    errorMsg = 'Error de red o respuesta inválida.';
+  }
+
+  if (!product) {
+    modalManager.open('admin-product-modal', `
+      <div class="admin-product-card-error">
+        <h2>Producto no encontrado</h2>
+        <p>${errorMsg || 'Intenta con otro código o revisa la conexión.'}</p>
+        <button type="button" class="modal-close" aria-label="Cerrar" onclick="document.querySelector('.modal-close').click()">Cerrar</button>
+      </div>
+    `);
+    return;
+  }
+
+  // Mostrar ficha pública con botón Editar en modal admin
+  modalManager.open('admin-product-modal', renderAdminProductModalView(product), {
+    onOpen: (modal) => {
+      const editBtn = modal.querySelector('#admin-edit-product-btn');
+      if (editBtn) {
+        editBtn.onclick = () => {
+          // Reemplazar contenido del modal por el formulario de edición
+          modal.querySelector('.modal-body').innerHTML = renderAdminProductCard(product);
+          const form = modal.querySelector('#admin-edit-product-form');
+          if (form) {
+            form.onsubmit = async (e) => {
+              e.preventDefault();
+              const formData = new FormData(form);
+              const payload = Object.fromEntries(formData.entries());
+              const statusDiv = document.createElement('div');
+              form.appendChild(statusDiv);
+              statusDiv.textContent = 'Actualizando producto...';
+              try {
+                await fetchJSON(`./api/admin/productos/${product.id}`, {
+                  method: 'PUT',
+                  body: JSON.stringify(payload)
+                });
+                statusDiv.textContent = 'Producto actualizado con éxito.';
+              } catch (err) {
+                if (err.status === 401) {
+                  statusDiv.textContent = 'Sesión expirada. Redirigiendo...';
+                  setTimeout(() => { window.location.hash = '#login'; }, 400);
+                } else {
+                  statusDiv.textContent = `Error: ${err.message}`;
+                }
+              }
+            };
+          }
+        };
+      }
+    }
+  });
+}
 // public/js/views/adminView.js
 /**
  * Vista de administración

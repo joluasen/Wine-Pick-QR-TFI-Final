@@ -82,7 +82,8 @@ header('Content-Type: text/html; charset=utf-8');
       </div>
     </div>
 
-    <button type="submit">Crear Producto</button>
+    <button type="submit" id="product-create-btn">Crear Producto</button>
+    <button type="button" id="product-edit-btn" style="display:none; margin-left:1rem;">Editar Producto</button>
   </form>
 
   <hr style="margin: 3rem 0; border: none; border-top: 1px solid var(--border);">
