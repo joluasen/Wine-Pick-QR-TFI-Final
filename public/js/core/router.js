@@ -5,6 +5,7 @@
 
 import { getBasePath, getHashParams } from './utils.js';
 import { modalManager } from './modalManager.js';
+import { initUnifiedSearchBar } from '../search-bar.js';
 
 // Configuración de rutas
 const ROUTES = {
@@ -119,7 +120,7 @@ async function loadSearchHeader() {
       if (mobileSearch) mobileSearch.innerHTML = html;
       if (desktopSearch) desktopSearch.innerHTML = html;
       
-      initSearchListeners();
+      initUnifiedSearchBar();
     }
   } catch (err) {
     console.error('Error cargando buscador:', err);
