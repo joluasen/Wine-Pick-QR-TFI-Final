@@ -1,6 +1,6 @@
 # Pruebas Postman - API REST WINE-PICK-QR
 
-Este documento contiene ejemplos de peticiones HTTP para probar manualmente los endpoints de la API REST usando Postman u otra herramienta similar.
+Este documento contiene ejemplos de peticiones HTTP para probar los endpoints de la API REST usando Postman.
 
 ---
 
@@ -8,7 +8,7 @@ Este documento contiene ejemplos de peticiones HTTP para probar manualmente los 
 
 **URL Base:** `http://localhost/proyectos/Wine-Pick-QR-TFI`
 
-**Headers recomendados para todas las peticiones:**
+**Headers:**
 ```
 Content-Type: application/json
 Accept: application/json
@@ -26,13 +26,6 @@ Accept: application/json
 ```
 http://localhost/proyectos/Wine-Pick-QR-TFI/api/public/productos/MALBEC-RES-750-001
 ```
-
-**Headers:**
-```
-Content-Type: application/json
-```
-
-**Body:** (vacío)
 
 **Respuesta esperada:** 200 OK
 ```json
@@ -53,7 +46,11 @@ Content-Type: application/json
     "image_url": null,
     "is_active": true,
     "created_at": "2025-12-04 21:02:28",
-    "updated_at": "2025-12-04 21:02:28"
+    "updated_at": "2025-12-04 21:02:28",
+    "qr_link": "http://localhost/proyectos/Wine-Pick-QR-TFI/#qr?code=MALBEC-RES-750-001",
+    "promotion": null,
+    "final_price": 5500.00,
+    "original_price": 5500.00
   },
   "error": null
 }
@@ -61,37 +58,7 @@ Content-Type: application/json
 
 ---
 
-### 1.2 Obtener Producto - Código Inexistente
-
-**Método:** `GET`
-
-**URL:**
-```
-http://localhost/proyectos/Wine-Pick-QR-TFI/api/public/productos/CODIGO-INVALIDO
-```
-
-**Headers:**
-```
-Content-Type: application/json
-```
-
-**Body:** (vacío)
-
-**Respuesta esperada:** 404 Not Found
-```json
-{
-  "ok": false,
-  "data": null,
-  "error": {
-    "code": "NOT_FOUND",
-    "message": "Producto no encontrado."
-  }
-}
-```
-
----
-
-### 1.3 Búsqueda de Productos
+### 1.2 Búsqueda Simple
 
 **Método:** `GET`
 
@@ -100,80 +67,90 @@ Content-Type: application/json
 http://localhost/proyectos/Wine-Pick-QR-TFI/api/public/productos?search=malbec
 ```
 
-**Headers:**
-```
-Content-Type: application/json
-```
-
-**Body:** (vacío)
-
 **Respuesta esperada:** 200 OK
-```json
-{
-  "ok": true,
-  "data": {
-    "count": 1,
-    "products": [
-      {
-        "id": 1,
-        "public_code": "MALBEC-RES-750-001",
-        "name": "Malbec Reserva 750ml",
-        "drink_type": "vino",
-        "winery_distillery": "Bodega Ejemplo",
-        "varietal": "Malbec",
-        "origin": "Mendoza, Argentina",
-        "vintage_year": 2021,
-        "short_description": "Malbec reserva intenso y frutado.",
-        "base_price": 5500.00,
-        "visible_stock": 24,
-        "image_url": null,
-        "is_active": true,
-        "created_at": "2025-12-04 21:02:28",
-        "updated_at": "2025-12-04 21:02:28"
-      }
-    ]
-  },
-  "error": null
-}
-```
 
 ---
 
-### 1.4 Búsqueda de Productos - Otro Término
+### 1.3 Búsqueda con Filtro de Precio
 
 **Método:** `GET`
 
 **URL:**
 ```
-http://localhost/proyectos/Wine-Pick-QR-TFI/api/public/productos?search=bodega
+http://localhost/proyectos/Wine-Pick-QR-TFI/api/public/productos?search=vino&min_price=500&max_price=2000
 ```
 
-**Headers:**
-```
-Content-Type: application/json
-```
-
-**Body:** (vacío)
-
-**Respuesta esperada:** 200 OK con múltiples resultados (todos los productos con "bodega" en el nombre)
+**Descripción:** Busca productos tipo "vino" con precio entre $500 y $2000.
 
 ---
 
-### 1.5 Búsqueda sin Parámetro
+### 1.4 Búsqueda con Año de Cosecha
 
 **Método:** `GET`
 
 **URL:**
 ```
-http://localhost/proyectos/Wine-Pick-QR-TFI/api/public/productos?search=
+http://localhost/proyectos/Wine-Pick-QR-TFI/api/public/productos?search=malbec&vintage_year=2020
 ```
 
-**Headers:**
+---
+
+### 1.5 Búsqueda en Campo Específico
+
+**Método:** `GET`
+
+**URL (buscar en varietal):**
 ```
-Content-Type: application/json
+http://localhost/proyectos/Wine-Pick-QR-TFI/api/public/productos?search=malbec&field=varietal
 ```
 
-**Body:** (vacío)
+**URL (buscar en origen):**
+```
+http://localhost/proyectos/Wine-Pick-QR-TFI/api/public/productos?search=mendoza&field=origin
+```
+
+**Campos válidos:** `name`, `drink_type`, `varietal`, `origin`, `public_code`
+
+---
+
+### 1.6 Búsqueda Completa con Filtros
+
+**Método:** `GET`
+
+**URL:**
+```
+http://localhost/proyectos/Wine-Pick-QR-TFI/api/public/productos?search=vino&field=name&min_price=500&max_price=3000&vintage_year=2020&limit=10&offset=0
+```
+
+---
+
+### 1.7 Paginación de Resultados
+
+**Primera página:**
+```
+http://localhost/proyectos/Wine-Pick-QR-TFI/api/public/productos?search=vino&limit=10&offset=0
+```
+
+**Segunda página:**
+```
+http://localhost/proyectos/Wine-Pick-QR-TFI/api/public/productos?search=vino&limit=10&offset=10
+```
+
+**Tercera página:**
+```
+http://localhost/proyectos/Wine-Pick-QR-TFI/api/public/productos?search=vino&limit=10&offset=20
+```
+
+---
+
+### 1.8 Error de Validación
+
+**Método:** `GET`
+
+**URL:**
+```
+http://localhost/proyectos/Wine-Pick-QR-TFI/api/public/productos
+```
 
 **Respuesta esperada:** 400 Bad Request
 ```json
@@ -182,27 +159,140 @@ Content-Type: application/json
   "data": null,
   "error": {
     "code": "VALIDATION_ERROR",
-    "message": "El parámetro \"search\" es requerido y no puede estar vacío."
+    "message": "El parámetro \"search\" es requerido y no puede estar vacío.",
+    "details": {
+      "field": "search"
+    }
   }
 }
 ```
 
 ---
 
-## 2. Endpoints Administrativos
+### 1.9 Productos con Promociones Vigentes
 
-### 2.1 Crear Producto - Caso Exitoso
+**Método:** `GET`
+
+**URL:**
+```
+http://localhost/proyectos/Wine-Pick-QR-TFI/api/public/promociones?limit=20&offset=0
+```
+
+---
+
+### 1.10 Productos Más Buscados
+
+**Método:** `GET`
+
+**URL:**
+```
+http://localhost/proyectos/Wine-Pick-QR-TFI/api/public/mas-buscados?limit=10&offset=0
+```
+
+---
+
+## 2. Autenticación
+
+### 2.1 Login de Administrador
+
+**Método:** `POST`
+
+**URL:**
+```
+http://localhost/proyectos/Wine-Pick-QR-TFI/api/admin/login
+```
+
+**Body (JSON):**
+```json
+{
+  "username": "admin",
+  "password": "tu_password"
+}
+```
+
+**Respuesta esperada:** 200 OK
+```json
+{
+  "ok": true,
+  "data": {
+    "message": "Login exitoso",
+    "username": "admin"
+  },
+  "error": null
+}
+```
+
+---
+
+### 2.2 Verificar Sesión
+
+**Método:** `GET`
+
+**URL:**
+```
+http://localhost/proyectos/Wine-Pick-QR-TFI/api/admin/me
+```
+
+**Respuesta esperada:** 200 OK
+```json
+{
+  "ok": true,
+  "data": {
+    "id": 1,
+    "username": "admin"
+  },
+  "error": null
+}
+```
+
+---
+
+### 2.3 Logout
+
+**Método:** `POST`
+
+**URL:**
+```
+http://localhost/proyectos/Wine-Pick-QR-TFI/api/admin/logout
+```
+
+---
+
+## 3. Endpoints Administrativos
+
+### 3.1 Listar Todos los Productos
+
+**Método:** `GET`
+
+**URL:**
+```
+http://localhost/proyectos/Wine-Pick-QR-TFI/api/admin/productos?limit=20&offset=0
+```
+
+**Requiere:** Sesión activa
+
+**Respuesta esperada:** 200 OK
+```json
+{
+  "ok": true,
+  "data": {
+    "count": 20,
+    "total": 150,
+    "products": [...]
+  },
+  "error": null
+}
+```
+
+---
+
+### 3.2 Crear Producto
 
 **Método:** `POST`
 
 **URL:**
 ```
 http://localhost/proyectos/Wine-Pick-QR-TFI/api/admin/productos
-```
-
-**Headers:**
-```
-Content-Type: application/json
 ```
 
 **Body (JSON):**
@@ -215,54 +305,19 @@ Content-Type: application/json
   "varietal": "Tempranillo",
   "origin": "La Rioja, España",
   "vintage_year": 2022,
-  "short_description": "Tempranillo con envejecimiento en roble, notas elegantes y complejas.",
+  "short_description": "Tempranillo con envejecimiento en roble",
   "base_price": 6500.00,
   "visible_stock": 15,
-  "image_url": "https://example.com/images/tempranillo_2022.jpg",
+  "image_url": null,
   "is_active": 1
 }
 ```
 
 **Respuesta esperada:** 201 Created
-```json
-{
-  "ok": true,
-  "data": {
-    "id": 11,
-    "public_code": "TEMPRANILLO-RESERVA-2022",
-    "name": "Tempranillo Reserva 2022",
-    "drink_type": "vino",
-    "winery_distillery": "Bodega Premium",
-    "varietal": "Tempranillo",
-    "origin": "La Rioja, España",
-    "vintage_year": 2022,
-    "short_description": "Tempranillo con envejecimiento en roble, notas elegantes y complejas.",
-    "base_price": 6500.00,
-    "visible_stock": 15,
-    "image_url": "https://example.com/images/tempranillo_2022.jpg",
-    "is_active": true,
-    "created_at": "2025-12-05 14:30:00",
-    "updated_at": "2025-12-05 14:30:00"
-  },
-  "error": null
-}
-```
 
 ---
 
-### 2.2 Crear Producto - Mínimo (Solo Campos Requeridos)
-
-**Método:** `POST`
-
-**URL:**
-```
-http://localhost/proyectos/Wine-Pick-QR-TFI/api/admin/productos
-```
-
-**Headers:**
-```
-Content-Type: application/json
-```
+### 3.3 Crear Producto - Campos Mínimos
 
 **Body (JSON):**
 ```json
@@ -275,46 +330,9 @@ Content-Type: application/json
 }
 ```
 
-**Respuesta esperada:** 201 Created
-```json
-{
-  "ok": true,
-  "data": {
-    "id": 12,
-    "public_code": "SYRAH-2023-01",
-    "name": "Syrah 2023",
-    "drink_type": "vino",
-    "winery_distillery": "Bodega Valor",
-    "varietal": null,
-    "origin": null,
-    "vintage_year": null,
-    "short_description": null,
-    "base_price": 4200.50,
-    "visible_stock": null,
-    "image_url": null,
-    "is_active": true,
-    "created_at": "2025-12-05 14:35:00",
-    "updated_at": "2025-12-05 14:35:00"
-  },
-  "error": null
-}
-```
-
 ---
 
-### 2.3 Crear Producto - Sin Campo Requerido (name)
-
-**Método:** `POST`
-
-**URL:**
-```
-http://localhost/proyectos/Wine-Pick-QR-TFI/api/admin/productos
-```
-
-**Headers:**
-```
-Content-Type: application/json
-```
+### 3.4 Error - Campo Requerido Faltante
 
 **Body (JSON):**
 ```json
@@ -343,73 +361,23 @@ Content-Type: application/json
 
 ---
 
-### 2.4 Crear Producto - Código Duplicado
+### 3.5 Error - Código Duplicado
 
-**Método:** `POST`
-
-**URL:**
-```
-http://localhost/proyectos/Wine-Pick-QR-TFI/api/admin/productos
-```
-
-**Headers:**
-```
-Content-Type: application/json
-```
-
-**Body (JSON):**
-```json
-{
-  "public_code": "MALBEC-RES-750-001",
-  "name": "Malbec Reserva Duplicado",
-  "drink_type": "vino",
-  "winery_distillery": "Otra Bodega",
-  "base_price": 5000.00
-}
-```
-
-**Respuesta esperada:** 400 Bad Request
+**Respuesta esperada:** 409 Conflict
 ```json
 {
   "ok": false,
   "data": null,
   "error": {
-    "code": "VALIDATION_ERROR",
-    "message": "Ya existe un producto con este código (public_code).",
-    "details": {
-      "field": "public_code",
-      "error": "Duplicate entry 'MALBEC-RES-750-001' for key 'uq_products_public_code'"
-    }
+    "code": "CONFLICT",
+    "message": "Ya existe un producto con este código (public_code)."
   }
 }
 ```
 
 ---
 
-### 2.5 Crear Producto - drink_type Inválido
-
-**Método:** `POST`
-
-**URL:**
-```
-http://localhost/proyectos/Wine-Pick-QR-TFI/api/admin/productos
-```
-
-**Headers:**
-```
-Content-Type: application/json
-```
-
-**Body (JSON):**
-```json
-{
-  "public_code": "BEBIDA-RARA-01",
-  "name": "Bebida Rara",
-  "drink_type": "bebida_inexistente",
-  "winery_distillery": "Bodega X",
-  "base_price": 5000.00
-}
-```
+### 3.6 Error - drink_type Inválido
 
 **Respuesta esperada:** 400 Bad Request
 ```json
@@ -429,194 +397,182 @@ Content-Type: application/json
 
 ---
 
-### 2.6 Crear Producto - Precio Inválido (<=0)
+### 3.7 Crear Promoción
 
 **Método:** `POST`
 
 **URL:**
 ```
-http://localhost/proyectos/Wine-Pick-QR-TFI/api/admin/productos
-```
-
-**Headers:**
-```
-Content-Type: application/json
+http://localhost/proyectos/Wine-Pick-QR-TFI/api/admin/promociones
 ```
 
 **Body (JSON):**
 ```json
 {
-  "public_code": "GRATIS-01",
-  "name": "Producto Gratis",
-  "drink_type": "vino",
-  "winery_distillery": "Bodega Caridad",
-  "base_price": 0
+  "product_id": 1,
+  "promotion_type": "porcentaje",
+  "parameter_value": 25,
+  "visible_text": "25% OFF por tiempo limitado",
+  "start_at": "2025-01-01 00:00:00",
+  "end_at": "2025-12-31 23:59:59"
 }
 ```
 
-**Respuesta esperada:** 400 Bad Request
-```json
-{
-  "ok": false,
-  "data": null,
-  "error": {
-    "code": "VALIDATION_ERROR",
-    "message": "El \"base_price\" debe ser mayor a 0.",
-    "details": {
-      "field": "base_price"
-    }
-  }
-}
-```
-
----
-
-### 2.7 Crear Producto - Gin
-
-**Método:** `POST`
-
-**URL:**
-```
-http://localhost/proyectos/Wine-Pick-QR-TFI/api/admin/productos
-```
-
-**Headers:**
-```
-Content-Type: application/json
-```
-
-**Body (JSON):**
-```json
-{
-  "public_code": "GIN-BOTANICO-2025",
-  "name": "Gin Botánico Premium",
-  "drink_type": "gin",
-  "winery_distillery": "Destilería Aromática",
-  "varietal": "Junípero Francés",
-  "origin": "París, Francia",
-  "short_description": "Gin destilado con botánicos selectos, ideal para cockteles sofisticados.",
-  "base_price": 7800.00,
-  "visible_stock": 10
-}
-```
+**Tipos de promoción:** `porcentaje`, `precio_fijo`, `2x1`, `3x2`, `nxm`
 
 **Respuesta esperada:** 201 Created
 
 ---
 
-### 2.8 Crear Producto - Cerveza
+### 3.8 Listar Todas las Promociones
 
-**Método:** `POST`
-
-**URL:**
-```
-http://localhost/proyectos/Wine-Pick-QR-TFI/api/admin/productos
-```
-
-**Headers:**
-```
-Content-Type: application/json
-```
-
-**Body (JSON):**
-```json
-{
-  "public_code": "CERVEZA-ARTESANAL-IPA",
-  "name": "Cerveza Artesanal IPA 473ml",
-  "drink_type": "cerveza",
-  "winery_distillery": "Cervecería Hoppy",
-  "short_description": "IPA artesanal con abundante lúpulo y amargor balanceado.",
-  "base_price": 320.00,
-  "visible_stock": 50
-}
-```
-
-**Respuesta esperada:** 201 Created
-
----
-
-### 2.9 Crear Producto - Whisky
-
-**Método:** `POST`
+**Método:** `GET`
 
 **URL:**
 ```
-http://localhost/proyectos/Wine-Pick-QR-TFI/api/admin/productos
+http://localhost/proyectos/Wine-Pick-QR-TFI/api/admin/promociones?limit=10&offset=0
 ```
 
-**Headers:**
-```
-Content-Type: application/json
-```
+**Requiere:** Sesión activa
 
-**Body (JSON):**
+**Respuesta esperada:** 200 OK
 ```json
 {
-  "public_code": "WHISKY-ESCOCES-12Y",
-  "name": "Whisky Escocés 12 Años",
-  "drink_type": "whisky",
-  "winery_distillery": "Destilería Highland",
-  "origin": "Escocia",
-  "short_description": "Whisky single malt con notas ahumadas y toques de vainilla.",
-  "base_price": 8500.00,
-  "visible_stock": 8
+  "ok": true,
+  "data": {
+    "count": 10,
+    "total": 45,
+    "promotions": [
+      {
+        "id": 1,
+        "product_id": 5,
+        "product_name": "Syrah Reserva",
+        "promotion_type": "porcentaje",
+        "parameter_value": 25.00,
+        "visible_text": "25% OFF en Syrah",
+        "start_at": "2025-01-01 00:00:00",
+        "end_at": "2025-03-31 23:59:59",
+        "is_active": true,
+        "created_at": "2025-12-04 21:05:00"
+      }
+    ]
+  },
+  "error": null
 }
 ```
 
-**Respuesta esperada:** 201 Created
-
 ---
 
-## 3. Casos de Prueba Recomendados
+### 3.9 Listar Promociones de un Producto
 
-### Prueba Completa (Secuencia)
+**Método:** `GET`
 
-1. **Obtener producto existente** → GET MALBEC
-2. **Obtener producto inexistente** → 404
-3. **Buscar productos** → search=bodega (múltiples resultados)
-4. **Crear producto nuevo** → POST con todos los campos
-5. **Crear producto mínimo** → POST con solo campos requeridos
-6. **Intentar duplicar código** → POST con código existente
-7. **Intentar drink_type inválido** → 400 validation error
-8. **Intentar precio negativo** → 400 validation error
-
----
-
-## 4. Notas Importantes
-
-- **Headers**: Siempre incluir `Content-Type: application/json`
-- **Charset**: La API soporta caracteres especiales (acentos, ñ, etc.)
-- **Códigos**: Los `public_code` deben ser únicos, usar prefijos para no generar conflictos
-- **Precios**: Usar números decimales (ej: 5500.00, 4200.50)
-- **Stocks**: Puede ser null si no se especifica
-- **Booleanos**: Usar `1` o `true` (ambos funcionan)
-- **Status HTTP**: 
-  - 200 = Éxito en GET
-  - 201 = Éxito en POST (created)
-  - 400 = Error de validación
-  - 404 = No encontrado
-  - 500 = Error interno
-
----
-
-## 5. URLs de Prueba Rápida (copia y pega)
-
-### GET - Producto por código
+**URL:**
 ```
+http://localhost/proyectos/Wine-Pick-QR-TFI/api/admin/promociones?product_id=8
+```
+
+**Requiere:** Sesión activa
+
+**Respuesta esperada:** 200 OK
+```json
+{
+  "ok": true,
+  "data": {
+    "count": 1,
+    "promotions": [
+      {
+        "id": 6,
+        "promotion_type": "precio_fijo",
+        "parameter_value": 6000.00,
+        "visible_text": "Precio especial $6000",
+        "start_at": "2025-01-01 00:00:00",
+        "end_at": "2025-12-31 23:59:59",
+        "is_active": true,
+        "created_at": "2025-12-04 21:05:00"
+      }
+    ]
+  },
+  "error": null
+}
+```
+
+---
+
+## 4. Suite de Pruebas
+
+### Secuencia Completa
+
+1. **Login** → `POST /api/admin/login`
+2. **Verificar Sesión** → `GET /api/admin/me`
+3. **Búsqueda Simple** → `GET /api/public/productos?search=vino`
+4. **Búsqueda con Filtros** → `GET /api/public/productos?search=vino&min_price=500&max_price=2000`
+5. **Búsqueda por Campo** → `GET /api/public/productos?search=malbec&field=varietal`
+6. **Paginación** → `GET /api/public/productos?search=vino&limit=5&offset=0`
+7. **Listar Productos Admin** → `GET /api/admin/productos?limit=20&offset=0`
+8. **Crear Producto** → `POST /api/admin/productos`
+9. **Crear Promoción** → `POST /api/admin/promociones`
+10. **Listar Promociones** → `GET /api/admin/promociones?limit=10&offset=0`
+11. **Promociones por Producto** → `GET /api/admin/promociones?product_id=1`
+12. **Logout** → `POST /api/admin/logout`
+
+---
+
+## 5. URLs Rápidas
+
+### Públicos
+```
+# Producto por código
 http://localhost/proyectos/Wine-Pick-QR-TFI/api/public/productos/MALBEC-RES-750-001
+
+# Búsqueda simple
+http://localhost/proyectos/Wine-Pick-QR-TFI/api/public/productos?search=malbec
+
+# Búsqueda con precio
+http://localhost/proyectos/Wine-Pick-QR-TFI/api/public/productos?search=vino&min_price=500&max_price=2000
+
+# Búsqueda por campo
+http://localhost/proyectos/Wine-Pick-QR-TFI/api/public/productos?search=mendoza&field=origin
+
+# Promociones vigentes
+http://localhost/proyectos/Wine-Pick-QR-TFI/api/public/promociones?limit=20
+
+# Más buscados
+http://localhost/proyectos/Wine-Pick-QR-TFI/api/public/mas-buscados?limit=10
 ```
 
-### GET - Búsqueda
+### Admin (requieren login)
 ```
-http://localhost/proyectos/Wine-Pick-QR-TFI/api/public/productos?search=bodega
-```
+# Login
+http://localhost/proyectos/Wine-Pick-QR-TFI/api/admin/login
 
-### POST - Crear producto
-```
+# Listar productos
+http://localhost/proyectos/Wine-Pick-QR-TFI/api/admin/productos?limit=20&offset=0
+
+# Crear producto
 http://localhost/proyectos/Wine-Pick-QR-TFI/api/admin/productos
+
+# Listar promociones
+http://localhost/proyectos/Wine-Pick-QR-TFI/api/admin/promociones?limit=10&offset=0
+
+# Promociones por producto
+http://localhost/proyectos/Wine-Pick-QR-TFI/api/admin/promociones?product_id=8
+
+# Crear promoción
+http://localhost/proyectos/Wine-Pick-QR-TFI/api/admin/promociones
 ```
 
 ---
 
-**Última actualización:** 4 de diciembre de 2025
-**Estado:** MVP Sprint 1 ✅
+## 6. Notas
+
+- **GET** se usa para consultas y búsquedas (query params)
+- **POST** se usa para creación de recursos (JSON body)
+- Los endpoints `/api/admin/*` requieren login previo
+- La sesión se mantiene mediante cookie PHPSESSID
+- Paginación: `limit` (max 100, default 20), `offset` (default 0)
+- Filtros opcionales se ignoran si están vacíos
+
+---
+
+**Última actualización:** Diciembre 2025

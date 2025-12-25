@@ -126,60 +126,66 @@ class PromotionController
     }
 
     /**
-     * GET /api/admin/promociones/:productId
-     * 
-     * Listar promociones de un producto.
-     * 
+     * GET /api/admin/promociones?product_id=... o GET /api/admin/promociones?limit=...&offset=...
+     *
+     * Listar promociones con dos modos:
+     * 1. Si se proporciona product_id: Listar todas las promociones de ese producto
+     * 2. Si NO se proporciona product_id: Listar todas las promociones (paginado)
+     *
+     * Query params:
+     * - product_id: ID del producto (opcional, para filtrar por producto)
+     * - limit: Límite de resultados (default: 10, max: 100, solo si NO hay product_id)
+     * - offset: Offset para paginación (default: 0, solo si NO hay product_id)
+     *
      * @return void JSON con lista de promociones.
      */
-    public function listByProduct(): void
+    public function listPromotions(): void
     {
         if (empty($_SESSION['admin_user_id'])) {
             ApiResponse::unauthorized('Requiere autenticación.');
         }
 
-        $productId = (int)($_GET['product_id'] ?? 0);
+        $productId = isset($_GET['product_id']) && $_GET['product_id'] !== '' ? (int)$_GET['product_id'] : null;
 
-        if ($productId <= 0) {
-            ApiResponse::validationError('product_id requerido.', 'product_id');
+        // Modo 1: Listar promociones de un producto específico
+        if ($productId !== null) {
+            if ($productId <= 0) {
+                ApiResponse::validationError('product_id debe ser un número positivo.', 'product_id');
+            }
+
+            $promos = $this->promotionModel->findByProductId($productId);
+
+            ApiResponse::success([
+                'count' => count($promos),
+                'promotions' => array_map(fn($p) => [
+                    'id' => (int)$p['id'],
+                    'promotion_type' => $p['promotion_type'],
+                    'parameter_value' => (float)$p['parameter_value'],
+                    'visible_text' => $p['visible_text'],
+                    'start_at' => $p['start_at'],
+                    'end_at' => $p['end_at'],
+                    'is_active' => (bool)$p['is_active'],
+                    'created_at' => $p['created_at'],
+                ], $promos),
+            ], 200);
         }
 
-        $promos = $this->promotionModel->findByProductId($productId);
+        // Modo 2: Listar todas las promociones (paginado, con datos de producto)
+        $limit = isset($_GET['limit']) ? (int)$_GET['limit'] : 10;
+        $offset = isset($_GET['offset']) ? (int)$_GET['offset'] : 0;
 
-        ApiResponse::success([
-            'count' => count($promos),
-            'promotions' => array_map(fn($p) => [
-                'id' => (int)$p['id'],
-                'promotion_type' => $p['promotion_type'],
-                'parameter_value' => (float)$p['parameter_value'],
-                'visible_text' => $p['visible_text'],
-                'start_at' => $p['start_at'],
-                'end_at' => $p['end_at'],
-                'is_active' => (bool)$p['is_active'],
-                'created_at' => $p['created_at'],
-            ], $promos),
-        ], 200);
-    }
-
-    /**
-     * POST /api/admin/promociones/listar
-     * Listar promociones paginadas para admin (con datos de producto)
-     * Body: { limit, offset }
-     */
-    public function listAll(): void
-    {
-        $body = json_decode(file_get_contents('php://input'), true) ?? [];
-        $limit = isset($body['limit']) ? (int)$body['limit'] : 10;
-        $offset = isset($body['offset']) ? (int)$body['offset'] : 0;
         if ($limit <= 0) $limit = 10;
         if ($limit > 100) $limit = 100;
         if ($offset < 0) $offset = 0;
+
         $promos = $this->promotionModel->findAllWithProduct($limit, $offset);
         $total = $this->promotionModel->countAll();
+
         ApiResponse::success([
-            'promotions' => $promos,
+            'count' => count($promos),
             'total' => $total,
-        ]);
+            'promotions' => $promos,
+        ], 200);
     }
 
     /**

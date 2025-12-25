@@ -17,44 +17,6 @@ declare(strict_types=1);
 
 class ProductController {
 
-    /**
-     * POST /api/public/productos/buscar
-     * Buscar productos por texto libre (body JSON: search, limit, offset)
-     * @return void Devuelve JSON con lista de productos y total.
-     */
-    public function postSearch(): void
-    {
-        $body = file_get_contents('php://input');
-        $data = json_decode($body, true);
-        if (!is_array($data)) {
-            ApiResponse::validationError('El cuerpo debe ser JSON válido.');
-        }
-        $searchText = trim($data['search'] ?? '');
-        $field = isset($data['field']) ? $data['field'] : null;
-        $limit = isset($data['limit']) ? (int)$data['limit'] : 20;
-        $offset = isset($data['offset']) ? (int)$data['offset'] : 0;
-        if ($limit <= 0) $limit = 20;
-        if ($limit > 100) $limit = 100;
-        if ($offset < 0) $offset = 0;
-        if ($searchText === '') {
-            ApiResponse::validationError('El campo "search" es requerido.', 'search');
-        }
-        // Limitar longitud de búsqueda
-        $searchText = mb_substr($searchText, 0, 100);
-        $minPrice = isset($data['min_price']) ? (float)$data['min_price'] : null;
-        $maxPrice = isset($data['max_price']) ? (float)$data['max_price'] : null;
-        $vintageYear = isset($data['vintage_year']) ? (int)$data['vintage_year'] : null;
-        $results = $this->productModel->search($searchText, $limit, $offset, $field, $minPrice, $maxPrice, $vintageYear);
-        $data = array_map(function ($product) {
-            $promotion = $this->productModel->getActivePromotion((int)$product['id']);
-            return $this->formatProductResponse($product, $promotion);
-        }, $results['products']);
-        ApiResponse::success([
-            'count' => count($data),
-            'total' => $results['total'],
-            'products' => $data,
-        ], 200);
-    }
     private \Product $productModel;
     
     /**
@@ -176,33 +138,58 @@ class ProductController {
     }
 
     /**
-     * GET /api/public/productos?search=texto
-     * 
-     * Buscar productos por texto libre.
-     * 
-     * @return void Devuelve JSON con lista de productos o error 400.
+     * GET /api/public/productos?search=texto&field=...&min_price=...&max_price=...&vintage_year=...&limit=...&offset=...
+     *
+     * Buscar productos por texto libre con filtros opcionales.
+     *
+     * Query params:
+     * - search: Texto a buscar (requerido)
+     * - field: Campo específico (name, drink_type, varietal, origin, public_code) (opcional)
+     * - min_price: Precio mínimo (opcional)
+     * - max_price: Precio máximo (opcional)
+     * - vintage_year: Año de cosecha (opcional)
+     * - limit: Límite de resultados (default: 20, max: 100)
+     * - offset: Offset para paginación (default: 0)
+     *
+     * @return void Devuelve JSON con lista de productos, total y count.
      */
     public function search(): void
     {
-        $searchText = $_GET['search'] ?? '';
+        $searchText = trim($_GET['search'] ?? '');
 
-        if (empty($searchText)) {
+        if ($searchText === '') {
             ApiResponse::validationError('El parámetro "search" es requerido y no puede estar vacío.', 'search');
         }
 
         // Limitar longitud de búsqueda
         $searchText = mb_substr($searchText, 0, 100);
 
-        $results = $this->productModel->search($searchText, 20);
+        // Parámetros de filtrado
+        $field = isset($_GET['field']) && $_GET['field'] !== '' ? $_GET['field'] : null;
+        $minPrice = isset($_GET['min_price']) && $_GET['min_price'] !== '' ? (float)$_GET['min_price'] : null;
+        $maxPrice = isset($_GET['max_price']) && $_GET['max_price'] !== '' ? (float)$_GET['max_price'] : null;
+        $vintageYear = isset($_GET['vintage_year']) && $_GET['vintage_year'] !== '' ? (int)$_GET['vintage_year'] : null;
+
+        // Parámetros de paginación
+        $limit = isset($_GET['limit']) ? (int)$_GET['limit'] : 20;
+        $offset = isset($_GET['offset']) ? (int)$_GET['offset'] : 0;
+
+        if ($limit <= 0) $limit = 20;
+        if ($limit > 100) $limit = 100;
+        if ($offset < 0) $offset = 0;
+
+        // Ejecutar búsqueda con filtros
+        $results = $this->productModel->search($searchText, $limit, $offset, $field, $minPrice, $maxPrice, $vintageYear);
 
         // Transformar cada resultado agregando promoción vigente (si existe)
         $data = array_map(function ($product) {
             $promotion = $this->productModel->getActivePromotion((int)$product['id']);
             return $this->formatProductResponse($product, $promotion);
-        }, $results);
+        }, $results['products']);
 
         ApiResponse::success([
             'count' => count($data),
+            'total' => $results['total'],
             'products' => $data,
         ], 200);
     }
@@ -373,9 +360,13 @@ class ProductController {
     }
 
     /**
-     * POST /api/admin/productos/listar
+     * GET /api/admin/productos?limit=...&offset=...
      * Listar todos los productos para el panel de administración (paginado).
-     * Body JSON: { limit, offset }
+     *
+     * Query params:
+     * - limit: Límite de resultados (default: 20, max: 100)
+     * - offset: Offset para paginación (default: 0)
+     *
      * Solo para administradores autenticados.
      */
     public function listAllAdmin(): void
@@ -385,10 +376,9 @@ class ProductController {
             ApiResponse::unauthorized('No autenticado. Inicia sesión para continuar.');
         }
 
-        $body = file_get_contents('php://input');
-        $data = json_decode($body, true);
-        $limit = isset($data['limit']) ? (int)$data['limit'] : 20;
-        $offset = isset($data['offset']) ? (int)$data['offset'] : 0;
+        $limit = isset($_GET['limit']) ? (int)$_GET['limit'] : 20;
+        $offset = isset($_GET['offset']) ? (int)$_GET['offset'] : 0;
+
         if ($limit <= 0) $limit = 20;
         if ($limit > 100) $limit = 100;
         if ($offset < 0) $offset = 0;

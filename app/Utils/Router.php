@@ -49,10 +49,8 @@ class Router
         // GET /api/public/productos/{codigo}
         $this->get('/api/public/productos/{codigo}', 'ProductController@getByCode');
 
-        // GET /api/public/productos?search=...
+        // GET /api/public/productos?search=... (búsqueda simple y avanzada)
         $this->get('/api/public/productos', 'ProductController@search');
-        // POST /api/public/productos/buscar
-        $this->post('/api/public/productos/buscar', 'ProductController@postSearch');
 
         // GET /api/public/promociones - Listar productos con promociones vigentes
         $this->get('/api/public/promociones', 'ProductController@listActivePromotions');
@@ -68,17 +66,14 @@ class Router
         // POST /api/admin/productos (protegido)
         $this->post('/api/admin/productos', 'ProductController@create');
 
-        // POST /api/admin/productos/listar (protegido)
-        $this->post('/api/admin/productos/listar', 'ProductController@listAllAdmin');
+        // GET /api/admin/productos?limit=...&offset=... (protegido, listar con paginación)
+        $this->get('/api/admin/productos', 'ProductController@listAllAdmin');
 
         // POST /api/admin/promociones (protegido)
         $this->post('/api/admin/promociones', 'PromotionController@create');
 
-        // GET /api/admin/promociones?product_id=... (protegido)
-        $this->get('/api/admin/promociones', 'PromotionController@listByProduct');
-
-        // POST /api/admin/promociones/listar (protegido, paginado)
-        $this->post('/api/admin/promociones/listar', 'PromotionController@listAll');
+        // GET /api/admin/promociones?product_id=... o ?limit=...&offset=... (protegido)
+        $this->get('/api/admin/promociones', 'PromotionController@listPromotions');
     }
 
     /**
