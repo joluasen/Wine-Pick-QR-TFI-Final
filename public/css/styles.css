@@ -323,6 +323,7 @@ button:disabled {
   border: 1px solid var(--border-light);
   border-radius: 2px;
 }
+
   /* QR Scanner Styles */
   /* .qr-scanner-container {
     background: #fff;

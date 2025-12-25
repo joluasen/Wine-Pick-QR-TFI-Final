@@ -232,35 +232,46 @@ $appConfig = [
   <!-- Lógica de filtros -->
   <script>
     document.getElementById('applyFiltersBtn')?.addEventListener('click', function() {
-      const input = document.getElementById('searchInput');
+      // Buscar el input visible (desktop o mobile)
+      let input = null;
+      const desktopInput = document.querySelector('#desktop-search-header #searchInput');
+      const mobileInput = document.querySelector('#mobile-search-header #searchInput');
+      if (desktopInput && window.getComputedStyle(desktopInput).display !== 'none') {
+        input = desktopInput;
+      } else if (mobileInput && window.getComputedStyle(mobileInput).display !== 'none') {
+        input = mobileInput;
+      } else {
+        // Fallback: tomar el primero disponible
+        input = desktopInput || mobileInput;
+      }
       const query = input?.value?.trim() || '';
-      
+
       const filters = [
         { id: 'filterVarietal', param: 'varietal' },
         { id: 'filterOrigin', param: 'origin' },
         { id: 'filterWinery', param: 'winery_distillery' },
         { id: 'filterDrinkType', param: 'drink_type' }
       ];
-      
+
       let hash = '#search?query=' + encodeURIComponent(query);
-      
+
       filters.forEach(f => {
         const el = document.getElementById(f.id);
         if (el?.checked) {
           hash += `&${f.param}=1`;
         }
       });
-      
+
       const yearInput = document.getElementById('filterYearInput');
       if (yearInput?.value) {
         hash += `&vintage_year=${encodeURIComponent(yearInput.value)}`;
       }
-      
+
       const codeInput = document.getElementById('filterPublicCode');
       if (codeInput?.value) {
         hash += `&public_code=${encodeURIComponent(codeInput.value)}`;
       }
-      
+
       window.location.hash = hash;
     });
   </script>

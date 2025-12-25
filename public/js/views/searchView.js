@@ -138,6 +138,30 @@ function getActiveFilters() {
   return filters;
 }
 
+function renderActiveFilters(container, filters) {
+  let summary = '';
+  const filterLabels = {
+    varietal: 'Varietal',
+    origin: 'Origen',
+    winery_distillery: 'Bodega',
+    drink_type: 'Tipo de bebida',
+    vintage_year: 'Año: ',
+    public_code: 'Código: '
+  };
+  const active = [];
+  if (filters.field) active.push(filterLabels[filters.field]);
+  if (filters.vintage_year) active.push(filterLabels.vintage_year + filters.vintage_year);
+  if (filters.public_code) active.push(filterLabels.public_code + filters.public_code);
+  // Insertar o actualizar el resumen arriba de los resultados
+  let bar = container.querySelector('.active-filters-bar');
+  if (!bar && summary) {
+    container.insertAdjacentHTML('afterbegin', summary);
+  } else if (bar) {
+    if (summary) bar.outerHTML = summary;
+    else bar.remove();
+  }
+}
+
 /**
  * Carga los resultados de búsqueda
  */
@@ -213,8 +237,22 @@ export function initSearchView(container) {
   // Actualizar título
   const title = document.createElement('h2');
   title.className = 'search-title';
-  title.textContent = `Resultados para "${query}"`;
   container.insertBefore(title, container.firstChild);
+  
+  // Mostrar resumen de filtros activos
+  const filters = getActiveFilters();
+  renderActiveFilters(container, filters);
+  
+  // Listener para limpiar filtros
+  setTimeout(() => {
+    const clearBtn = container.querySelector('#clearFiltersBtn');
+    if (clearBtn) {
+      clearBtn.onclick = () => {
+        // Limpiar solo los filtros, mantener el término
+        window.location.hash = `#search?query=${encodeURIComponent(query)}`;
+      };
+    }
+  }, 0);
   
   loadResults(query, 0);
 }

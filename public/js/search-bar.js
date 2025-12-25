@@ -108,10 +108,21 @@ function initUnifiedSearchBar() {
       const query = newInput.value.trim();
       if (query) {
         window.location.hash = `#search?query=${encodeURIComponent(query)}`;
-        newInput.blur();
+        setTimeout(() => {
+          newInput.value = query;
+        }, 200);
         clearDropdown();
       }
     });
+
+    // Sincronizar el valor del input con el hash al cargar o cambiar la vista
+    function syncInputWithHash() {
+      const params = new URLSearchParams(window.location.hash.split('?')[1] || '');
+      const query = params.get('query') || '';
+      newInput.value = query;
+    }
+    syncInputWithHash();
+    window.addEventListener('hashchange', syncInputWithHash);
   });
 }
 
