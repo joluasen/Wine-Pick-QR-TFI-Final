@@ -19,25 +19,29 @@ function initUnifiedSearchBar() {
     form.parentNode.replaceChild(newForm, form);
     const newInput = newForm.querySelector('#searchInput');
 
-    // Crear dropdown simple
+    // Crear dropdown simple fuera del input-group para evitar overflow hidden
     let dropdown = newForm.querySelector('#search-autocomplete');
     if (!dropdown) {
       dropdown = document.createElement('ul');
       dropdown.id = 'search-autocomplete';
       dropdown.style.position = 'absolute';
-      dropdown.style.top = '100%';
+      dropdown.style.top = 'calc(100% + 0.5em)';
       dropdown.style.left = '0';
-      dropdown.style.width = '100%';
+      dropdown.style.right = '0';
       dropdown.style.background = '#fff';
-      dropdown.style.borderRadius = '2em';
+      dropdown.style.border = '1px solid #e0e0e0';
+      dropdown.style.borderRadius = '0.5em';
       dropdown.style.boxShadow = '0 4px 16px rgba(0,0,0,0.10)';
-      dropdown.style.marginTop = '0.5em';
-      dropdown.style.padding = '0.75em 0.5em';
-      dropdown.style.zIndex = '1000';
+      dropdown.style.zIndex = '1050';
       dropdown.style.listStyle = 'none';
-      dropdown.style.border = 'none';
+      dropdown.style.padding = '0.5em 0';
+      dropdown.style.margin = '0';
       dropdown.style.display = 'none';
-      newInput.parentNode.appendChild(dropdown);
+      dropdown.style.maxHeight = '300px';
+      dropdown.style.overflowY = 'auto';
+      // Agregar al form (que tiene position relative) en lugar del input-group
+      newForm.style.position = 'relative';
+      newForm.appendChild(dropdown);
     }
 
     function clearDropdown() {
@@ -52,10 +56,9 @@ function initUnifiedSearchBar() {
         return;
       }
       try {
-        const data = await fetchJSON('./api/public/productos/buscar', {
-          method: 'POST',
-          body: JSON.stringify({ search: query, limit: AUTOCOMPLETE_LIMIT })
-        });
+        const params = new URLSearchParams({ search: query, limit: AUTOCOMPLETE_LIMIT });
+        const url = `./api/public/productos?${params.toString()}`;
+        const data = await fetchJSON(url);
         const suggestions = data?.data?.products || [];
         renderSuggestions(suggestions);
       } catch (err) {
@@ -73,14 +76,19 @@ function initUnifiedSearchBar() {
       items.slice(0, AUTOCOMPLETE_LIMIT).forEach(item => {
         const li = document.createElement('li');
         li.textContent = item.name;
-        li.style.padding = '0.5em 1.2em';
-        li.style.fontSize = '1.05em';
-        li.style.color = '#4B1C2F';
-        li.style.background = 'none';
-        li.style.borderRadius = '1em';
+        li.style.padding = '0.75em 1em';
+        li.style.fontSize = '0.95em';
+        li.style.color = '#1A1A1A';
+        li.style.background = '#fff';
         li.style.cursor = 'pointer';
-        li.style.transition = 'background 0.15s';
-        li.style.marginBottom = '0.15em';
+        li.style.transition = 'background 0.15s ease';
+        li.style.borderBottom = '1px solid #f5f5f5';
+        li.addEventListener('mouseenter', () => {
+          li.style.background = '#f8f9fa';
+        });
+        li.addEventListener('mouseleave', () => {
+          li.style.background = '#fff';
+        });
         li.addEventListener('mousedown', (e) => {
           e.preventDefault();
           newInput.value = item.name;
@@ -89,6 +97,10 @@ function initUnifiedSearchBar() {
         });
         dropdown.appendChild(li);
       });
+      // Quitar border del último item
+      const lastLi = dropdown.querySelector('li:last-child');
+      if (lastLi) lastLi.style.borderBottom = 'none';
+
       dropdown.style.display = 'block';
     }
 

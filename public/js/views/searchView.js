@@ -177,23 +177,22 @@ async function loadResults(query, page = 0) {
   resultsEl.innerHTML = '<p class="loading-state">Buscando...</p>';
   
   const filters = getActiveFilters();
-  
-  const body = {
+
+  const params = {
     search: query,
     limit: PAGE_SIZE,
     offset: page * PAGE_SIZE,
     ...filters
   };
-  
+
   try {
-    const data = await fetchJSON('./api/public/productos/buscar', {
-      method: 'POST',
-      body: JSON.stringify(body)
-    });
-    
+    const queryParams = new URLSearchParams(params);
+    const url = `./api/public/productos?${queryParams.toString()}`;
+    const data = await fetchJSON(url);
+
     const products = data?.data?.products || [];
     const total = data?.data?.total || 0;
-    
+
     renderResults(resultsEl, products, total, page);
     
   } catch (err) {
