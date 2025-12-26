@@ -1,3 +1,9 @@
+  function scrollToPagination() {
+    const pagDiv = container.querySelector('.d-flex.justify-content-center.align-items-center.mt-2');
+    if (pagDiv) {
+      pagDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }
 // public/js/views/adminPromotionsView.js
 /**
  * Vista de gestión de promociones para admin
@@ -112,6 +118,12 @@ function setupPromoForm(container, selectEl) {
 }
 
 export async function initAdminPromotionsView(container) {
+    function scrollToPagination() {
+      const pagDiv = container.querySelector('.d-flex.justify-content-center.align-items-center.mt-2');
+      if (pagDiv) {
+        pagDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }
   container.innerHTML = `
     <div class="table-responsive d-none d-md-block">
       <table class="table table-bordered align-middle shadow" id="admin-promos-table">
@@ -157,20 +169,11 @@ export async function initAdminPromotionsView(container) {
     tableBody.innerHTML = `<tr><td colspan='9'>Cargando...</td></tr>`;
     try {
       // Obtener el total de promociones solo la primera vez o cuando sea necesario
-      if (page === 0 || totalPromos === 0) {
-        const countData = await fetchJSON('./api/admin/promociones/listar', {
-          method: 'POST',
-          body: JSON.stringify({ count: true }),
-          headers: { 'Content-Type': 'application/json' }
-        });
-        totalPromos = countData?.data?.total || 0;
-      }
       const offset = page * PAGE_SIZE;
-      const data = await fetchJSON('./api/admin/promociones/listar', {
-        method: 'POST',
-        body: JSON.stringify({ limit: PAGE_SIZE, offset }),
-        headers: { 'Content-Type': 'application/json' }
-      });
+      const params = new URLSearchParams({ limit: PAGE_SIZE, offset });
+      const url = `./api/admin/promociones?${params.toString()}`;
+      const data = await fetchJSON(url);
+      totalPromos = data?.data?.total || 0;
       const promos = data?.data?.promotions || [];
       let rows = promos.map(p => `
         <tr>
@@ -200,6 +203,7 @@ export async function initAdminPromotionsView(container) {
         tableBody.innerHTML = rows.join('');
       }
       updatePagination(page, totalPromos);
+      scrollToPagination();
     } catch (err) {
       tableBody.innerHTML = `<tr><td colspan='9'>Error al cargar promociones</td></tr>`;
       updatePagination(page, totalPromos);
@@ -210,6 +214,7 @@ export async function initAdminPromotionsView(container) {
     if (currentPage > 0) {
       currentPage--;
       loadPromos(currentPage);
+      scrollToPagination();
     }
   };
   nextBtn.onclick = () => {
@@ -217,6 +222,7 @@ export async function initAdminPromotionsView(container) {
     if (currentPage < totalPages - 1) {
       currentPage++;
       loadPromos(currentPage);
+      scrollToPagination();
     }
   };
 

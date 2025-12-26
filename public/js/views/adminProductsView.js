@@ -3,14 +3,15 @@ import { setupLogout } from './adminView.js';
 import { modalManager } from '../core/modalManager.js';
 
 async function fetchAdminProducts({ limit = 20, offset = 0 } = {}) {
-  const res = await fetch('./api/admin/productos/listar', {
-    method: 'POST',
+  // Construir la URL con query params
+  const params = new URLSearchParams({ limit, offset });
+  const url = `./api/admin/productos?${params.toString()}`;
+  const res = await fetch(url, {
+    method: 'GET',
     headers: {
-      'Content-Type': 'application/json',
       'Accept': 'application/json'
     },
-    credentials: 'same-origin',
-    body: JSON.stringify({ limit, offset })
+    credentials: 'same-origin'
   });
   if (!res.ok) throw new Error('Error al obtener productos');
   return res.json();
