@@ -112,6 +112,7 @@ header .h5 i {
   overflow-y: auto;
   background-color: #fafafa;
   min-height: 100%;
+  padding: 10px;
 }
 
 /* =========================================
@@ -129,6 +130,34 @@ header .h5 i {
 
   header {
     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+  }
+
+  #app-root {
+    padding: 0;
+  }
+
+  section[data-view] {
+    padding: 0;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  section[data-view] h2 {
+    padding: 0 0.5rem;
+    font-size: 1rem;
+    margin-bottom: 0.15rem;
+  }
+
+  section[data-view] > p {
+    padding: 0 0.5rem;
+    font-size: 0.75rem;
+    margin-bottom: 0.35rem;
+  }
+
+  section[data-view] > div[id$="-status"],
+  section[data-view] > div[id$="-pagination"] {
+    padding: 0 0.5rem;
   }
 }
 
@@ -156,14 +185,62 @@ header .h5 i {
 
 /* Contenedor de vista genérica */
 .view-container {
-  padding: 1.5rem;
+  padding: 0.5rem;
   max-width: 100%;
 }
 
 @media (min-width: 768px) {
   .view-container {
-    padding: 2rem;
-    max-width: 100%;
+    padding: 1rem;
+    max-width: 1280px;
+    margin: 0 auto;
+  }
+}
+
+/* Secciones de vistas (data-view) */
+section[data-view] {
+  background: var(--bg-card);
+  padding: 10px;
+  border-radius: 2px;
+  border: 1px solid var(--border-light);
+  box-shadow: 0 1px 3px var(--shadow);
+}
+
+section[data-view] h2 {
+  font-size: 1.1rem;
+  margin-bottom: 0.25rem;
+  padding: 0 0.5rem;
+  font-weight: 600;
+}
+
+section[data-view] > p {
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+  margin-bottom: 0.5rem;
+  padding: 0 0.5rem;
+}
+
+section[data-view] > div[id$="-status"],
+section[data-view] > div[id$="-pagination"] {
+  padding: 0 0.5rem;
+}
+
+@media (min-width: 768px) {
+  section[data-view] h2 {
+    font-size: 1.3rem;
+    padding: 0 0.75rem;
+    margin-bottom: 0.35rem;
+  }
+
+  section[data-view] > p {
+    font-size: 0.875rem;
+    padding: 0 0.75rem;
+    margin-bottom: 0.65rem;
+  }
+
+  section[data-view] > div[id$="-status"],
+  section[data-view] > div[id$="-pagination"] {
+    padding: 0 0.75rem;
   }
 }
 

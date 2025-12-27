@@ -162,36 +162,7 @@
   width: 100%;
 }
 
-section[data-view] {
-  background: var(--bg-card);
-  padding: 2.5rem;
-  border-radius: 2px;
-  border: 1px solid var(--border-light);
-  box-shadow: 0 1px 3px var(--shadow);
-}
-
-section[data-view] h2 {
-  color: var(--primary);
-  font-size: 1.5rem;
-  font-weight: 600;
-  margin-bottom: 0.5rem;
-  padding-bottom: 0.75rem;
-  border-bottom: 1px solid var(--border);
-}
-
-section[data-view] h3 {
-  color: var(--primary);
-  font-size: 1.1rem;
-  font-weight: 600;
-  margin-top: 2rem;
-  margin-bottom: 0.75rem;
-}
-
-section[data-view] > p {
-  color: var(--text-light);
-  margin-bottom: 2rem;
-  font-size: 0.95rem;
-}
+/* section[data-view] styles moved to layout.css to avoid duplication */
 
 /* Forms */
 form {
@@ -1084,13 +1055,6 @@ button:disabled {
 
 /* Responsive */
 @media (max-width: 768px) {
-  #app-root {
-    padding: 1rem;
-  }
-
-  section[data-view] {
-    padding: 1.5rem;
-  }
 
   .app-title {
     font-size: 1.5rem;

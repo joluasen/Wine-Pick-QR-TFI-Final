@@ -96,7 +96,7 @@ $appConfig = [
     </aside>
 
     <!-- MAIN CONTENT -->
-    <main id="app-root" class="flex-grow-1 overflow-auto p-3 p-md-4">
+    <main id="app-root">
       <!-- Vistas cargadas dinámicamente -->
       <div class="loading-initial">
         <div class="spinner-border text-primary" role="status">
