@@ -1,0 +1,102 @@
+/**
+ * admin.css
+ * Estilos específicos para el panel de administración
+ * Extrae todos los estilos inline del JavaScript
+ */
+
+/* =========================================
+   TOAST CONTAINER
+   ========================================= */
+
+.toast-container {
+  position: fixed;
+  top: 0;
+  right: 0;
+  padding: 1rem;
+  z-index: 1080;
+}
+
+/* =========================================
+   BOTONES DE ACCIÓN EN TABLAS
+   ========================================= */
+
+.btn-admin-action {
+  font-size: 0.85rem;
+  min-width: 40px;
+}
+
+/* =========================================
+   MODAL DE PROMOCIÓN
+   ========================================= */
+
+#modal-new-promo .modal-content {
+  border-radius: 1rem;
+  max-height: 90vh;
+  overflow: hidden;
+}
+
+#modal-new-promo .modal-header {
+  background-color: #7a003c;
+  color: #fff;
+}
+
+#modal-new-promo .modal-body {
+  overflow-y: auto;
+  max-height: 70vh;
+}
+
+/* Alerta de promoción activa */
+.promo-active-alert {
+  padding: 1.5rem;
+  border-radius: 1rem;
+  background-color: #fffbe8;
+  border: 1px solid #f3d6e6;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.promo-active-alert .alert-icon {
+  font-size: 1.5rem;
+}
+
+.promo-active-alert .alert-title {
+  font-size: 1.2rem;
+  color: #7a003c;
+  font-weight: 700;
+}
+
+.promo-active-alert .alert-detail {
+  font-size: 1.05rem;
+}
+
+.promo-active-alert .alert-note {
+  font-size: 0.97rem;
+  color: #666;
+}
+
+.promo-active-alert .alert-question {
+  color: #7a003c;
+  font-weight: 600;
+}
+
+.promo-active-alert .alert-action-btn {
+  font-size: 0.92rem;
+}
+
+/* =========================================
+   TABLA ADMIN RESPONSIVE
+   ========================================= */
+
+.admin-table-wrapper {
+  overflow-x: auto;
+}
+
+@media (max-width: 767.98px) {
+  .admin-table-wrapper {
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .btn-admin-action {
+    font-size: 0.75rem;
+    min-width: 35px;
+  }
+}

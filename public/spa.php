@@ -49,6 +49,7 @@ $appConfig = [
   <link rel="stylesheet" href="<?= $baseUrl ?>css/components.css">
   <link rel="stylesheet" href="<?= $baseUrl ?>css/product-modal.css">
   <link rel="stylesheet" href="<?= $baseUrl ?>css/winepick-search.css">
+  <link rel="stylesheet" href="<?= $baseUrl ?>css/admin.css">
   
   <!-- Configuración global para JavaScript -->
   <script>

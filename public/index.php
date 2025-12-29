@@ -23,23 +23,30 @@ $fullUri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) ?? '/';
 $projectPath = parse_url(BASE_URL, PHP_URL_PATH) ?: '/proyectos/Wine-Pick-QR-TFI';
 $relative = (strpos($fullUri, $projectPath) === 0) ? substr($fullUri, strlen($projectPath)) : $fullUri;
 
+// Autoloader PSR-4 para cargar clases del backend (disponible globalmente)
+spl_autoload_register(function ($class) {
+    // Soportar namespaces PSR-4: App\Helpers\ViewHelper → app/Helpers/ViewHelper.php
+    $classPath = str_replace('\\', '/', $class);
+    $classPath = str_replace('App/', '', $classPath); // Quitar namespace raíz
+
+    $paths = [
+        BASE_PATH . '/app/' . $classPath . '.php',
+        BASE_PATH . '/app/Utils/' . $class . '.php',
+        BASE_PATH . '/app/Models/' . $class . '.php',
+        BASE_PATH . '/app/Controllers/' . $class . '.php',
+        BASE_PATH . '/app/Helpers/' . $class . '.php',
+    ];
+
+    foreach ($paths as $file) {
+        if (file_exists($file)) {
+            require_once $file;
+            return;
+        }
+    }
+});
+
 // Si es una petición a la API, delegar al router backend
 if (strpos($relative, '/api/') === 0) {
-    // Autoloader PSR-4 para cargar clases del backend
-    spl_autoload_register(function ($class) {
-        $paths = [
-            BASE_PATH . '/app/Utils/' . $class . '.php',
-            BASE_PATH . '/app/Models/' . $class . '.php',
-            BASE_PATH . '/app/Controllers/' . $class . '.php',
-        ];
-
-        foreach ($paths as $file) {
-            if (file_exists($file)) {
-                require_once $file;
-                return;
-            }
-        }
-    });
 
     // Registrar solicitud
     wpq_debug_log('Solicitud API: ' . $_SERVER['REQUEST_METHOD'] . ' ' . $_SERVER['REQUEST_URI'] . ' desde ' . ($_SERVER['REMOTE_ADDR'] ?? 'desconocido'));

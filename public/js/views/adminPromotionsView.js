@@ -1,131 +1,24 @@
-  function scrollToPagination() {
-    const pagDiv = container.querySelector('.d-flex.justify-content-center.align-items-center.mt-2');
-    if (pagDiv) {
-      pagDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }
-  }
-// public/js/views/adminPromotionsView.js
 /**
- * Vista de gestión de promociones para admin
+ * adminPromotionsView.js
+ * Vista de gestión de promociones - Refactorizada siguiendo principios SOLID y MVC
+ *
+ * RESPONSABILIDAD: Controlador de vista de promociones
+ * - Renderiza tabla de promociones
+ * - Maneja paginación
+ * - Delega operaciones CRUD a servicios
  */
 
+import { getPromotions, deletePromotion, togglePromotionStatus } from '../admin/services/promotionService.js';
+import { showToast } from '../admin/components/Toast.js';
 
-import { setStatus, fetchJSON } from '../core/utils.js';
-
-function dateToSQL(dateStr) {
-  if (!dateStr) return null;
-  return `${dateStr} 00:00:00`;
-}
-
-async function loadProducts(selectEl) {
-  if (!selectEl) return;
-  try {
-    const data = await fetchJSON('./api/public/productos?search=.');
-    selectEl.innerHTML = '<option value="">-- Selecciona un producto --</option>';
-    const products = data?.data?.products || [];
-    products.forEach(product => {
-      const option = document.createElement('option');
-      option.value = product.id;
-      option.textContent = `${product.name} ($${product.base_price})`;
-      selectEl.appendChild(option);
-    });
-  } catch (err) {
-    console.error('Error cargando productos:', err);
-  }
-}
-
-function setupPromoForm(container, selectEl) {
-  const form = container.querySelector('#promotion-create-form');
-  const statusEl = container.querySelector('#promotion-create-status');
-  const typeSelect = container.querySelector('#promo_type');
-  const valueInput = container.querySelector('#promo_value');
-  const valueLabel = container.querySelector('label[for="promo_value"]');
-  if (!form) return;
-  if (typeSelect && valueInput && valueLabel) {
-    const updateLabel = () => {
-      const type = typeSelect.value;
-      const labels = {
-        'porcentaje': 'Porcentaje de descuento (0-100) *',
-        'precio_fijo': 'Precio promocional (ARS) *',
-        '2x1': 'Valor fijo (usa 1) *',
-        '3x2': 'Valor fijo (usa 2) *',
-        'nxm': 'M (pagas M de N unidades) *'
-      };
-      const placeholders = {
-        'porcentaje': 'Ej: 15',
-        'precio_fijo': 'Ej: 3999.99',
-        '2x1': '1',
-        '3x2': '2',
-        'nxm': 'Ej: 2'
-      };
-      valueLabel.textContent = labels[type] || 'Valor *';
-      valueInput.placeholder = placeholders[type] || '';
-      valueInput.step = ['porcentaje', '2x1', '3x2', 'nxm'].includes(type) ? '1' : '0.01';
-    };
-    typeSelect.addEventListener('change', updateLabel);
-    updateLabel();
-  }
-  form.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const productId = selectEl?.value;
-    const type = typeSelect?.value;
-    const value = parseFloat(valueInput?.value);
-    let text = form.querySelector('#promo_text')?.value?.trim();
-    const startDate = form.querySelector('#promo_start')?.value;
-    const endDate = form.querySelector('#promo_end')?.value;
-    if (!productId || !type || !value || !text || !startDate) {
-      setStatus(statusEl, 'Completá todos los campos requeridos.', 'error');
-      return;
-    }
-    if (endDate && endDate < startDate) {
-      setStatus(statusEl, 'La fecha de fin debe ser posterior a la de inicio.', 'error');
-      return;
-    }
-    if (!text) {
-      const defaults = {
-        '2x1': 'Llevate 2 y pagas 1',
-        '3x2': 'Llevate 3 y pagas 2',
-        'nxm': 'Combo especial'
-      };
-      text = defaults[type] || 'Promoción';
-    }
-    const payload = {
-      product_id: parseInt(productId),
-      promotion_type: type,
-      parameter_value: value,
-      visible_text: text,
-      start_at: dateToSQL(startDate),
-      end_at: endDate ? dateToSQL(endDate) : null
-    };
-    setStatus(statusEl, 'Creando promoción...', 'info');
-    try {
-      await fetchJSON('./api/admin/promociones', {
-        method: 'POST',
-        body: JSON.stringify(payload)
-      });
-      setStatus(statusEl, 'Promoción creada con éxito.', 'success');
-      form.reset();
-      await loadProducts(selectEl);
-    } catch (err) {
-      if (err.status === 401) {
-        setStatus(statusEl, 'Sesión expirada. Redirigiendo...', 'error');
-        setTimeout(() => { window.location.hash = '#login'; }, 400);
-      } else {
-        setStatus(statusEl, `Error: ${err.message}`, 'error');
-      }
-    }
-  });
-}
-
+/**
+ * Inicializa la vista de gestión de promociones
+ * @param {HTMLElement} container - Contenedor de la vista
+ */
 export async function initAdminPromotionsView(container) {
-    function scrollToPagination() {
-      const pagDiv = container.querySelector('.d-flex.justify-content-center.align-items-center.mt-2');
-      if (pagDiv) {
-        pagDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }
-    }
+  // Renderizar estructura de la tabla
   container.innerHTML = `
-    <div class="table-responsive d-none d-md-block">
+    <div class="table-responsive d-none d-md-block admin-table-wrapper">
       <table class="table table-bordered align-middle shadow" id="admin-promos-table">
         <thead>
           <tr>
@@ -143,21 +36,35 @@ export async function initAdminPromotionsView(container) {
         <tbody><tr><td colspan='9'>Cargando...</td></tr></tbody>
       </table>
     </div>
-  <div class="d-flex justify-content-center align-items-center mt-2">
-    <button class="btn btn-secondary btn-sm mx-1" id="admin-promos-prev" disabled>Anterior</button>
-    <span id="admin-promos-page" class="mx-2"></span>
-    <button class="btn btn-secondary btn-sm mx-1" id="admin-promos-next" disabled>Siguiente</button>
-  </div>
+    <div class="d-flex justify-content-center align-items-center mt-2">
+      <button class="btn btn-secondary btn-sm mx-1" id="admin-promos-prev" disabled>Anterior</button>
+      <span id="admin-promos-page" class="mx-2"></span>
+      <button class="btn btn-secondary btn-sm mx-1" id="admin-promos-next" disabled>Siguiente</button>
+    </div>
   `;
 
   const tableBody = container.querySelector('#admin-promos-table tbody');
   const paginationEl = container.querySelector('#admin-promos-page');
   const prevBtn = container.querySelector('#admin-promos-prev');
   const nextBtn = container.querySelector('#admin-promos-next');
+
   const PAGE_SIZE = 20;
   let currentPage = 0;
   let totalPromos = 0;
 
+  /**
+   * Scroll automático a la paginación
+   */
+  function scrollToPagination() {
+    const pagDiv = container.querySelector('.d-flex.justify-content-center.align-items-center.mt-2');
+    if (pagDiv) {
+      pagDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }
+
+  /**
+   * Actualiza los controles de paginación
+   */
   function updatePagination(page, total) {
     const totalPages = Math.ceil(total / PAGE_SIZE) || 1;
     paginationEl.textContent = `Página ${page + 1} de ${totalPages}`;
@@ -165,67 +72,129 @@ export async function initAdminPromotionsView(container) {
     nextBtn.disabled = page >= totalPages - 1;
   }
 
+  /**
+   * Renderiza las filas de la tabla
+   */
+  function renderRows(promos) {
+    let rows = promos.map(p => `
+      <tr>
+        <td>${p.id}</td>
+        <td>${p.product_name || ''}</td>
+        <td>${p.promotion_type}</td>
+        <td>${p.parameter_value}</td>
+        <td>${p.visible_text}</td>
+        <td>${p.start_at ? p.start_at.split(' ')[0] : ''}</td>
+        <td>${p.end_at ? p.end_at.split(' ')[0] : ''}</td>
+        <td>${p.is_active ? 'Activa' : 'Inactiva'}</td>
+        <td>
+          <button class="btn btn-xs btn-primary btn-admin-action px-2 py-1" data-edit-promo="${p.id}">Editar</button>
+          <button class="btn btn-xs btn-danger ms-1 btn-admin-action px-2 py-1" data-delete-promo="${p.id}">Borrar</button>
+          <button class="btn btn-xs btn-secondary ms-1 btn-admin-action px-2 py-1" data-toggle-promo="${p.id}" data-is-active="${p.is_active}">
+            ${p.is_active ? 'Deshabilitar' : 'Habilitar'}
+          </button>
+        </td>
+      </tr>
+    `);
+
+    // Rellenar con filas vacías
+    for (let i = promos.length; i < PAGE_SIZE; i++) {
+      rows.push('<tr>' + '<td>&nbsp;</td>'.repeat(9) + '</tr>');
+    }
+
+    return rows.join('');
+  }
+
+  /**
+   * Adjunta event listeners a los botones de acciones
+   */
+  function attachActionListeners() {
+    // Editar
+    tableBody.querySelectorAll('[data-edit-promo]').forEach(btn => {
+      btn.onclick = async () => {
+        const promoId = btn.getAttribute('data-edit-promo');
+        // TODO: Implementar edición
+        showToast(`Editar promoción ${promoId} - Por implementar`, 'info');
+      };
+    });
+
+    // Eliminar
+    tableBody.querySelectorAll('[data-delete-promo]').forEach(btn => {
+      btn.onclick = async () => {
+        const promoId = btn.getAttribute('data-delete-promo');
+        if (!confirm('¿Estás seguro de eliminar esta promoción?')) return;
+
+        try {
+          await deletePromotion(promoId);
+          showToast('Promoción eliminada con éxito', 'success');
+          loadPromos(currentPage);
+        } catch (err) {
+          showToast(`Error al eliminar: ${err.message}`, 'error');
+        }
+      };
+    });
+
+    // Activar/Desactivar
+    tableBody.querySelectorAll('[data-toggle-promo]').forEach(btn => {
+      btn.onclick = async () => {
+        const promoId = btn.getAttribute('data-toggle-promo');
+        const isActive = btn.getAttribute('data-is-active') === 'true';
+
+        try {
+          await togglePromotionStatus(promoId, !isActive);
+          showToast(`Promoción ${!isActive ? 'activada' : 'desactivada'} con éxito`, 'success');
+          loadPromos(currentPage);
+        } catch (err) {
+          showToast(`Error al cambiar estado: ${err.message}`, 'error');
+        }
+      };
+    });
+  }
+
+  /**
+   * Carga promociones de la página especificada
+   */
   async function loadPromos(page = 0) {
     tableBody.innerHTML = `<tr><td colspan='9'>Cargando...</td></tr>`;
+
     try {
-      // Obtener el total de promociones solo la primera vez o cuando sea necesario
       const offset = page * PAGE_SIZE;
-      const params = new URLSearchParams({ limit: PAGE_SIZE, offset });
-      const url = `./api/admin/promociones?${params.toString()}`;
-      const data = await fetchJSON(url);
-      totalPromos = data?.data?.total || 0;
-      const promos = data?.data?.promotions || [];
-      let rows = promos.map(p => `
-        <tr>
-          <td>${p.id}</td>
-          <td>${p.product_name || ''}</td>
-          <td>${p.promotion_type}</td>
-          <td>${p.parameter_value}</td>
-          <td>${p.visible_text}</td>
-          <td>${p.start_at ? p.start_at.split(' ')[0] : ''}</td>
-          <td>${p.end_at ? p.end_at.split(' ')[0] : ''}</td>
-          <td>${p.is_active ? 'Activa' : 'Inactiva'}</td>
-          <td>
-            <button class="btn btn-xs btn-primary px-2 py-1" data-edit-promo="${p.id}">Editar</button>
-            <button class="btn btn-xs btn-danger ms-1 px-2 py-1" data-delete-promo="${p.id}">Borrar</button>
-            <button class="btn btn-xs btn-secondary ms-1 px-2 py-1" data-toggle-promo="${p.id}">${p.is_active ? 'Deshabilitar' : 'Habilitar'}</button>
-          </td>
-        </tr>
-      `);
-      // Si hay menos de PAGE_SIZE, rellenar con filas vacías
-      for (let i = promos.length; i < PAGE_SIZE; i++) {
-        rows.push('<tr>' + '<td>&nbsp;</td>'.repeat(9) + '</tr>');
-      }
-      // Si no hay promociones en toda la tabla
-      if (promos.length === 0 && totalPromos === 0) {
+      const { promotions, total } = await getPromotions({ limit: PAGE_SIZE, offset });
+
+      totalPromos = total;
+
+      if (promotions.length === 0 && totalPromos === 0) {
         tableBody.innerHTML = `<tr><td colspan='9'>No hay promociones para mostrar.</td></tr>`;
       } else {
-        tableBody.innerHTML = rows.join('');
+        tableBody.innerHTML = renderRows(promotions);
+        attachActionListeners();
       }
+
       updatePagination(page, totalPromos);
       scrollToPagination();
+
     } catch (err) {
       tableBody.innerHTML = `<tr><td colspan='9'>Error al cargar promociones</td></tr>`;
+      showToast(`Error: ${err.message}`, 'error');
       updatePagination(page, totalPromos);
     }
   }
 
+  // Event listeners de paginación
   prevBtn.onclick = () => {
     if (currentPage > 0) {
       currentPage--;
       loadPromos(currentPage);
-      scrollToPagination();
     }
   };
+
   nextBtn.onclick = () => {
     const totalPages = Math.ceil(totalPromos / PAGE_SIZE) || 1;
     if (currentPage < totalPages - 1) {
       currentPage++;
       loadPromos(currentPage);
-      scrollToPagination();
     }
   };
 
-  // Inicializar la vista
+  // Inicializar carga
   loadPromos(0);
 }
