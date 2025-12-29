@@ -99,11 +99,6 @@ $appConfig = [
     <!-- MAIN CONTENT -->
     <main id="app-root">
       <!-- Vistas cargadas dinámicamente -->
-      <div class="loading-initial">
-        <div class="spinner-border text-primary" role="status">
-          <span class="visually-hidden">Cargando...</span>
-        </div>
-      </div>
     </main>
   </div>
 

@@ -8,7 +8,7 @@
  * - Delega operaciones CRUD a servicios
  */
 
-import { getProducts, deleteProduct } from '../admin/services/productService.js';
+import { getProducts } from '../admin/services/productService.js';
 import { getPromotions, deletePromotion, togglePromotionStatus } from '../admin/services/promotionService.js';
 import { showToast } from '../admin/components/Toast.js';
 import { modalManager } from '../core/modalManager.js';
@@ -21,32 +21,42 @@ import { setupPromotionCreateForm } from '../admin/components/PromotionFormHandl
  * @param {HTMLElement} container - Contenedor de la vista
  */
 export async function initAdminProductsView(container) {
-  // Renderizar estructura de la tabla
+  // Renderizar estructura de la tabla con loading inicial (esto limpia todo el contenedor)
   container.innerHTML = `
-    <div class="table-responsive d-none d-md-block admin-table-wrapper">
-      <table class="table table-bordered align-middle shadow" id="admin-products-table">
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Código</th>
-            <th>Nombre</th>
-            <th>Tipo</th>
-            <th>Bodega</th>
-            <th>Precio</th>
-            <th>Activo</th>
-            <th>Acciones</th>
-          </tr>
-        </thead>
-        <tbody><tr><td colspan='8'>Cargando...</td></tr></tbody>
-      </table>
+    <div id="admin-products-loading" class="text-center py-5">
+      <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+        <span class="visually-hidden">Cargando...</span>
+      </div>
+      <p class="mt-3 text-muted">Cargando productos...</p>
     </div>
-    <div class="d-flex justify-content-center align-items-center mt-2">
-      <button class="btn btn-secondary btn-sm mx-1" id="admin-products-prev" disabled>Anterior</button>
-      <span id="admin-products-page" class="mx-2"></span>
-      <button class="btn btn-secondary btn-sm mx-1" id="admin-products-next" disabled>Siguiente</button>
+    <div id="admin-products-content" style="display: none;">
+      <div class="table-responsive d-none d-md-block admin-table-wrapper">
+        <table class="table table-bordered align-middle shadow" id="admin-products-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Código</th>
+              <th>Nombre</th>
+              <th>Tipo</th>
+              <th>Bodega</th>
+              <th>Precio</th>
+              <th>Activo</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div class="d-flex justify-content-center align-items-center mt-2">
+        <button class="btn btn-secondary btn-sm mx-1" id="admin-products-prev" disabled>Anterior</button>
+        <span id="admin-products-page" class="mx-2"></span>
+        <button class="btn btn-secondary btn-sm mx-1" id="admin-products-next" disabled>Siguiente</button>
+      </div>
     </div>
   `;
 
+  const loadingEl = container.querySelector('#admin-products-loading');
+  const contentEl = container.querySelector('#admin-products-content');
   const tableBody = container.querySelector('#admin-products-table tbody');
   const paginationEl = container.querySelector('#admin-products-page');
   const prevBtn = container.querySelector('#admin-products-prev');
@@ -56,16 +66,6 @@ export async function initAdminProductsView(container) {
   let currentPage = 0;
   let totalProducts = 0;
   let cachedProducts = [];
-
-  /**
-   * Scroll automático a la paginación
-   */
-  function scrollToPagination() {
-    const pagDiv = container.querySelector('.d-flex.justify-content-center.align-items-center.mt-2');
-    if (pagDiv) {
-      pagDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }
-  }
 
   /**
    * Actualiza los controles de paginación
@@ -134,10 +134,45 @@ export async function initAdminProductsView(container) {
 
         // Abrir modal con formulario de edición
         modalManager.open('admin-product-modal', renderAdminProductCard(product), {
+          preventClose: true,
           onOpen: (modal) => {
             const form = modal.querySelector('#admin-edit-product-form');
+            let formChanged = false;
+
+            // Detectar cambios en el formulario
+            if (form) {
+              form.addEventListener('input', () => {
+                formChanged = true;
+              });
+            }
+
+            // Función para cerrar con confirmación
+            const closeWithConfirmation = () => {
+              if (formChanged) {
+                if (confirm('¿Estás seguro de cerrar sin guardar los cambios?')) {
+                  modalManager.close('admin-product-modal');
+                }
+              } else {
+                modalManager.close('admin-product-modal');
+              }
+            };
+
+            // Configurar botón X
+            const closeBtn = modal.querySelector('[data-close-modal]');
+            if (closeBtn) {
+              closeBtn.onclick = closeWithConfirmation;
+            }
+
+            // Configurar botón cancelar
+            const cancelBtn = modal.querySelector('[data-dismiss-modal]');
+            if (cancelBtn) {
+              cancelBtn.onclick = closeWithConfirmation;
+            }
+
+            // Configurar formulario
             if (form) {
               setupProductEditForm(form, product, () => {
+                formChanged = false; // Resetear flag al guardar
                 modalManager.close('admin-product-modal');
                 loadProducts(currentPage);
               });
@@ -149,17 +184,8 @@ export async function initAdminProductsView(container) {
 
     // Eliminar producto
     tableBody.querySelectorAll('[data-delete-product]').forEach(btn => {
-      btn.onclick = async () => {
-        const productId = btn.getAttribute('data-delete-product');
-        if (!confirm('¿Estás seguro de eliminar este producto?')) return;
-
-        try {
-          await deleteProduct(productId);
-          showToast('Producto eliminado con éxito', 'success');
-          loadProducts(currentPage);
-        } catch (err) {
-          showToast(`Error al eliminar: ${err.message}`, 'error');
-        }
+      btn.onclick = () => {
+        showToast('La función de eliminar productos no está disponible actualmente. Contacte al administrador del sistema.', 'info');
       };
     });
 
@@ -182,11 +208,19 @@ export async function initAdminProductsView(container) {
    * Carga productos de la página especificada
    */
   async function loadProducts(page = 0) {
-    tableBody.innerHTML = `<tr><td colspan='8'>Cargando...</td></tr>`;
+    // Mostrar loading, ocultar contenido
+    loadingEl.style.display = 'block';
+    contentEl.style.display = 'none';
 
     try {
       const offset = page * PAGE_SIZE;
-      const { products, total } = await getProducts({ limit: PAGE_SIZE, offset });
+
+      // Crear promesas para el fetch y el delay de 2 segundos
+      const fetchPromise = getProducts({ limit: PAGE_SIZE, offset });
+      const delayPromise = new Promise(resolve => setTimeout(resolve, 250));
+
+      // Esperar ambas promesas
+      const [{ products, total }] = await Promise.all([fetchPromise, delayPromise]);
 
       totalProducts = total;
       cachedProducts = products;
@@ -199,12 +233,19 @@ export async function initAdminProductsView(container) {
       }
 
       updatePagination(page, totalProducts);
-      scrollToPagination();
+
+      // Ocultar loading, mostrar contenido
+      loadingEl.style.display = 'none';
+      contentEl.style.display = 'block';
 
     } catch (err) {
       tableBody.innerHTML = `<tr><td colspan='8'>Error al cargar productos</td></tr>`;
       showToast(`Error: ${err.message}`, 'error');
       updatePagination(page, totalProducts);
+
+      // Ocultar loading, mostrar contenido (incluso con error)
+      loadingEl.style.display = 'none';
+      contentEl.style.display = 'block';
     }
   }
 
@@ -226,62 +267,85 @@ export async function initAdminProductsView(container) {
     // Si hay promoción activa, mostrar alerta
     if (activePromo) {
       modalContent = `
-        <div class="promo-active-alert">
-          <div class="mb-3 d-flex align-items-center gap-2">
-            <i class="bi bi-exclamation-triangle-fill text-warning" style="font-size:1.5rem;"></i>
-            <span class="fw-bold" style="font-size:1.2rem;color:#7a003c;">Promoción activa</span>
-          </div>
-          <div class="mb-2" style="font-size:1.05rem;">
-            <span class="fw-semibold">${activePromo.promotion_type.replace('_', ' ').toUpperCase()}</span>
-            <span class="mx-2">|</span>
-            <span class="fw-semibold">Valor:</span> <span>${activePromo.parameter_value}</span>
-            <span class="mx-2">|</span>
-            <span class="fw-semibold">Vigencia:</span> <span>${activePromo.start_at ? activePromo.start_at.split(' ')[0] : ''}${activePromo.end_at ? ' al ' + activePromo.end_at.split(' ')[0] : ''}</span>
-          </div>
-          <div class="mb-3 text-muted" style="font-size:0.97rem;">No puedes crear otra promoción hasta que la actual finalice o sea eliminada.</div>
-          <div class="mb-2 fw-semibold" style="color:#7a003c;">¿Qué acción deseas realizar sobre la promoción?</div>
-          <div class="d-flex gap-2 justify-content-start align-items-center mt-2">
-            <button type="button" class="btn btn-outline-primary btn-xs fw-semibold px-2 py-1" style="font-size:0.92rem;" data-edit-promo="${activePromo.id}"><i class="bi bi-pencil-square me-1"></i>Editar</button>
-            <button type="button" class="btn btn-outline-danger btn-xs fw-semibold px-2 py-1" style="font-size:0.92rem;" data-delete-promo="${activePromo.id}"><i class="bi bi-trash me-1"></i>Eliminar</button>
-            <button type="button" class="btn btn-outline-secondary btn-xs fw-semibold px-2 py-1" style="font-size:0.92rem;" data-toggle-promo="${activePromo.id}"><i class="bi bi-power me-1"></i>Desactivar</button>
+        <div>
+          <div class="promo-active-alert">
+            <div class="mb-3 d-flex align-items-center gap-2">
+              <i class="bi bi-exclamation-triangle-fill text-warning" style="font-size:1.5rem;"></i>
+              <span class="fw-bold" style="font-size:1.2rem;color:#7a003c;">Promoción activa</span>
+            </div>
+            <div class="mb-2" style="font-size:1.05rem;">
+              <span class="fw-semibold">${activePromo.promotion_type.replace('_', ' ').toUpperCase()}</span>
+              <span class="mx-2">|</span>
+              <span class="fw-semibold">Valor:</span> <span>${activePromo.parameter_value}</span>
+              <span class="mx-2">|</span>
+              <span class="fw-semibold">Vigencia:</span> <span>${activePromo.start_at ? activePromo.start_at.split(' ')[0] : ''}${activePromo.end_at ? ' al ' + activePromo.end_at.split(' ')[0] : ''}</span>
+            </div>
+            <div class="mb-3 text-muted" style="font-size:0.97rem;">No puedes crear otra promoción hasta que la actual finalice o sea eliminada.</div>
+            <div class="mb-2 fw-semibold" style="color:#7a003c;">¿Qué acción deseas realizar sobre la promoción?</div>
+            <div class="d-flex gap-2 justify-content-start align-items-center mt-2">
+              <button type="button" class="btn btn-outline-primary btn-xs fw-semibold px-2 py-1" style="font-size:0.92rem;" data-edit-promo="${activePromo.id}"><i class="bi bi-pencil-square me-1"></i>Editar</button>
+              <button type="button" class="btn btn-outline-danger btn-xs fw-semibold px-2 py-1" style="font-size:0.92rem;" data-delete-promo="${activePromo.id}"><i class="bi bi-trash me-1"></i>Eliminar</button>
+              <button type="button" class="btn btn-outline-secondary btn-xs fw-semibold px-2 py-1" style="font-size:0.92rem;" data-toggle-promo="${activePromo.id}"><i class="bi bi-power me-1"></i>Desactivar</button>
+            </div>
           </div>
         </div>
       `;
     } else {
       // Mostrar formulario de creación
       modalContent = `
-        <div class='mb-2'><strong>Producto seleccionado:</strong> ${productName} (ID: ${productId})</div>
-        <form id="promo-create-form-modal">
-          <div class="mb-2">
-            <label for="promo_type_modal" class="form-label">Tipo de promoción</label>
-            <select id="promo_type_modal" class="form-select" required>
-              <option value="">Selecciona tipo</option>
-              <option value="porcentaje">Porcentaje (%)</option>
-              <option value="precio_fijo">Precio fijo</option>
-              <option value="2x1">2x1</option>
-              <option value="3x2">3x2</option>
-              <option value="nxm">N x M</option>
-            </select>
+        <div>
+          <div class="alert alert-info mb-3">
+            <strong>Producto seleccionado:</strong> ${productName}
           </div>
-          <div class="mb-2">
-            <label for="promo_value_modal" class="form-label">Valor</label>
-            <input type="number" id="promo_value_modal" class="form-control" required min="0" step="0.01">
-          </div>
-          <div class="mb-2">
-            <label for="promo_text_modal" class="form-label">Texto visible</label>
-            <input type="text" id="promo_text_modal" class="form-control" maxlength="100">
-          </div>
-          <div class="mb-2">
-            <label for="promo_start_modal" class="form-label">Inicio</label>
-            <input type="date" id="promo_start_modal" class="form-control" required>
-          </div>
-          <div class="mb-2">
-            <label for="promo_end_modal" class="form-label">Fin</label>
-            <input type="date" id="promo_end_modal" class="form-control">
-          </div>
-          <div id="promo-create-status-modal" class="mb-2"></div>
-          <button type="submit" class="btn btn-success">Crear promoción</button>
-        </form>
+          <form id="promo-create-form-modal">
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label for="promo_type_modal" class="form-label fw-semibold">Tipo de promoción <span class="text-danger">*</span></label>
+                <select id="promo_type_modal" class="form-select" required>
+                  <option value="">Selecciona tipo</option>
+                  <option value="porcentaje">Porcentaje (%)</option>
+                  <option value="precio_fijo">Precio fijo</option>
+                  <option value="2x1">2x1</option>
+                  <option value="3x2">3x2</option>
+                  <option value="nxm">N x M</option>
+                </select>
+              </div>
+              <div class="col-md-6">
+                <label for="promo_value_modal" class="form-label fw-semibold">Valor <span class="text-danger">*</span></label>
+                <input type="number" id="promo_value_modal" class="form-control" required min="0" step="0.01" placeholder="Ej: 15">
+              </div>
+            </div>
+
+            <div class="row g-3 mt-2">
+              <div class="col-12">
+                <label for="promo_text_modal" class="form-label fw-semibold">Texto visible</label>
+                <input type="text" id="promo_text_modal" class="form-control" maxlength="100" placeholder="Ej: Oferta especial">
+                <div class="form-text">Máximo 100 caracteres</div>
+              </div>
+            </div>
+
+            <div class="row g-3 mt-2">
+              <div class="col-md-6">
+                <label for="promo_start_modal" class="form-label fw-semibold">Fecha de inicio <span class="text-danger">*</span></label>
+                <input type="date" id="promo_start_modal" class="form-control" required>
+              </div>
+              <div class="col-md-6">
+                <label for="promo_end_modal" class="form-label fw-semibold">Fecha de fin</label>
+                <input type="date" id="promo_end_modal" class="form-control">
+              </div>
+            </div>
+
+            <div id="promo-create-status-modal" class="mt-3"></div>
+
+            <div class="d-flex gap-2 justify-content-end mt-4">
+              <button type="button" class="btn btn-secondary" data-dismiss-modal>Cancelar</button>
+              <button type="submit" class="btn btn-success">
+                <i class="bi bi-plus-circle me-1"></i>
+                Crear promoción
+              </button>
+            </div>
+          </form>
+        </div>
       `;
     }
 
@@ -289,6 +353,12 @@ export async function initAdminProductsView(container) {
     modalManager.open('modal-new-promo', modalContent, {
       title: 'Nueva Promoción',
       onOpen: (modal) => {
+        // Configurar botón cancelar
+        const cancelBtn = modal.querySelector('[data-dismiss-modal]');
+        if (cancelBtn) {
+          cancelBtn.onclick = () => modalManager.close('modal-new-promo');
+        }
+
         // Si hay promoción activa, configurar handlers
         if (activePromo) {
           const editBtn = modal.querySelector('[data-edit-promo]');

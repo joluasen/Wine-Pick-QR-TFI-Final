@@ -375,10 +375,86 @@ class Product
     }
 
     /**
+     * Actualizar un producto existente.
+     *
+     * @param int $id ID del producto a actualizar.
+     * @param array $data Datos del producto a actualizar.
+     * @param int|null $adminId ID del admin que modifica el producto.
+     *
+     * @return bool True si se actualizó correctamente.
+     * @throws Exception Si falta el ID o hay error en BD.
+     */
+    public function update(int $id, array $data, ?int $adminId = null): bool
+    {
+        if ($id <= 0) {
+            throw new \Exception("ID de producto inválido");
+        }
+
+        // Construir dinámicamente los campos a actualizar
+        $allowedFields = [
+            'name', 'drink_type', 'winery_distillery', 'varietal', 'origin',
+            'vintage_year', 'short_description', 'base_price', 'visible_stock',
+            'image_url', 'is_active'
+        ];
+
+        $updates = [];
+        $params = [];
+        $types = '';
+
+        foreach ($allowedFields as $field) {
+            if (isset($data[$field])) {
+                $updates[] = "{$field} = ?";
+
+                // Determinar tipo y agregar parámetro
+                if ($field === 'base_price') {
+                    $params[] = (float)$data[$field];
+                    $types .= 'd';
+                } elseif (in_array($field, ['vintage_year', 'visible_stock', 'is_active'])) {
+                    $params[] = $data[$field] !== null && $data[$field] !== '' ? (int)$data[$field] : null;
+                    $types .= 'i';
+                } else {
+                    $params[] = !empty($data[$field]) ? trim($data[$field]) : null;
+                    $types .= 's';
+                }
+            }
+        }
+
+        if (empty($updates)) {
+            throw new \Exception("No hay campos para actualizar");
+        }
+
+        // Agregar updated_at y last_modified_by_admin_id
+        $updates[] = "updated_at = ?";
+        $params[] = date('Y-m-d H:i:s');
+        $types .= 's';
+
+        $updates[] = "last_modified_by_admin_id = ?";
+        $params[] = $adminId;
+        $types .= 'i';
+
+        // Agregar ID al final
+        $params[] = $id;
+        $types .= 'i';
+
+        $query = "
+            UPDATE products
+            SET " . implode(', ', $updates) . "
+            WHERE id = ?
+        ";
+
+        try {
+            $this->db->execute($query, $params, $types);
+            return true;
+        } catch (\Exception $e) {
+            throw $e;
+        }
+    }
+
+    /**
      * Validar que drink_type sea válido.
-     * 
+     *
      * @param string $type
-     * 
+     *
      * @return bool
      */
     public static function isValidDrinkType(string $type): bool

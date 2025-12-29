@@ -250,16 +250,23 @@ async function loadView(viewName) {
         return;
       }
     }
-    
-    // Mostrar loading
-    root.innerHTML = `
-      <div class="loading-view text-center py-5">
-        <div class="spinner-border text-primary" role="status">
-          <span class="visually-hidden">Cargando...</span>
+
+    // Solo mostrar loading del router si la vista no tiene su propio loading
+    const viewsWithOwnLoading = ['adminProducts', 'adminPromotions'];
+
+    if (!viewsWithOwnLoading.includes(viewName)) {
+      root.innerHTML = `
+        <div class="loading-view text-center py-5">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Cargando...</span>
+          </div>
         </div>
-      </div>
-    `;
-    
+      `;
+    } else {
+      // Para vistas con su propio loading, solo limpiar el contenido
+      root.innerHTML = '';
+    }
+
     // Cargar header y navegación en paralelo
     await Promise.all([
       loadSearchHeader(),

@@ -61,9 +61,9 @@ export async function createProduct(productData) {
  * @returns {Promise<Object>}
  */
 export async function updateProduct(productId, productData) {
-  return await fetchJSON(`./api/admin/productos/${productId}`, {
-    method: 'PUT',
-    body: JSON.stringify(productData)
+  return await fetchJSON(`./api/admin/productos/actualizar`, {
+    method: 'POST',
+    body: JSON.stringify({ id: productId, ...productData })
   });
 }
 

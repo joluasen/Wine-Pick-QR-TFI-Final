@@ -360,6 +360,92 @@ class ProductController {
     }
 
     /**
+     * POST /api/admin/productos/actualizar
+     * Actualizar un producto existente.
+     *
+     * Body JSON:
+     * - id: ID del producto (requerido)
+     * - name, drink_type, winery_distillery, base_price, etc. (campos a actualizar)
+     *
+     * @return void Devuelve JSON con el producto actualizado (200) o error.
+     */
+    public function update(): void
+    {
+        // Proteger endpoint: requiere sesión de admin
+        if (empty($_SESSION['admin_user_id'])) {
+            ApiResponse::unauthorized('No autenticado. Inicia sesión para continuar.');
+        }
+
+        // Obtener JSON del body
+        $body = file_get_contents('php://input');
+        $data = json_decode($body, true);
+
+        if ($data === null) {
+            ApiResponse::validationError('El cuerpo de la solicitud no es un JSON válido.');
+        }
+
+        // Validación del ID
+        if (!isset($data['id'])) {
+            ApiResponse::validationError('El campo "id" es requerido.', 'id');
+        }
+
+        $productId = (int)$data['id'];
+
+        if ($productId <= 0) {
+            ApiResponse::validationError('El "id" debe ser un número positivo.', 'id');
+        }
+
+        // Verificar que el producto existe
+        $existingProduct = $this->productModel->findById($productId);
+        if (!$existingProduct) {
+            ApiResponse::notFound('Producto no encontrado.');
+        }
+
+        // Validar drink_type si está presente
+        if (isset($data['drink_type']) && !Product::isValidDrinkType($data['drink_type'])) {
+            $validTypes = ['vino', 'espumante', 'whisky', 'gin', 'licor', 'cerveza', 'otro'];
+            ApiResponse::validationError(
+                'El "drink_type" no es válido. Valores aceptados: ' . implode(', ', $validTypes),
+                'drink_type',
+                ['valid_values' => $validTypes]
+            );
+        }
+
+        // Validar base_price si está presente
+        if (isset($data['base_price'])) {
+            $basePrice = (float)$data['base_price'];
+            if ($basePrice <= 0) {
+                ApiResponse::validationError('El "base_price" debe ser mayor a 0.', 'base_price');
+            }
+        }
+
+        // Intentar actualizar el producto
+        try {
+            $adminId = $_SESSION['admin_user_id'] ?? null;
+            $this->productModel->update($productId, $data, $adminId);
+
+            // Recuperar el producto actualizado
+            $product = $this->productModel->findById($productId);
+
+            if (!$product) {
+                throw new \Exception('No se pudo recuperar el producto actualizado.');
+            }
+
+            // Obtener promoción activa si existe
+            $promotion = $this->productModel->getActivePromotion($productId);
+            $responseData = $this->formatProductResponse($product, $promotion);
+
+            ApiResponse::success($responseData, 200);
+        } catch (\Exception $e) {
+            // Error genérico
+            ApiResponse::serverError(
+                'Error al actualizar el producto.',
+                ['error' => $e->getMessage()]
+            );
+        }
+    }
+
+    /**
      * GET /api/admin/productos?limit=...&offset=...
      * Listar todos los productos para el panel de administración (paginado).
      *
