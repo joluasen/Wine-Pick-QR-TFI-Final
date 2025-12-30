@@ -211,9 +211,4 @@
   .admin-table-wrapper {
     -webkit-overflow-scrolling: touch;
   }
-
-  .btn-admin-action {
-    font-size: 0.75rem;
-    min-width: 35px;
-  }
 }

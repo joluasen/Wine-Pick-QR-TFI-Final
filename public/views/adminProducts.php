@@ -1,3 +1,41 @@
 <!-- Vista de administración de productos -->
-<div class="container py-4">
+<div>
+  <!-- Loading inicial -->
+  <div id="admin-products-loading" class="text-center py-5">
+    <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+      <span class="visually-hidden">Cargando...</span>
+    </div>
+    <p class="mt-3 text-muted">Cargando productos...</p>
+  </div>
+
+  <!-- Contenido de productos -->
+  <div id="admin-products-content" style="display: none;">
+    <!-- Tabla Desktop -->
+    <div class="table-responsive d-none d-md-block admin-table-wrapper">
+      <table class="table table-bordered align-middle shadow" id="admin-products-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Código</th>
+            <th>Nombre</th>
+            <th>Tipo</th>
+            <th>Bodega</th>
+            <th>Precio</th>
+            <th>Activo</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Filas inyectadas dinámicamente por JS -->
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Paginación -->
+    <div class="d-flex justify-content-center align-items-center mt-2">
+      <button class="btn btn-secondary btn-sm mx-1" id="admin-products-prev" disabled>Anterior</button>
+      <span id="admin-products-page" class="mx-2"></span>
+      <button class="btn btn-secondary btn-sm mx-1" id="admin-products-next" disabled>Siguiente</button>
+    </div>
+  </div>
 </div>

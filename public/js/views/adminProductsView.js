@@ -18,49 +18,16 @@ import { setupPromotionCreateForm } from '../admin/components/PromotionFormHandl
 
 /**
  * Inicializa la vista de gestión de productos
- * @param {HTMLElement} container - Contenedor de la vista
+ * @param {HTMLElement} _container - Contenedor (no usado, HTML está en adminProducts.php)
  */
-export async function initAdminProductsView(container) {
-  // Renderizar estructura de la tabla con loading inicial (esto limpia todo el contenedor)
-  container.innerHTML = `
-    <div id="admin-products-loading" class="text-center py-5">
-      <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
-        <span class="visually-hidden">Cargando...</span>
-      </div>
-      <p class="mt-3 text-muted">Cargando productos...</p>
-    </div>
-    <div id="admin-products-content" style="display: none;">
-      <div class="table-responsive d-none d-md-block admin-table-wrapper">
-        <table class="table table-bordered align-middle shadow" id="admin-products-table">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Código</th>
-              <th>Nombre</th>
-              <th>Tipo</th>
-              <th>Bodega</th>
-              <th>Precio</th>
-              <th>Activo</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-        </table>
-      </div>
-      <div class="d-flex justify-content-center align-items-center mt-2">
-        <button class="btn btn-secondary btn-sm mx-1" id="admin-products-prev" disabled>Anterior</button>
-        <span id="admin-products-page" class="mx-2"></span>
-        <button class="btn btn-secondary btn-sm mx-1" id="admin-products-next" disabled>Siguiente</button>
-      </div>
-    </div>
-  `;
-
-  const loadingEl = container.querySelector('#admin-products-loading');
-  const contentEl = container.querySelector('#admin-products-content');
-  const tableBody = container.querySelector('#admin-products-table tbody');
-  const paginationEl = container.querySelector('#admin-products-page');
-  const prevBtn = container.querySelector('#admin-products-prev');
-  const nextBtn = container.querySelector('#admin-products-next');
+export async function initAdminProductsView(_container) {
+  // El HTML está en adminProducts.php, solo obtenemos referencias
+  const loadingEl = document.getElementById('admin-products-loading');
+  const contentEl = document.getElementById('admin-products-content');
+  const tableBody = document.querySelector('#admin-products-table tbody');
+  const paginationEl = document.getElementById('admin-products-page');
+  const prevBtn = document.getElementById('admin-products-prev');
+  const nextBtn = document.getElementById('admin-products-next');
 
   const PAGE_SIZE = 20;
   let currentPage = 0;
@@ -88,13 +55,13 @@ export async function initAdminProductsView(container) {
         <td>${p.name}</td>
         <td>${p.drink_type}</td>
         <td>${p.winery_distillery}</td>
-        <td>${p.base_price.toFixed(2)}</td>
+        <td>$${p.base_price.toFixed(2)}</td>
         <td>${p.is_active ? 'Sí' : 'No'}</td>
         <td>
           <button class="btn btn-xs btn-primary btn-admin-action px-2 py-1" data-edit-product="${p.id}">Editar</button>
           <button class="btn btn-xs btn-info ms-1 btn-admin-action px-2 py-1" data-view-product="${p.id}">Ver</button>
           <button class="btn btn-xs btn-danger ms-1 btn-admin-action px-2 py-1" data-delete-product="${p.id}">Borrar</button>
-          <button class="btn btn-xs btn-success ms-1 btn-admin-action px-2 py-1" data-new-promo="${p.id}">Nueva Promoción</button>
+          <button class="btn btn-xs btn-success ms-1 btn-admin-action px-2 py-1" data-new-promo="${p.id}">Nueva Promo</button>
         </td>
       </tr>
     `);
