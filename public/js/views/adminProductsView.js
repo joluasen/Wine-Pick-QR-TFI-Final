@@ -8,13 +8,17 @@
  * - Delega operaciones CRUD a servicios
  */
 
-import { getProducts } from '../admin/services/productService.js';
-import { getPromotions, deletePromotion, togglePromotionStatus } from '../admin/services/promotionService.js';
-import { showToast } from '../admin/components/Toast.js';
-import { modalManager } from '../core/modalManager.js';
-import { renderAdminProductCard } from './adminProductCard.js';
-import { setupProductEditForm } from '../admin/components/ProductFormHandler.js';
-import { setupPromotionCreateForm } from '../admin/components/PromotionFormHandler.js';
+import { getProducts } from "../admin/services/productService.js";
+import {
+  getPromotions,
+  deletePromotion,
+  togglePromotionStatus,
+} from "../admin/services/promotionService.js";
+import { showToast } from "../admin/components/Toast.js";
+import { modalManager } from "../core/modalManager.js";
+import { renderAdminProductCard } from "./adminProductCard.js";
+import { setupProductEditForm } from "../admin/components/ProductFormHandler.js";
+import { setupPromotionCreateForm } from "../admin/components/PromotionFormHandler.js";
 
 /**
  * Inicializa la vista de gestión de productos
@@ -22,12 +26,12 @@ import { setupPromotionCreateForm } from '../admin/components/PromotionFormHandl
  */
 export async function initAdminProductsView(_container) {
   // El HTML está en adminProducts.php, solo obtenemos referencias
-  const loadingEl = document.getElementById('admin-products-loading');
-  const contentEl = document.getElementById('admin-products-content');
-  const tableBody = document.querySelector('#admin-products-table tbody');
-  const paginationEl = document.getElementById('admin-products-page');
-  const prevBtn = document.getElementById('admin-products-prev');
-  const nextBtn = document.getElementById('admin-products-next');
+  const loadingEl = document.getElementById("admin-products-loading");
+  const contentEl = document.getElementById("admin-products-content");
+  const tableBody = document.querySelector("#admin-products-table tbody");
+  const paginationEl = document.getElementById("admin-products-page");
+  const prevBtn = document.getElementById("admin-products-prev");
+  const nextBtn = document.getElementById("admin-products-next");
 
   const PAGE_SIZE = 20;
   let currentPage = 0;
@@ -48,7 +52,8 @@ export async function initAdminProductsView(_container) {
    * Renderiza las filas de la tabla
    */
   function renderRows(products) {
-    let rows = products.map(p => `
+    let rows = products.map(
+      (p) => `
       <tr>
         <td>${p.id}</td>
         <td>${p.public_code}</td>
@@ -56,22 +61,23 @@ export async function initAdminProductsView(_container) {
         <td>${p.drink_type}</td>
         <td>${p.winery_distillery}</td>
         <td>$${p.base_price.toFixed(2)}</td>
-        <td>${p.is_active ? 'Sí' : 'No'}</td>
+        <td>${p.is_active ? "Sí" : "No"}</td>
         <td>
-          <button class="btn btn-xs btn-primary btn-admin-action px-2 py-1" data-edit-product="${p.id}">Editar</button>
-          <button class="btn btn-xs btn-info ms-1 btn-admin-action px-2 py-1" data-view-product="${p.id}">Ver</button>
-          <button class="btn btn-xs btn-danger ms-1 btn-admin-action px-2 py-1" data-delete-product="${p.id}">Borrar</button>
-          <button class="btn btn-xs btn-success ms-1 btn-admin-action px-2 py-1" data-new-promo="${p.id}">Nueva Promo</button>
+          <button class="btn-table" data-edit-product="${p.id}">Editar</button>
+          <button class="btn-table ms-1" data-view-product="${p.id}">Ver</button>
+          <button class="btn-table ms-1" data-delete-product="${p.id}">Borrar</button>
+          <button class="btn-table ms-1" data-new-promo="${p.id}">Nueva Promo</button>
         </td>
       </tr>
-    `);
+    `
+    );
 
     // Rellenar con filas vacías
     for (let i = products.length; i < PAGE_SIZE; i++) {
-      rows.push('<tr>' + '<td>&nbsp;</td>'.repeat(8) + '</tr>');
+      rows.push("<tr>" + "<td>&nbsp;</td>".repeat(8) + "</tr>");
     }
 
-    return rows.join('');
+    return rows.join("");
   }
 
   /**
@@ -79,10 +85,12 @@ export async function initAdminProductsView(_container) {
    */
   function attachActionListeners() {
     // Ver producto
-    tableBody.querySelectorAll('[data-view-product]').forEach(btn => {
+    tableBody.querySelectorAll("[data-view-product]").forEach((btn) => {
       btn.onclick = () => {
-        const productId = btn.getAttribute('data-view-product');
-        const product = cachedProducts.find(p => String(p.id) === String(productId));
+        const productId = btn.getAttribute("data-view-product");
+        const product = cachedProducts.find(
+          (p) => String(p.id) === String(productId)
+        );
         if (product) {
           modalManager.showProduct(product);
         }
@@ -90,79 +98,92 @@ export async function initAdminProductsView(_container) {
     });
 
     // Editar producto
-    tableBody.querySelectorAll('[data-edit-product]').forEach(btn => {
+    tableBody.querySelectorAll("[data-edit-product]").forEach((btn) => {
       btn.onclick = async () => {
-        const productId = btn.getAttribute('data-edit-product');
-        const product = cachedProducts.find(p => String(p.id) === String(productId));
+        const productId = btn.getAttribute("data-edit-product");
+        const product = cachedProducts.find(
+          (p) => String(p.id) === String(productId)
+        );
         if (!product) {
-          showToast('Producto no encontrado', 'error');
+          showToast("Producto no encontrado", "error");
           return;
         }
 
         // Abrir modal con formulario de edición
-        modalManager.open('admin-product-modal', renderAdminProductCard(product), {
-          preventClose: true,
-          onOpen: (modal) => {
-            const form = modal.querySelector('#admin-edit-product-form');
-            let formChanged = false;
+        modalManager.open(
+          "admin-product-modal",
+          renderAdminProductCard(product),
+          {
+            preventClose: true,
+            onOpen: (modal) => {
+              const form = modal.querySelector("#admin-edit-product-form");
+              let formChanged = false;
 
-            // Detectar cambios en el formulario
-            if (form) {
-              form.addEventListener('input', () => {
-                formChanged = true;
-              });
-            }
-
-            // Función para cerrar con confirmación
-            const closeWithConfirmation = () => {
-              if (formChanged) {
-                if (confirm('¿Estás seguro de cerrar sin guardar los cambios?')) {
-                  modalManager.close('admin-product-modal');
-                }
-              } else {
-                modalManager.close('admin-product-modal');
+              // Detectar cambios en el formulario
+              if (form) {
+                form.addEventListener("input", () => {
+                  formChanged = true;
+                });
               }
-            };
 
-            // Configurar botón X
-            const closeBtn = modal.querySelector('[data-close-modal]');
-            if (closeBtn) {
-              closeBtn.onclick = closeWithConfirmation;
-            }
+              // Función para cerrar con confirmación
+              const closeWithConfirmation = () => {
+                if (formChanged) {
+                  if (
+                    confirm("¿Estás seguro de cerrar sin guardar los cambios?")
+                  ) {
+                    modalManager.close("admin-product-modal");
+                  }
+                } else {
+                  modalManager.close("admin-product-modal");
+                }
+              };
 
-            // Configurar botón cancelar
-            const cancelBtn = modal.querySelector('[data-dismiss-modal]');
-            if (cancelBtn) {
-              cancelBtn.onclick = closeWithConfirmation;
-            }
+              // Configurar botón X
+              const closeBtn = modal.querySelector("[data-close-modal]");
+              if (closeBtn) {
+                closeBtn.onclick = closeWithConfirmation;
+              }
 
-            // Configurar formulario
-            if (form) {
-              setupProductEditForm(form, product, () => {
-                formChanged = false; // Resetear flag al guardar
-                modalManager.close('admin-product-modal');
-                loadProducts(currentPage);
-              });
-            }
+              // Configurar botón cancelar
+              const cancelBtn = modal.querySelector("[data-dismiss-modal]");
+              if (cancelBtn) {
+                cancelBtn.onclick = closeWithConfirmation;
+              }
+
+              // Configurar formulario
+              if (form) {
+                setupProductEditForm(form, product, () => {
+                  formChanged = false; // Resetear flag al guardar
+                  modalManager.close("admin-product-modal");
+                  loadProducts(currentPage);
+                });
+              }
+            },
           }
-        });
+        );
       };
     });
 
     // Eliminar producto
-    tableBody.querySelectorAll('[data-delete-product]').forEach(btn => {
+    tableBody.querySelectorAll("[data-delete-product]").forEach((btn) => {
       btn.onclick = () => {
-        showToast('La función de eliminar productos no está disponible actualmente. Contacte al administrador del sistema.', 'info');
+        showToast(
+          "La función de eliminar productos no está disponible actualmente. Contacte al administrador del sistema.",
+          "info"
+        );
       };
     });
 
     // Nueva promoción
-    tableBody.querySelectorAll('[data-new-promo]').forEach(btn => {
+    tableBody.querySelectorAll("[data-new-promo]").forEach((btn) => {
       btn.onclick = async () => {
-        const productId = btn.getAttribute('data-new-promo');
-        const product = cachedProducts.find(p => String(p.id) === String(productId));
+        const productId = btn.getAttribute("data-new-promo");
+        const product = cachedProducts.find(
+          (p) => String(p.id) === String(productId)
+        );
         if (!product) {
-          showToast('Producto no encontrado', 'error');
+          showToast("Producto no encontrado", "error");
           return;
         }
 
@@ -176,18 +197,21 @@ export async function initAdminProductsView(_container) {
    */
   async function loadProducts(page = 0) {
     // Mostrar loading, ocultar contenido
-    loadingEl.style.display = 'block';
-    contentEl.style.display = 'none';
+    loadingEl.style.display = "block";
+    contentEl.style.display = "none";
 
     try {
       const offset = page * PAGE_SIZE;
 
       // Crear promesas para el fetch y el delay de 2 segundos
       const fetchPromise = getProducts({ limit: PAGE_SIZE, offset });
-      const delayPromise = new Promise(resolve => setTimeout(resolve, 250));
+      const delayPromise = new Promise((resolve) => setTimeout(resolve, 250));
 
       // Esperar ambas promesas
-      const [{ products, total }] = await Promise.all([fetchPromise, delayPromise]);
+      const [{ products, total }] = await Promise.all([
+        fetchPromise,
+        delayPromise,
+      ]);
 
       totalProducts = total;
       cachedProducts = products;
@@ -202,17 +226,16 @@ export async function initAdminProductsView(_container) {
       updatePagination(page, totalProducts);
 
       // Ocultar loading, mostrar contenido
-      loadingEl.style.display = 'none';
-      contentEl.style.display = 'block';
-
+      loadingEl.style.display = "none";
+      contentEl.style.display = "block";
     } catch (err) {
       tableBody.innerHTML = `<tr><td colspan='8'>Error al cargar productos</td></tr>`;
-      showToast(`Error: ${err.message}`, 'error');
+      showToast(`Error: ${err.message}`, "error");
       updatePagination(page, totalProducts);
 
       // Ocultar loading, mostrar contenido (incluso con error)
-      loadingEl.style.display = 'none';
-      contentEl.style.display = 'block';
+      loadingEl.style.display = "none";
+      contentEl.style.display = "block";
     }
   }
 
@@ -224,12 +247,12 @@ export async function initAdminProductsView(_container) {
     let activePromo = null;
     try {
       const { promotions } = await getPromotions({ productId });
-      activePromo = promotions.find(p => p.is_active);
+      activePromo = promotions.find((p) => p.is_active);
     } catch (err) {
       // Continuar sin promoción activa
     }
 
-    let modalContent = '';
+    let modalContent = "";
 
     // Si hay promoción activa, mostrar alerta
     if (activePromo) {
@@ -241,18 +264,32 @@ export async function initAdminProductsView(_container) {
               <span class="fw-bold" style="font-size:1.2rem;color:#7a003c;">Promoción activa</span>
             </div>
             <div class="mb-2" style="font-size:1.05rem;">
-              <span class="fw-semibold">${activePromo.promotion_type.replace('_', ' ').toUpperCase()}</span>
+              <span class="fw-semibold">${activePromo.promotion_type
+                .replace("_", " ")
+                .toUpperCase()}</span>
               <span class="mx-2">|</span>
-              <span class="fw-semibold">Valor:</span> <span>${activePromo.parameter_value}</span>
+              <span class="fw-semibold">Valor:</span> <span>${
+                activePromo.parameter_value
+              }</span>
               <span class="mx-2">|</span>
-              <span class="fw-semibold">Vigencia:</span> <span>${activePromo.start_at ? activePromo.start_at.split(' ')[0] : ''}${activePromo.end_at ? ' al ' + activePromo.end_at.split(' ')[0] : ''}</span>
+              <span class="fw-semibold">Vigencia:</span> <span>${
+                activePromo.start_at ? activePromo.start_at.split(" ")[0] : ""
+              }${
+        activePromo.end_at ? " al " + activePromo.end_at.split(" ")[0] : ""
+      }</span>
             </div>
             <div class="mb-3 text-muted" style="font-size:0.97rem;">No puedes crear otra promoción hasta que la actual finalice o sea eliminada.</div>
             <div class="mb-2 fw-semibold" style="color:#7a003c;">¿Qué acción deseas realizar sobre la promoción?</div>
             <div class="d-flex gap-2 justify-content-start align-items-center mt-2">
-              <button type="button" class="btn btn-outline-primary btn-xs fw-semibold px-2 py-1" style="font-size:0.92rem;" data-edit-promo="${activePromo.id}"><i class="bi bi-pencil-square me-1"></i>Editar</button>
-              <button type="button" class="btn btn-outline-danger btn-xs fw-semibold px-2 py-1" style="font-size:0.92rem;" data-delete-promo="${activePromo.id}"><i class="bi bi-trash me-1"></i>Eliminar</button>
-              <button type="button" class="btn btn-outline-secondary btn-xs fw-semibold px-2 py-1" style="font-size:0.92rem;" data-toggle-promo="${activePromo.id}"><i class="bi bi-power me-1"></i>Desactivar</button>
+              <button type="button" class="btn btn-outline-primary btn-xs fw-semibold px-2 py-1" style="font-size:0.92rem;" data-edit-promo="${
+                activePromo.id
+              }"><i class="bi bi-pencil-square me-1"></i>Editar</button>
+              <button type="button" class="btn btn-outline-danger btn-xs fw-semibold px-2 py-1" style="font-size:0.92rem;" data-delete-promo="${
+                activePromo.id
+              }"><i class="bi bi-trash me-1"></i>Eliminar</button>
+              <button type="button" class="btn btn-outline-secondary btn-xs fw-semibold px-2 py-1" style="font-size:0.92rem;" data-toggle-promo="${
+                activePromo.id
+              }"><i class="bi bi-power me-1"></i>Desactivar</button>
             </div>
           </div>
         </div>
@@ -317,37 +354,37 @@ export async function initAdminProductsView(_container) {
     }
 
     // Abrir modal
-    modalManager.open('modal-new-promo', modalContent, {
-      title: 'Nueva Promoción',
+    modalManager.open("modal-new-promo", modalContent, {
+      title: "Nueva Promoción",
       onOpen: (modal) => {
         // Configurar botón cancelar
-        const cancelBtn = modal.querySelector('[data-dismiss-modal]');
+        const cancelBtn = modal.querySelector("[data-dismiss-modal]");
         if (cancelBtn) {
-          cancelBtn.onclick = () => modalManager.close('modal-new-promo');
+          cancelBtn.onclick = () => modalManager.close("modal-new-promo");
         }
 
         // Si hay promoción activa, configurar handlers
         if (activePromo) {
-          const editBtn = modal.querySelector('[data-edit-promo]');
-          const deleteBtn = modal.querySelector('[data-delete-promo]');
-          const toggleBtn = modal.querySelector('[data-toggle-promo]');
+          const editBtn = modal.querySelector("[data-edit-promo]");
+          const deleteBtn = modal.querySelector("[data-delete-promo]");
+          const toggleBtn = modal.querySelector("[data-toggle-promo]");
 
           if (editBtn) {
             editBtn.onclick = () => {
-              showToast('Editar promoción - Por implementar', 'info');
+              showToast("Editar promoción - Por implementar", "info");
             };
           }
 
           if (deleteBtn) {
             deleteBtn.onclick = async () => {
-              if (!confirm('¿Estás seguro de eliminar esta promoción?')) return;
+              if (!confirm("¿Estás seguro de eliminar esta promoción?")) return;
 
               try {
                 await deletePromotion(activePromo.id);
-                showToast('Promoción eliminada con éxito', 'success');
-                modalManager.close('modal-new-promo');
+                showToast("Promoción eliminada con éxito", "success");
+                modalManager.close("modal-new-promo");
               } catch (err) {
-                showToast(`Error al eliminar: ${err.message}`, 'error');
+                showToast(`Error al eliminar: ${err.message}`, "error");
               }
             };
           }
@@ -356,36 +393,32 @@ export async function initAdminProductsView(_container) {
             toggleBtn.onclick = async () => {
               try {
                 await togglePromotionStatus(activePromo.id, false);
-                showToast('Promoción desactivada con éxito', 'success');
-                modalManager.close('modal-new-promo');
+                showToast("Promoción desactivada con éxito", "success");
+                modalManager.close("modal-new-promo");
               } catch (err) {
-                showToast(`Error al desactivar: ${err.message}`, 'error');
+                showToast(`Error al desactivar: ${err.message}`, "error");
               }
             };
           }
         } else {
           // Configurar formulario de creación
-          const form = modal.querySelector('#promo-create-form-modal');
+          const form = modal.querySelector("#promo-create-form-modal");
 
           // Crear input hidden de producto
-          const productIdInput = document.createElement('input');
-          productIdInput.type = 'hidden';
-          productIdInput.id = 'promo_product_id_modal';
+          const productIdInput = document.createElement("input");
+          productIdInput.type = "hidden";
+          productIdInput.id = "promo_product_id_modal";
           productIdInput.value = productId;
           form.appendChild(productIdInput);
 
           if (form) {
-            setupPromotionCreateForm(
-              modal,
-              productIdInput,
-              () => {
-                modalManager.close('modal-new-promo');
-                loadProducts(currentPage);
-              }
-            );
+            setupPromotionCreateForm(modal, productIdInput, () => {
+              modalManager.close("modal-new-promo");
+              loadProducts(currentPage);
+            });
           }
         }
-      }
+      },
     });
   }
 

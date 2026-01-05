@@ -1,0 +1,187 @@
+/**
+ * buttons.css
+ * Sistema de botones elegante para WinePick - Vinoteca
+ */
+
+/* =========================================
+   BOTONES DE TABLA - btn-table
+   Estilo sofisticado tipo badge con efecto moderno
+   ========================================= */
+
+.btn-table {
+  /* Reset */
+  margin: 0;
+  font-family: inherit;
+
+  /* Estructura */
+  display: inline-block;
+  padding: 0.4rem 1rem;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  line-height: 1.4;
+  text-align: center;
+  white-space: nowrap;
+  vertical-align: middle;
+  cursor: pointer;
+  user-select: none;
+
+  /* Diseño elegante */
+  background: linear-gradient(135deg, #4A0E1A 0%, #6B0F2A 100%);
+  color: #FFFFFF;
+  border: none;
+  border-radius: 6px;
+
+  /* Sombra sutil para profundidad */
+  box-shadow:
+    0 2px 4px rgba(74, 14, 26, 0.15),
+    0 1px 2px rgba(0, 0, 0, 0.1);
+
+  /* Transiciones suaves */
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Tipografía refinada */
+  letter-spacing: 0.3px;
+  text-transform: capitalize;
+}
+
+/* Hover - Efecto de elevación y brillo */
+.btn-table:hover {
+  background: linear-gradient(135deg, #6B0F2A 0%, #8B1538 100%);
+  color: #FFFFFF;
+
+  /* Efecto de elevación */
+  transform: translateY(-2px);
+  box-shadow:
+    0 4px 8px rgba(74, 14, 26, 0.25),
+    0 2px 4px rgba(0, 0, 0, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+/* Active - Efecto de presión */
+.btn-table:active {
+  background: linear-gradient(135deg, #2D0810 0%, #4A0E1A 100%);
+  color: #E8E8E8;
+
+  /* Presionado hacia abajo */
+  transform: translateY(0) scale(0.98);
+  box-shadow:
+    0 1px 2px rgba(74, 14, 26, 0.2),
+    inset 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Focus - Outline elegante */
+.btn-table:focus {
+  outline: none;
+  box-shadow:
+    0 2px 4px rgba(74, 14, 26, 0.15),
+    0 1px 2px rgba(0, 0, 0, 0.1),
+    0 0 0 3px rgba(74, 14, 26, 0.15);
+}
+
+/* Disabled - Apariencia desaturada */
+.btn-table:disabled,
+.btn-table.disabled {
+  background: linear-gradient(135deg, #9E9E9E 0%, #BDBDBD 100%);
+  color: #FFFFFF;
+  cursor: not-allowed;
+  opacity: 0.6;
+  transform: none;
+  box-shadow: none;
+}
+
+.btn-table:disabled:hover,
+.btn-table.disabled:hover {
+  background: linear-gradient(135deg, #9E9E9E 0%, #BDBDBD 100%);
+  transform: none;
+  box-shadow: none;
+}
+
+/* =========================================
+   VARIANTES DE COLOR (opcional)
+   ========================================= */
+
+/* Botón secundario - Tono más claro */
+.btn-table.btn-secondary {
+  background: linear-gradient(135deg, #721C2E 0%, #8B2842 100%);
+}
+
+.btn-table.btn-secondary:hover {
+  background: linear-gradient(135deg, #8B2842 0%, #A33556 100%);
+}
+
+.btn-table.btn-secondary:active {
+  background: linear-gradient(135deg, #5A1624 0%, #721C2E 100%);
+}
+
+/* Botón de acción suave - Sin gradiente */
+.btn-table.btn-soft {
+  background: #4A0E1A;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.btn-table.btn-soft:hover {
+  background: #6B0F2A;
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.btn-table.btn-soft:active {
+  background: #2D0810;
+}
+
+/* =========================================
+   UTILIDADES DE SPACING
+   ========================================= */
+
+.ms-1 {
+  margin-left: 0.25rem;
+}
+
+.ms-2 {
+  margin-left: 0.5rem;
+}
+
+.me-1 {
+  margin-right: 0.25rem;
+}
+
+.me-2 {
+  margin-right: 0.5rem;
+}
+
+/* =========================================
+   ANIMACIÓN OPCIONAL - Ripple effect
+   ========================================= */
+
+@keyframes ripple {
+  0% {
+    transform: scale(0);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
+.btn-table::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 5px;
+  height: 5px;
+  background: rgba(255, 255, 255, 0.5);
+  opacity: 0;
+  border-radius: 100%;
+  transform: scale(1) translate(-50%, -50%);
+  transform-origin: 50% 50%;
+}
+
+.btn-table {
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-table:active::after {
+  animation: ripple 0.6s ease-out;
+}

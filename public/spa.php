@@ -1,4 +1,5 @@
 <?php
+
 /**
  * spa.php - Shell principal de la aplicación SPA
  */
@@ -11,59 +12,61 @@ $baseUrl = rtrim(BASE_URL, '/') . '/';
 
 // Configuración para JavaScript
 $appConfig = [
-    'baseUrl' => $baseUrl,
-    'apiUrl' => $baseUrl . 'api/',
-    'appName' => 'WINE-PICK-QR',
-    'version' => '1.0.0'
+  'baseUrl' => $baseUrl,
+  'apiUrl' => $baseUrl . 'api/',
+  'appName' => 'WINE-PICK-QR',
+  'version' => '1.0.0'
 ];
 ?>
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title><?= $appConfig['appName'] ?></title>
-  
+
   <!-- Meta tags -->
   <meta name="description" content="Catálogo de vinos y bebidas con búsqueda por código QR">
   <meta name="theme-color" content="#4A0E1A">
-  
+
   <!-- Manifest PWA -->
   <link rel="manifest" href="<?= $baseUrl ?>manifest.json">
-  
+
   <!-- Iconos -->
   <link rel="icon" type="image/png" sizes="192x192" href="<?= $baseUrl ?>assets/icons/icon-192.png">
   <link rel="apple-touch-icon" href="<?= $baseUrl ?>assets/icons/icon-192.png">
-  
+
   <!-- Bootstrap 5.3 CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  
+
   <!-- Font Awesome 6 -->
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-  
+
   <!-- Estilos de la aplicación (todos los originales) -->
   <link rel="stylesheet" href="<?= $baseUrl ?>css/theme.css">
   <link rel="stylesheet" href="<?= $baseUrl ?>css/layout.css">
   <link rel="stylesheet" href="<?= $baseUrl ?>css/navbar.css">
-  <link rel="stylesheet" href="<?= $baseUrl ?>css/styles.css">
   <link rel="stylesheet" href="<?= $baseUrl ?>css/components.css">
   <link rel="stylesheet" href="<?= $baseUrl ?>css/product-modal.css">
   <link rel="stylesheet" href="<?= $baseUrl ?>css/winepick-search.css">
   <link rel="stylesheet" href="<?= $baseUrl ?>css/admin.css">
-  
+  <link rel="stylesheet" href="<?= $baseUrl ?>css/buttons.css">
+
   <!-- Configuración global para JavaScript -->
   <script>
     window.APP_CONFIG = <?= json_encode($appConfig, JSON_UNESCAPED_SLASHES) ?>;
   </script>
 </head>
+
 <body class="d-flex flex-column">
-  
+
   <!-- HEADER -->
   <header class="bg-white border-bottom sticky-top">
     <div class="py-3">
       <div class="container-fluid header-container">
         <div class="d-flex align-items-center justify-content-center gap-4">
-          
+
           <!-- Logo (Desktop) -->
           <div class="d-none d-md-flex align-items-center header-logo">
             <a href="#home" class="text-decoration-none">
@@ -90,7 +93,7 @@ $appConfig = [
 
   <!-- CONTAINER: Sidebar + Main -->
   <div class="d-flex flex-grow-1 main-container">
-    
+
     <!-- SIDEBAR (Desktop) -->
     <aside id="sidebar-container" class="d-none d-md-block bg-white border-end sidebar">
       <!-- Inyectado dinámicamente -->
@@ -125,28 +128,26 @@ $appConfig = [
           <form id="login-form-modal">
             <div class="mb-3">
               <label for="login-username-modal" class="form-label small fw-semibold">Usuario</label>
-              <input 
-                id="login-username-modal" 
-                name="username" 
-                type="text" 
-                class="form-control" 
-                placeholder="admin" 
+              <input
+                id="login-username-modal"
+                name="username"
+                type="text"
+                class="form-control"
+                placeholder="admin"
                 required
-                autocomplete="username"
-              >
+                autocomplete="username">
             </div>
 
             <div class="mb-4">
               <label for="login-password-modal" class="form-label small fw-semibold">Contraseña</label>
-              <input 
-                id="login-password-modal" 
-                name="password" 
-                type="password" 
-                class="form-control" 
-                placeholder="••••••••" 
+              <input
+                id="login-password-modal"
+                name="password"
+                type="password"
+                class="form-control"
+                placeholder="••••••••"
                 required
-                autocomplete="current-password"
-              >
+                autocomplete="current-password">
             </div>
 
             <div id="login-status-modal" class="mb-3" aria-live="polite"></div>
@@ -178,7 +179,7 @@ $appConfig = [
             <label for="filterPublicCode" class="form-label fw-semibold">Buscar por código público</label>
             <input type="text" class="form-control" id="filterPublicCode" placeholder="Ej: WINE-123-456">
           </div>
-          
+
           <!-- Checkboxes de filtros -->
           <div class="form-check mb-2">
             <input class="form-check-input" type="checkbox" id="filterVarietal">
@@ -196,7 +197,7 @@ $appConfig = [
             <input class="form-check-input" type="checkbox" id="filterDrinkType">
             <label class="form-check-label" for="filterDrinkType">Filtrar por tipo de bebida</label>
           </div>
-          
+
           <!-- Filtro de año -->
           <div class="mb-3 mt-3">
             <label for="filterYearInput" class="form-label">Año de cosecha</label>
@@ -242,11 +243,22 @@ $appConfig = [
       }
       const query = input?.value?.trim() || '';
 
-      const filters = [
-        { id: 'filterVarietal', param: 'varietal' },
-        { id: 'filterOrigin', param: 'origin' },
-        { id: 'filterWinery', param: 'winery_distillery' },
-        { id: 'filterDrinkType', param: 'drink_type' }
+      const filters = [{
+          id: 'filterVarietal',
+          param: 'varietal'
+        },
+        {
+          id: 'filterOrigin',
+          param: 'origin'
+        },
+        {
+          id: 'filterWinery',
+          param: 'winery_distillery'
+        },
+        {
+          id: 'filterDrinkType',
+          param: 'drink_type'
+        }
       ];
 
       let hash = '#search?query=' + encodeURIComponent(query);
@@ -275,4 +287,5 @@ $appConfig = [
   <!-- JS principal (ES modules) -->
   <script type="module" src="<?= $baseUrl ?>js/app.js"></script>
 </body>
+
 </html>

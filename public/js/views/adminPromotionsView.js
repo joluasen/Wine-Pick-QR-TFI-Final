@@ -8,8 +8,12 @@
  * - Delega operaciones CRUD a servicios
  */
 
-import { getPromotions, deletePromotion, togglePromotionStatus } from '../admin/services/promotionService.js';
-import { showToast } from '../admin/components/Toast.js';
+import {
+  getPromotions,
+  deletePromotion,
+  togglePromotionStatus,
+} from "../admin/services/promotionService.js";
+import { showToast } from "../admin/components/Toast.js";
 
 /**
  * Inicializa la vista de gestión de promociones
@@ -43,10 +47,10 @@ export async function initAdminPromotionsView(container) {
     </div>
   `;
 
-  const tableBody = container.querySelector('#admin-promos-table tbody');
-  const paginationEl = container.querySelector('#admin-promos-page');
-  const prevBtn = container.querySelector('#admin-promos-prev');
-  const nextBtn = container.querySelector('#admin-promos-next');
+  const tableBody = container.querySelector("#admin-promos-table tbody");
+  const paginationEl = container.querySelector("#admin-promos-page");
+  const prevBtn = container.querySelector("#admin-promos-prev");
+  const nextBtn = container.querySelector("#admin-promos-next");
 
   const PAGE_SIZE = 20;
   let currentPage = 0;
@@ -56,9 +60,11 @@ export async function initAdminPromotionsView(container) {
    * Scroll automático a la paginación
    */
   function scrollToPagination() {
-    const pagDiv = container.querySelector('.d-flex.justify-content-center.align-items-center.mt-2');
+    const pagDiv = container.querySelector(
+      ".d-flex.justify-content-center.align-items-center.mt-2"
+    );
     if (pagDiv) {
-      pagDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      pagDiv.scrollIntoView({ behavior: "smooth", block: "center" });
     }
   }
 
@@ -76,32 +82,34 @@ export async function initAdminPromotionsView(container) {
    * Renderiza las filas de la tabla
    */
   function renderRows(promos) {
-    let rows = promos.map(p => `
+    let rows = promos.map(
+      (p) => `
       <tr>
         <td>${p.id}</td>
-        <td>${p.product_name || ''}</td>
+        <td>${p.product_name || ""}</td>
         <td>${p.promotion_type}</td>
         <td>${p.parameter_value}</td>
         <td>${p.visible_text}</td>
-        <td>${p.start_at ? p.start_at.split(' ')[0] : ''}</td>
-        <td>${p.end_at ? p.end_at.split(' ')[0] : ''}</td>
-        <td>${p.is_active ? 'Activa' : 'Inactiva'}</td>
+        <td>${p.start_at ? p.start_at.split(" ")[0] : ""}</td>
+        <td>${p.end_at ? p.end_at.split(" ")[0] : ""}</td>
+        <td>${p.is_active ? "Activa" : "Inactiva"}</td>
         <td>
-          <button class="btn btn-xs btn-primary btn-admin-action px-2 py-1" data-edit-promo="${p.id}">Editar</button>
-          <button class="btn btn-xs btn-danger ms-1 btn-admin-action px-2 py-1" data-delete-promo="${p.id}">Borrar</button>
-          <button class="btn btn-xs btn-secondary ms-1 btn-admin-action px-2 py-1" data-toggle-promo="${p.id}" data-is-active="${p.is_active}">
-            ${p.is_active ? 'Deshabilitar' : 'Habilitar'}
+          <button class="btn-table" data-edit-promo="${p.id}">Editar</button>
+          <button class="btn-table ms-1" data-delete-promo="${p.id}">Borrar</button>
+          <button class="btn-table ms-1" data-toggle-promo="${p.id}" data-is-active="${p.is_active}">
+            ${p.is_active ? "Deshabilitar" : "Habilitar"}
           </button>
         </td>
       </tr>
-    `);
+    `
+    );
 
     // Rellenar con filas vacías
     for (let i = promos.length; i < PAGE_SIZE; i++) {
-      rows.push('<tr>' + '<td>&nbsp;</td>'.repeat(9) + '</tr>');
+      rows.push("<tr>" + "<td>&nbsp;</td>".repeat(9) + "</tr>");
     }
 
-    return rows.join('');
+    return rows.join("");
   }
 
   /**
@@ -109,42 +117,45 @@ export async function initAdminPromotionsView(container) {
    */
   function attachActionListeners() {
     // Editar
-    tableBody.querySelectorAll('[data-edit-promo]').forEach(btn => {
+    tableBody.querySelectorAll("[data-edit-promo]").forEach((btn) => {
       btn.onclick = async () => {
-        const promoId = btn.getAttribute('data-edit-promo');
+        const promoId = btn.getAttribute("data-edit-promo");
         // TODO: Implementar edición
-        showToast(`Editar promoción ${promoId} - Por implementar`, 'info');
+        showToast(`Editar promoción ${promoId} - Por implementar`, "info");
       };
     });
 
     // Eliminar
-    tableBody.querySelectorAll('[data-delete-promo]').forEach(btn => {
+    tableBody.querySelectorAll("[data-delete-promo]").forEach((btn) => {
       btn.onclick = async () => {
-        const promoId = btn.getAttribute('data-delete-promo');
-        if (!confirm('¿Estás seguro de eliminar esta promoción?')) return;
+        const promoId = btn.getAttribute("data-delete-promo");
+        if (!confirm("¿Estás seguro de eliminar esta promoción?")) return;
 
         try {
           await deletePromotion(promoId);
-          showToast('Promoción eliminada con éxito', 'success');
+          showToast("Promoción eliminada con éxito", "success");
           loadPromos(currentPage);
         } catch (err) {
-          showToast(`Error al eliminar: ${err.message}`, 'error');
+          showToast(`Error al eliminar: ${err.message}`, "error");
         }
       };
     });
 
     // Activar/Desactivar
-    tableBody.querySelectorAll('[data-toggle-promo]').forEach(btn => {
+    tableBody.querySelectorAll("[data-toggle-promo]").forEach((btn) => {
       btn.onclick = async () => {
-        const promoId = btn.getAttribute('data-toggle-promo');
-        const isActive = btn.getAttribute('data-is-active') === 'true';
+        const promoId = btn.getAttribute("data-toggle-promo");
+        const isActive = btn.getAttribute("data-is-active") === "true";
 
         try {
           await togglePromotionStatus(promoId, !isActive);
-          showToast(`Promoción ${!isActive ? 'activada' : 'desactivada'} con éxito`, 'success');
+          showToast(
+            `Promoción ${!isActive ? "activada" : "desactivada"} con éxito`,
+            "success"
+          );
           loadPromos(currentPage);
         } catch (err) {
-          showToast(`Error al cambiar estado: ${err.message}`, 'error');
+          showToast(`Error al cambiar estado: ${err.message}`, "error");
         }
       };
     });
@@ -158,7 +169,10 @@ export async function initAdminPromotionsView(container) {
 
     try {
       const offset = page * PAGE_SIZE;
-      const { promotions, total } = await getPromotions({ limit: PAGE_SIZE, offset });
+      const { promotions, total } = await getPromotions({
+        limit: PAGE_SIZE,
+        offset,
+      });
 
       totalPromos = total;
 
@@ -171,10 +185,9 @@ export async function initAdminPromotionsView(container) {
 
       updatePagination(page, totalPromos);
       scrollToPagination();
-
     } catch (err) {
       tableBody.innerHTML = `<tr><td colspan='9'>Error al cargar promociones</td></tr>`;
-      showToast(`Error: ${err.message}`, 'error');
+      showToast(`Error: ${err.message}`, "error");
       updatePagination(page, totalPromos);
     }
   }
