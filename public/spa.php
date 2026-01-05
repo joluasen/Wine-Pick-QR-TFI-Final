@@ -45,13 +45,13 @@ $appConfig = [
 
   <!-- Estilos de la aplicación (todos los originales) -->
   <link rel="stylesheet" href="<?= $baseUrl ?>css/theme.css">
-  <link rel="stylesheet" href="<?= $baseUrl ?>css/layout.css">
+  <link rel="stylesheet" href="<?= $baseUrl ?>css/layout.css?v=2">
   <link rel="stylesheet" href="<?= $baseUrl ?>css/navbar.css">
-  <link rel="stylesheet" href="<?= $baseUrl ?>css/components.css">
-  <link rel="stylesheet" href="<?= $baseUrl ?>css/product-modal.css">
-  <link rel="stylesheet" href="<?= $baseUrl ?>css/winepick-search.css">
+  <link rel="stylesheet" href="<?= $baseUrl ?>css/components.css?v=2">
+  <link rel="stylesheet" href="<?= $baseUrl ?>css/product-modal.css?v=2">
+  <link rel="stylesheet" href="<?= $baseUrl ?>css/winepick-search.css?v=2">
   <link rel="stylesheet" href="<?= $baseUrl ?>css/admin.css">
-  <link rel="stylesheet" href="<?= $baseUrl ?>css/buttons.css">
+  <link rel="stylesheet" href="<?= $baseUrl ?>css/buttons.css?v=7">
 
   <!-- Configuración global para JavaScript -->
   <script>
@@ -152,7 +152,7 @@ $appConfig = [
 
             <div id="login-status-modal" class="mb-3" aria-live="polite"></div>
 
-            <button type="submit" class="btn btn-primary w-100 py-2 fw-semibold">
+            <button type="submit" class="btn-modal btn-modal-primary w-100 py-2 fw-semibold">
               Ingresar
             </button>
           </form>
@@ -204,11 +204,11 @@ $appConfig = [
             <input type="number" class="form-control" id="filterYearInput" min="1900" max="2100" placeholder="Ej: 2020">
           </div>
         </div>
-        <div class="modal-footer border-0 pt-0">
-          <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">
+        <div class="modal-footer border-0 pt-0 gap-2">
+          <button type="button" class="btn-modal btn-modal-secondary btn-sm" data-bs-dismiss="modal">
             Cancelar
           </button>
-          <button type="button" class="btn btn-primary btn-sm" id="applyFiltersBtn" data-bs-dismiss="modal">
+          <button type="button" class="btn-modal btn-modal-primary btn-sm" id="applyFiltersBtn" data-bs-dismiss="modal">
             Aplicar filtros
           </button>
         </div>

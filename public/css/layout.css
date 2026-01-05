@@ -316,15 +316,16 @@ section[data-view] > div[id$="-pagination"] {
   cursor: pointer;
   padding: 0.25rem;
   line-height: 1;
-  transition: color 0.2s ease, transform 0.1s ease;
+  transition: all 0.2s ease;
 }
 
 .btn-close-custom:hover {
-  color: #b3b3b3;
+  color: #4A0E1A;
   transform: scale(1.1);
 }
 
 .btn-close-custom:active {
+  color: #2D0810;
   transform: scale(0.95);
 }
 

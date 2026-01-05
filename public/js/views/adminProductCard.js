@@ -82,8 +82,8 @@ export function renderAdminProductCard(product, onEdit) {
         </div>
 
         <div class="d-flex gap-2 justify-content-end mt-4">
-          <button type="button" class="btn btn-secondary" data-dismiss-modal>Cancelar</button>
-          <button type="submit" class="btn btn-primary">
+          <button type="button" class="btn-modal btn-modal-secondary" data-dismiss-modal>Cancelar</button>
+          <button type="submit" class="btn-modal btn-modal-primary">
             <i class="bi bi-check-circle me-1"></i>
             Guardar cambios
           </button>

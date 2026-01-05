@@ -33,9 +33,9 @@
 
     <!-- Paginación -->
     <div class="d-flex justify-content-center align-items-center mt-2">
-      <button class="btn btn-secondary btn-sm mx-1" id="admin-products-prev" disabled>Anterior</button>
+      <button class="btn-modal btn-modal-secondary btn-sm mx-1" id="admin-products-prev" disabled>Anterior</button>
       <span id="admin-products-page" class="mx-2"></span>
-      <button class="btn btn-secondary btn-sm mx-1" id="admin-products-next" disabled>Siguiente</button>
+      <button class="btn-modal btn-modal-secondary btn-sm mx-1" id="admin-products-next" disabled>Siguiente</button>
     </div>
   </div>
 </div>

@@ -149,6 +149,177 @@
 }
 
 /* =========================================
+   BOTONES DE MODALES - btn-modal
+   Botones para modales y formularios
+   ========================================= */
+
+.btn-modal {
+  /* Reset */
+  margin: 0;
+  font-family: inherit;
+
+  /* Estructura */
+  display: inline-block;
+  padding: 0.5rem 1.25rem;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  line-height: 1.5;
+  text-align: center;
+  white-space: nowrap;
+  vertical-align: middle;
+  cursor: pointer;
+  user-select: none;
+
+  /* Diseño */
+  border: none;
+  border-radius: 6px;
+  position: relative;
+  overflow: hidden;
+
+  /* Transición suave */
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Primary - Rojo vino (acción principal) */
+.btn-modal-primary {
+  background: linear-gradient(135deg, #4A0E1A 0%, #6B0F2A 100%);
+  color: #FFFFFF;
+  box-shadow:
+    0 2px 4px rgba(74, 14, 26, 0.15),
+    0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.btn-modal-primary:hover {
+  background: linear-gradient(135deg, #6B0F2A 0%, #8B1538 100%);
+  transform: translateY(-1px);
+  box-shadow:
+    0 4px 8px rgba(74, 14, 26, 0.25),
+    0 2px 4px rgba(0, 0, 0, 0.15);
+}
+
+.btn-modal-primary:active {
+  background: linear-gradient(135deg, #2D0810 0%, #4A0E1A 100%);
+  transform: translateY(0) scale(0.98);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Secondary - Gris (cancelar) */
+.btn-modal-secondary {
+  background: linear-gradient(135deg, #6C757D 0%, #5A6268 100%);
+  color: #FFFFFF;
+  box-shadow:
+    0 2px 4px rgba(108, 117, 125, 0.15),
+    0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.btn-modal-secondary:hover {
+  background: linear-gradient(135deg, #5A6268 0%, #4E555B 100%);
+  transform: translateY(-1px);
+  box-shadow:
+    0 4px 8px rgba(108, 117, 125, 0.25),
+    0 2px 4px rgba(0, 0, 0, 0.15);
+}
+
+.btn-modal-secondary:active {
+  background: linear-gradient(135deg, #4E555B 0%, #3E4549 100%);
+  transform: translateY(0) scale(0.98);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Success - Verde (guardar) */
+.btn-modal-success {
+  background: linear-gradient(135deg, #198754 0%, #157347 100%);
+  color: #FFFFFF;
+  box-shadow:
+    0 2px 4px rgba(25, 135, 84, 0.15),
+    0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.btn-modal-success:hover {
+  background: linear-gradient(135deg, #157347 0%, #0F5132 100%);
+  transform: translateY(-1px);
+  box-shadow:
+    0 4px 8px rgba(25, 135, 84, 0.25),
+    0 2px 4px rgba(0, 0, 0, 0.15);
+}
+
+.btn-modal-success:active {
+  background: linear-gradient(135deg, #0F5132 0%, #0A3622 100%);
+  transform: translateY(0) scale(0.98);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Danger - Rojo (eliminar) */
+.btn-modal-danger {
+  background: linear-gradient(135deg, #DC3545 0%, #BB2D3B 100%);
+  color: #FFFFFF;
+  box-shadow:
+    0 2px 4px rgba(220, 53, 69, 0.15),
+    0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.btn-modal-danger:hover {
+  background: linear-gradient(135deg, #BB2D3B 0%, #A02834 100%);
+  transform: translateY(-1px);
+  box-shadow:
+    0 4px 8px rgba(220, 53, 69, 0.25),
+    0 2px 4px rgba(0, 0, 0, 0.15);
+}
+
+.btn-modal-danger:active {
+  background: linear-gradient(135deg, #A02834 0%, #842029 100%);
+  transform: translateY(0) scale(0.98);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Disabled */
+.btn-modal:disabled,
+.btn-modal-primary:disabled,
+.btn-modal-secondary:disabled,
+.btn-modal-success:disabled,
+.btn-modal-danger:disabled {
+  background: linear-gradient(135deg, #E9ECEF 0%, #CED4DA 100%);
+  color: #6C757D;
+  cursor: not-allowed;
+  opacity: 0.65;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Focus */
+.btn-modal:focus,
+.btn-modal-primary:focus,
+.btn-modal-secondary:focus,
+.btn-modal-success:focus,
+.btn-modal-danger:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(74, 14, 26, 0.15);
+}
+
+/* =========================================
+   UTILIDADES ADICIONALES
+   ========================================= */
+
+.mx-1 {
+  margin-left: 0.25rem;
+  margin-right: 0.25rem;
+}
+
+.px-2 {
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+}
+
+.py-1 {
+  padding-top: 0.25rem;
+  padding-bottom: 0.25rem;
+}
+
+.fw-semibold {
+  font-weight: 600;
+}
+
+/* =========================================
    ANIMACIÓN OPCIONAL - Ripple effect
    ========================================= */
 

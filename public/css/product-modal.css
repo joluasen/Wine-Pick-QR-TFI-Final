@@ -27,13 +27,13 @@
   position: absolute;
   top: 1rem;
   right: 1rem;
-  background: #ededed;
+  background: transparent;
   border: none;
   font-size: 2rem;
-  color: #4A0E1A;
+  color: #999;
   cursor: pointer;
   border-radius: 4px;
-  transition: background 0.2s, color 0.2s;
+  transition: all 0.2s ease;
   width: 44px;
   height: 44px;
   display: flex;
@@ -43,8 +43,13 @@
 }
 
 #product-modal .modal-close:hover {
-  background: #d1d1d1;
-  color: #fff;
+  color: #4A0E1A;
+  transform: scale(1.1);
+}
+
+#product-modal .modal-close:active {
+  color: #2D0810;
+  transform: scale(0.95);
 }
 
 /* Bajar la imagen en el modal para que el botón no la tape */

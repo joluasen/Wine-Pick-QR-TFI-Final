@@ -28,7 +28,7 @@ header('Content-Type: text/html; charset=utf-8');
     >
       <i class="fas fa-sliders-h" aria-hidden="true"></i>
     </button>
-    <button type="submit" class="btn btn-winepick" aria-label="Buscar">
+    <button type="submit" class="btn-modal btn-modal-primary" aria-label="Buscar">
       <i class="fas fa-search" aria-hidden="true"></i>
     </button>
   </div>

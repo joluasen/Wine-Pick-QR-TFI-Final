@@ -301,7 +301,7 @@ async function loadView(viewName) {
         <i class="fas fa-exclamation-triangle fa-3x text-warning mb-3"></i>
         <h2>Error al cargar la página</h2>
         <p class="text-muted">${err.message}</p>
-        <button onclick="window.location.hash='#home'" class="btn btn-primary">
+        <button onclick="window.location.hash='#home'" class="btn-modal btn-modal-primary">
           <i class="fas fa-home me-1"></i> Volver al inicio
         </button>
       </div>

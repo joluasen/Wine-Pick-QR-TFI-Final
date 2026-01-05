@@ -281,13 +281,13 @@ export async function initAdminProductsView(_container) {
             <div class="mb-3 text-muted" style="font-size:0.97rem;">No puedes crear otra promoción hasta que la actual finalice o sea eliminada.</div>
             <div class="mb-2 fw-semibold" style="color:#7a003c;">¿Qué acción deseas realizar sobre la promoción?</div>
             <div class="d-flex gap-2 justify-content-start align-items-center mt-2">
-              <button type="button" class="btn btn-outline-primary btn-xs fw-semibold px-2 py-1" style="font-size:0.92rem;" data-edit-promo="${
+              <button type="button" class="btn-modal btn-modal-primary btn-xs fw-semibold px-2 py-1" style="font-size:0.92rem;" data-edit-promo="${
                 activePromo.id
               }"><i class="bi bi-pencil-square me-1"></i>Editar</button>
-              <button type="button" class="btn btn-outline-danger btn-xs fw-semibold px-2 py-1" style="font-size:0.92rem;" data-delete-promo="${
+              <button type="button" class="btn-modal btn-modal-danger btn-xs fw-semibold px-2 py-1" style="font-size:0.92rem;" data-delete-promo="${
                 activePromo.id
               }"><i class="bi bi-trash me-1"></i>Eliminar</button>
-              <button type="button" class="btn btn-outline-secondary btn-xs fw-semibold px-2 py-1" style="font-size:0.92rem;" data-toggle-promo="${
+              <button type="button" class="btn-modal btn-modal-secondary btn-xs fw-semibold px-2 py-1" style="font-size:0.92rem;" data-toggle-promo="${
                 activePromo.id
               }"><i class="bi bi-power me-1"></i>Desactivar</button>
             </div>
@@ -342,8 +342,8 @@ export async function initAdminProductsView(_container) {
             <div id="promo-create-status-modal" class="mt-3"></div>
 
             <div class="d-flex gap-2 justify-content-end mt-4">
-              <button type="button" class="btn btn-secondary" data-dismiss-modal>Cancelar</button>
-              <button type="submit" class="btn btn-success">
+              <button type="button" class="btn-modal btn-modal-secondary" data-dismiss-modal>Cancelar</button>
+              <button type="submit" class="btn-modal btn-modal-success">
                 <i class="bi bi-plus-circle me-1"></i>
                 Crear promoción
               </button>
