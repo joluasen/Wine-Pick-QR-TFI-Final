@@ -40,6 +40,12 @@ export async function initAdminPromotionsView(container) {
         <tbody><tr><td colspan='9'>Cargando...</td></tr></tbody>
       </table>
     </div>
+
+    <!-- Cards Mobile -->
+    <div class="d-md-none" id="admin-promos-cards">
+      <!-- Cards inyectadas dinámicamente por JS -->
+    </div>
+
     <div class="d-flex justify-content-center align-items-center mt-2">
       <button class="btn-modal btn-modal-secondary btn-sm mx-1" id="admin-promos-prev" disabled>Anterior</button>
       <span id="admin-promos-page" class="mx-2"></span>
@@ -48,6 +54,7 @@ export async function initAdminPromotionsView(container) {
   `;
 
   const tableBody = container.querySelector("#admin-promos-table tbody");
+  const cardsContainer = container.querySelector("#admin-promos-cards");
   const paginationEl = container.querySelector("#admin-promos-page");
   const prevBtn = container.querySelector("#admin-promos-prev");
   const nextBtn = container.querySelector("#admin-promos-next");
@@ -113,11 +120,79 @@ export async function initAdminPromotionsView(container) {
   }
 
   /**
+   * Renderiza las cards para vista mobile
+   */
+  function renderCards(promos) {
+    if (promos.length === 0) {
+      return '<div class="text-center py-4 text-muted">No hay promociones para mostrar.</div>';
+    }
+
+    return promos
+      .map(
+        (p) => `
+      <div class="admin-promo-card-mobile">
+        <div class="card-mobile-header">
+          <div style="flex: 1;">
+            <div class="card-mobile-title">${p.product_name || "Sin producto"}</div>
+            <div class="card-mobile-code">ID: ${p.id}</div>
+          </div>
+          <div class="card-mobile-status ${p.is_active ? "active" : ""}">
+            ${p.is_active ? "Activa" : "Inactiva"}
+          </div>
+        </div>
+        <div class="card-mobile-body">
+          <div class="card-mobile-info">
+            <span class="card-mobile-label">Tipo</span>
+            <span class="card-mobile-value">${p.promotion_type}</span>
+          </div>
+          <div class="card-mobile-info">
+            <span class="card-mobile-label">Valor</span>
+            <span class="card-mobile-value">${p.parameter_value}</span>
+          </div>
+          <div class="card-mobile-info">
+            <span class="card-mobile-label">Texto visible</span>
+            <span class="card-mobile-value">${p.visible_text}</span>
+          </div>
+          <div class="card-mobile-info">
+            <span class="card-mobile-label">Inicio</span>
+            <span class="card-mobile-value">${p.start_at ? p.start_at.split(" ")[0] : "N/A"}</span>
+          </div>
+          <div class="card-mobile-info">
+            <span class="card-mobile-label">Fin</span>
+            <span class="card-mobile-value">${p.end_at ? p.end_at.split(" ")[0] : "N/A"}</span>
+          </div>
+        </div>
+        <div class="card-mobile-actions">
+          <button class="btn-table btn-mobile" data-edit-promo="${p.id}">
+            <i class="fas fa-edit"></i>
+            <span>Editar</span>
+          </button>
+          <button class="btn-table btn-mobile" data-delete-promo="${p.id}">
+            <i class="fas fa-trash"></i>
+            <span>Borrar</span>
+          </button>
+          <button class="btn-table btn-mobile" data-toggle-promo="${p.id}" data-is-active="${p.is_active}">
+            <i class="fas fa-${p.is_active ? "toggle-off" : "toggle-on"}"></i>
+            <span>${p.is_active ? "Deshabilitar" : "Habilitar"}</span>
+          </button>
+        </div>
+      </div>
+    `
+      )
+      .join("");
+  }
+
+  /**
    * Adjunta event listeners a los botones de acciones
    */
   function attachActionListeners() {
+    // Obtener todos los botones tanto de tabla como de cards
+    const allEditBtns = container.querySelectorAll("[data-edit-promo]");
+    const allDeleteBtns = container.querySelectorAll("[data-delete-promo]");
+    const allToggleBtns = container.querySelectorAll("[data-toggle-promo]");
+
     // Editar
-    tableBody.querySelectorAll("[data-edit-promo]").forEach((btn) => {
+    allEditBtns.forEach((btn) => {
       btn.onclick = async () => {
         const promoId = btn.getAttribute("data-edit-promo");
         // TODO: Implementar edición
@@ -126,7 +201,7 @@ export async function initAdminPromotionsView(container) {
     });
 
     // Eliminar
-    tableBody.querySelectorAll("[data-delete-promo]").forEach((btn) => {
+    allDeleteBtns.forEach((btn) => {
       btn.onclick = async () => {
         const promoId = btn.getAttribute("data-delete-promo");
         if (!confirm("¿Estás seguro de eliminar esta promoción?")) return;
@@ -142,7 +217,7 @@ export async function initAdminPromotionsView(container) {
     });
 
     // Activar/Desactivar
-    tableBody.querySelectorAll("[data-toggle-promo]").forEach((btn) => {
+    allToggleBtns.forEach((btn) => {
       btn.onclick = async () => {
         const promoId = btn.getAttribute("data-toggle-promo");
         const isActive = btn.getAttribute("data-is-active") === "true";
@@ -178,8 +253,11 @@ export async function initAdminPromotionsView(container) {
 
       if (promotions.length === 0 && totalPromos === 0) {
         tableBody.innerHTML = `<tr><td colspan='9'>No hay promociones para mostrar.</td></tr>`;
+        cardsContainer.innerHTML =
+          '<div class="text-center py-4 text-muted">No hay promociones para mostrar.</div>';
       } else {
         tableBody.innerHTML = renderRows(promotions);
+        cardsContainer.innerHTML = renderCards(promotions);
         attachActionListeners();
       }
 

@@ -492,3 +492,56 @@
     min-height: 36px;
   }
 }
+
+/* =========================================
+   CARDS MOBILE ADMIN PROMOCIONES
+   Diseño ultra-minimalista y armonioso
+   ========================================= */
+
+.admin-promo-card-mobile {
+  background: #FFFFFF;
+  border: 1px solid #DDDDDD;
+  border-radius: 8px;
+  padding: 14px;
+  margin-bottom: 1rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  transition: all 0.2s ease;
+}
+
+.admin-promo-card-mobile:active {
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.12);
+  transform: scale(0.99);
+}
+
+/* Reutilizar estilos de productos para mantener consistencia */
+.admin-promo-card-mobile .card-mobile-header,
+.admin-promo-card-mobile .card-mobile-title,
+.admin-promo-card-mobile .card-mobile-code,
+.admin-promo-card-mobile .card-mobile-status,
+.admin-promo-card-mobile .card-mobile-body,
+.admin-promo-card-mobile .card-mobile-info,
+.admin-promo-card-mobile .card-mobile-label,
+.admin-promo-card-mobile .card-mobile-value,
+.admin-promo-card-mobile .card-mobile-actions {
+  /* Los estilos ya están definidos arriba para productos, se reutilizan */
+}
+
+/* Ajustes específicos para promociones */
+.admin-promo-card-mobile .card-mobile-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+/* El botón de toggle ocupa toda la fila inferior */
+.admin-promo-card-mobile .card-mobile-actions button[data-toggle-promo] {
+  grid-column: 1 / -1;
+}
+
+/* Responsividad para cards de promociones */
+@media (max-width: 360px) {
+  .admin-promo-card-mobile {
+    padding: 10px;
+  }
+}
