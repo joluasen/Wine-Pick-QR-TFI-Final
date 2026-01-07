@@ -356,3 +356,139 @@
 .btn-table:active::after {
   animation: ripple 0.6s ease-out;
 }
+
+/* =========================================
+   CARDS MOBILE ADMIN PRODUCTOS
+   Diseño ultra-minimalista y armonioso
+   ========================================= */
+
+.admin-product-card-mobile {
+  background: #FFFFFF;
+  border: 1px solid #DDDDDD;
+  border-radius: 8px;
+  padding: 14px;
+  margin-bottom: 1rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  transition: all 0.2s ease;
+}
+
+.admin-product-card-mobile:active {
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.12);
+  transform: scale(0.99);
+}
+
+/* Header simplificado */
+.card-mobile-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.card-mobile-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #1A1A1A;
+  margin: 0;
+  line-height: 1.3;
+  flex: 1;
+  letter-spacing: -0.01em;
+}
+
+.card-mobile-code {
+  font-size: 0.75rem;
+  color: #8A8A8A;
+  font-family: monospace;
+  margin-top: 0.25rem;
+}
+
+.card-mobile-status {
+  font-size: 0.7rem;
+  color: #5A5A5A;
+  background: #F5F5F5;
+  padding: 0.25rem 0.5rem;
+  border-radius: 3px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.card-mobile-status.active {
+  color: #2E7D42;
+  background: #F1F8F4;
+}
+
+/* Body simplificado */
+.card-mobile-body {
+  padding: 0.75rem 0;
+  border-top: 1px solid #F5F5F5;
+  border-bottom: 1px solid #F5F5F5;
+}
+
+.card-mobile-info {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.8rem;
+  margin-bottom: 0.5rem;
+}
+
+.card-mobile-info:last-child {
+  margin-bottom: 0;
+}
+
+.card-mobile-label {
+  color: #8A8A8A;
+}
+
+.card-mobile-value {
+  color: #1A1A1A;
+  font-weight: 500;
+}
+
+.card-mobile-price {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #4A0E1A;
+}
+
+/* Botones mejorados - más espacio, mejor disposición */
+.card-mobile-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.btn-mobile {
+  font-size: 0.8rem;
+  padding: 0.6rem 0.75rem;
+  font-weight: 500;
+  text-align: center;
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  border-radius: 4px;
+}
+
+.btn-mobile i {
+  font-size: 0.85rem;
+}
+
+/* Responsividad mejorada */
+@media (max-width: 360px) {
+  .admin-product-card-mobile {
+    padding: 10px;
+  }
+
+  .card-mobile-title {
+    font-size: 0.85rem;
+  }
+
+  .btn-mobile {
+    font-size: 0.75rem;
+    padding: 0.5rem 0.5rem;
+    min-height: 36px;
+  }
+}

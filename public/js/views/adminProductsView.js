@@ -29,6 +29,7 @@ export async function initAdminProductsView(_container) {
   const loadingEl = document.getElementById("admin-products-loading");
   const contentEl = document.getElementById("admin-products-content");
   const tableBody = document.querySelector("#admin-products-table tbody");
+  const cardsContainer = document.getElementById("admin-products-cards");
   const paginationEl = document.getElementById("admin-products-page");
   const prevBtn = document.getElementById("admin-products-prev");
   const nextBtn = document.getElementById("admin-products-next");
@@ -81,11 +82,76 @@ export async function initAdminProductsView(_container) {
   }
 
   /**
+   * Renderiza las cards para vista mobile
+   */
+  function renderCards(products) {
+    if (products.length === 0) {
+      return '<div class="text-center py-4 text-muted">No hay productos para mostrar.</div>';
+    }
+
+    return products
+      .map(
+        (p) => `
+      <div class="admin-product-card-mobile">
+        <div class="card-mobile-header">
+          <div style="flex: 1;">
+            <div class="card-mobile-title">${p.name}</div>
+            <div class="card-mobile-code">${p.public_code}</div>
+          </div>
+          <div class="card-mobile-status ${p.is_active ? "active" : ""}">
+            ${p.is_active ? "Activo" : "Inactivo"}
+          </div>
+        </div>
+        <div class="card-mobile-body">
+          <div class="card-mobile-info">
+            <span class="card-mobile-label">Tipo</span>
+            <span class="card-mobile-value">${p.drink_type}</span>
+          </div>
+          <div class="card-mobile-info">
+            <span class="card-mobile-label">Bodega</span>
+            <span class="card-mobile-value">${p.winery_distillery}</span>
+          </div>
+          <div class="card-mobile-info">
+            <span class="card-mobile-label">Precio</span>
+            <span class="card-mobile-price">$${p.base_price.toFixed(2)}</span>
+          </div>
+        </div>
+        <div class="card-mobile-actions">
+          <button class="btn-table btn-mobile" data-edit-product="${p.id}">
+            <i class="fas fa-edit"></i>
+            <span>Editar</span>
+          </button>
+          <button class="btn-table btn-mobile" data-view-product="${p.id}">
+            <i class="fas fa-eye"></i>
+            <span>Ver</span>
+          </button>
+          <button class="btn-table btn-mobile" data-delete-product="${p.id}">
+            <i class="fas fa-trash"></i>
+            <span>Borrar</span>
+          </button>
+          <button class="btn-table btn-mobile" data-new-promo="${p.id}">
+            <i class="fas fa-tag"></i>
+            <span>Promo</span>
+          </button>
+        </div>
+      </div>
+    `
+      )
+      .join("");
+  }
+
+  /**
    * Adjunta event listeners a los botones de acciones
    */
   function attachActionListeners() {
+    // Obtener todos los botones tanto de tabla como de cards
+    const allViewBtns = document.querySelectorAll("[data-view-product]");
+    const allEditBtns = document.querySelectorAll("[data-edit-product]");
+    const allDeleteBtns = document.querySelectorAll("[data-delete-product]");
+    const allPromoBtns = document.querySelectorAll("[data-new-promo]");
+
     // Ver producto
-    tableBody.querySelectorAll("[data-view-product]").forEach((btn) => {
+    allViewBtns.forEach((btn) => {
       btn.onclick = () => {
         const productId = btn.getAttribute("data-view-product");
         const product = cachedProducts.find(
@@ -98,7 +164,7 @@ export async function initAdminProductsView(_container) {
     });
 
     // Editar producto
-    tableBody.querySelectorAll("[data-edit-product]").forEach((btn) => {
+    allEditBtns.forEach((btn) => {
       btn.onclick = async () => {
         const productId = btn.getAttribute("data-edit-product");
         const product = cachedProducts.find(
@@ -166,7 +232,7 @@ export async function initAdminProductsView(_container) {
     });
 
     // Eliminar producto
-    tableBody.querySelectorAll("[data-delete-product]").forEach((btn) => {
+    allDeleteBtns.forEach((btn) => {
       btn.onclick = () => {
         showToast(
           "La función de eliminar productos no está disponible actualmente. Contacte al administrador del sistema.",
@@ -176,7 +242,7 @@ export async function initAdminProductsView(_container) {
     });
 
     // Nueva promoción
-    tableBody.querySelectorAll("[data-new-promo]").forEach((btn) => {
+    allPromoBtns.forEach((btn) => {
       btn.onclick = async () => {
         const productId = btn.getAttribute("data-new-promo");
         const product = cachedProducts.find(
@@ -218,8 +284,11 @@ export async function initAdminProductsView(_container) {
 
       if (products.length === 0 && totalProducts === 0) {
         tableBody.innerHTML = `<tr><td colspan='8'>No hay productos para mostrar.</td></tr>`;
+        cardsContainer.innerHTML =
+          '<div class="text-center py-4 text-muted">No hay productos para mostrar.</div>';
       } else {
         tableBody.innerHTML = renderRows(products);
+        cardsContainer.innerHTML = renderCards(products);
         attachActionListeners();
       }
 

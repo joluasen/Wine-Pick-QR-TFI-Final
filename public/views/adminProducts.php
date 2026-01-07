@@ -31,6 +31,11 @@
       </table>
     </div>
 
+    <!-- Cards Mobile -->
+    <div class="d-md-none" id="admin-products-cards">
+      <!-- Cards inyectadas dinámicamente por JS -->
+    </div>
+
     <!-- Paginación -->
     <div class="d-flex justify-content-center align-items-center mt-2">
       <button class="btn-modal btn-modal-secondary btn-sm mx-1" id="admin-products-prev" disabled>Anterior</button>
