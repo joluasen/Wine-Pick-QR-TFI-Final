@@ -27,6 +27,7 @@
 
 /* =========================================
    MODAL DE EDICIÓN DE PRODUCTO
+   Solución definitiva sin espacios en blanco
    ========================================= */
 
 #admin-product-modal .modal-content {
@@ -36,64 +37,170 @@
 #admin-product-modal .modal-body {
   padding: 0;
   max-height: 80vh;
-  overflow: hidden;
 }
 
 .admin-product-card-wrapper {
-  height: 80vh;
+  max-height: 80vh;
+  overflow-y: auto;
 }
 
 .admin-product-card {
-  padding: 1.5rem;
-  position: relative;
+  padding: 1.5rem 2rem;
 }
 
+/* Mobile: Forzar estructura correcta */
+@media (max-width: 768px) {
+  /* Resetear altura forzada de components.css */
+  #admin-product-modal .modal-content {
+    margin: 0 !important;
+    border-radius: 0 !important;
+    width: 100vw !important;
+    max-width: 100vw !important;
+    min-height: 100vh !important;
+    height: auto !important;
+  }
+
+  #admin-product-modal .modal-body {
+    padding: 0 !important;
+    max-height: 100vh !important;
+    height: auto !important;
+  }
+
+  .admin-product-card-wrapper {
+    max-height: 100vh !important;
+    height: auto !important;
+    min-height: 100vh !important;
+    overflow-y: auto !important;
+  }
+
+  .admin-product-card {
+    padding: 1rem !important;
+  }
+}
+
+/* Header del modal */
+.admin-product-card .modal-header {
+  margin: -1.5rem -2rem 1.5rem -2rem;
+  padding: 1.25rem 2rem;
+  background: linear-gradient(135deg, #F8F9FA 0%, #FFFFFF 100%);
+}
+
+.admin-product-card .modal-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #4A0E1A;
+}
+
+.admin-product-card .modal-title i {
+  color: #6B0F2A;
+}
+
+/* Secciones del formulario */
+.admin-product-card .form-section {
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid #EEEEEE;
+}
+
+.admin-product-card .form-section:last-of-type {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.admin-product-card .form-section-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #4A0E1A;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #4A0E1A;
+  display: inline-block;
+}
+
+/* Labels con iconos */
 .admin-product-card .form-label {
   font-weight: 600;
   color: #333;
   margin-bottom: 0.5rem;
+  font-size: 0.9rem;
 }
 
+.admin-product-card .form-label i {
+  color: #6B0F2A;
+  width: 16px;
+}
+
+/* Inputs y selects */
 .admin-product-card .form-control,
 .admin-product-card .form-select {
-  border: 1px solid #ced4da;
+  border: 1px solid #DDDDDD;
   border-radius: 0.375rem;
-  padding: 0.5rem 0.75rem;
-  font-size: 1rem;
+  padding: 0.625rem 0.875rem;
+  font-size: 0.95rem;
+  transition: all 0.2s ease;
 }
 
 .admin-product-card .form-control:focus,
 .admin-product-card .form-select:focus {
-  border-color: #7a003c;
-  box-shadow: 0 0 0 0.2rem rgba(122, 0, 60, 0.25);
+  border-color: #4A0E1A;
+  box-shadow: 0 0 0 0.2rem rgba(74, 14, 26, 0.15);
   outline: none;
 }
 
+.admin-product-card .form-control[readonly] {
+  background-color: #F5F5F5;
+  cursor: not-allowed;
+}
+
+/* Estados de validación */
+.admin-product-card .form-control.is-valid,
+.admin-product-card .form-select.is-valid {
+  border-color: #198754;
+}
+
+.admin-product-card .form-control.is-invalid,
+.admin-product-card .form-select.is-invalid {
+  border-color: #DC3545;
+}
+
+.admin-product-card .invalid-feedback {
+  font-size: 0.85rem;
+  color: #DC3545;
+}
+
+/* Form text */
+.admin-product-card .form-text {
+  font-size: 0.85rem;
+}
+
+/* Contador de caracteres */
+#char-counter {
+  font-weight: 600;
+  transition: color 0.2s ease;
+}
+
+/* Textarea */
+.admin-product-card textarea.form-control {
+  resize: vertical;
+  min-height: 100px;
+}
+
+/* Botones */
 .admin-product-card .btn {
-  padding: 0.5rem 1.25rem;
+  padding: 0.625rem 1.5rem;
   border-radius: 0.375rem;
   font-weight: 500;
-  transition: all 0.15s ease-in-out;
+  font-size: 0.95rem;
+  transition: all 0.2s ease;
+  min-width: 120px;
 }
 
-.admin-product-card .btn-primary {
-  background-color: #7a003c;
-  border-color: #7a003c;
+.admin-product-card .btn i {
+  margin-right: 0.35rem;
 }
 
-.admin-product-card .btn-primary:hover {
-  background-color: #5a002c;
-  border-color: #5a002c;
-}
-
-.admin-product-card .btn-secondary {
-  background-color: #6c757d;
-  border-color: #6c757d;
-}
-
-.admin-product-card .btn-secondary:hover {
-  background-color: #5a6268;
-  border-color: #545b62;
+.admin-product-card .btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
 }
 
 /* =========================================

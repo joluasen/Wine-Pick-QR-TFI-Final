@@ -111,32 +111,124 @@ export function setupProductCreateForm(container, onSuccess = null) {
 export function setupProductEditForm(form, product, onSuccess = null) {
   if (!form) return;
 
+  // Referencias a elementos del formulario
+  const statusEl = form.querySelector('#edit-form-status');
+  const submitBtn = form.querySelector('#save-product-btn');
+  const descriptionTextarea = form.querySelector('#edit-description');
+  const charCountSpan = form.querySelector('#char-count');
+
+  // Configurar contador de caracteres
+  if (descriptionTextarea && charCountSpan) {
+    descriptionTextarea.addEventListener('input', () => {
+      const length = descriptionTextarea.value.length;
+      charCountSpan.textContent = length;
+
+      // Cambiar color cuando se acerca al límite
+      const counterEl = charCountSpan.parentElement;
+      if (length > 180) {
+        counterEl.classList.add('text-warning');
+        counterEl.classList.remove('text-muted');
+      } else if (length === 200) {
+        counterEl.classList.add('text-danger');
+        counterEl.classList.remove('text-warning', 'text-muted');
+      } else {
+        counterEl.classList.add('text-muted');
+        counterEl.classList.remove('text-warning', 'text-danger');
+      }
+    });
+  }
+
+  // Mostrar mensaje de estado
+  function showStatus(message, type) {
+    if (!statusEl) return;
+
+    statusEl.textContent = message;
+    statusEl.className = `alert mb-3`;
+
+    switch(type) {
+      case 'success':
+        statusEl.classList.add('alert-success');
+        break;
+      case 'error':
+        statusEl.classList.add('alert-danger');
+        break;
+      case 'info':
+        statusEl.classList.add('alert-info');
+        break;
+    }
+
+    statusEl.classList.remove('d-none');
+  }
+
+  // Ocultar mensaje de estado
+  function hideStatus() {
+    if (statusEl) {
+      statusEl.classList.add('d-none');
+    }
+  }
+
+  // Manejar envío del formulario
   form.onsubmit = async (e) => {
     e.preventDefault();
+
+    // Validación HTML5
+    if (!form.checkValidity()) {
+      e.stopPropagation();
+      form.classList.add('was-validated');
+      showStatus('Por favor, complete todos los campos requeridos correctamente', 'error');
+      return;
+    }
 
     const formData = new FormData(form);
     const payload = Object.fromEntries(formData.entries());
 
-    const statusDiv = document.createElement('div');
-    form.appendChild(statusDiv);
-    statusDiv.textContent = 'Actualizando producto...';
+    // Deshabilitar botón de envío
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Guardando...';
+    }
+
+    hideStatus();
 
     try {
       await updateProduct(product.id, payload);
 
-      statusDiv.textContent = 'Producto actualizado con éxito.';
+      showStatus('Producto actualizado con éxito', 'success');
+      form.classList.remove('was-validated');
 
-      if (onSuccess) onSuccess();
+      // Esperar un momento antes de cerrar
+      setTimeout(() => {
+        if (onSuccess) onSuccess();
+      }, 800);
 
     } catch (err) {
       if (err.status === 401) {
-        statusDiv.textContent = 'Sesión expirada. Redirigiendo...';
-        setTimeout(redirectToLogin, 400);
+        showStatus('Sesión expirada. Redirigiendo al login...', 'error');
+        setTimeout(redirectToLogin, 1500);
       } else {
-        statusDiv.textContent = `Error: ${err.message}`;
+        showStatus(`Error al actualizar: ${err.message}`, 'error');
+      }
+
+      // Rehabilitar botón
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i class="fas fa-save me-1"></i>Guardar cambios';
       }
     }
   };
+
+  // Limpiar validación al escribir
+  const inputs = form.querySelectorAll('input, select, textarea');
+  inputs.forEach(input => {
+    input.addEventListener('input', () => {
+      if (input.checkValidity()) {
+        input.classList.remove('is-invalid');
+        input.classList.add('is-valid');
+      } else {
+        input.classList.remove('is-valid');
+      }
+    });
+  });
 }
 
 /**
