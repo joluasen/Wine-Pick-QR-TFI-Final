@@ -22,10 +22,25 @@ header('Content-Type: text/html; charset=utf-8');
     <i class="fas fa-tag"></i>
     <span>Promociones</span>
   </a>
-  <a href="#" id="logout-btn-mobile" class="bottom-nav-item" aria-label="Salir">
-    <i class="fas fa-sign-out-alt"></i>
-    <span>Salir</span>
-  </a>
+  <!-- Dropdown más opciones -->
+  <div class="dropdown bottom-nav-item dropup">
+    <a href="#" role="button" id="admin-dropdown-trigger" data-bs-toggle="dropdown" aria-expanded="false" class="d-flex flex-column align-items-center">
+      <i class="fas fa-ellipsis-h"></i>
+      <span>Más</span>
+    </a>
+    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="admin-dropdown-trigger">
+      <li><a class="dropdown-item" href="#" id="btn-new-product-mobile">
+        <i class="fas fa-plus-circle me-2"></i>Nuevo Producto
+      </a></li>
+      <li><a class="dropdown-item" href="#">
+        <i class="fas fa-user me-2"></i>Perfil
+      </a></li>
+      <li><hr class="dropdown-divider"></li>
+      <li><a class="dropdown-item" href="#" id="logout-btn-mobile">
+        <i class="fas fa-sign-out-alt me-2"></i>Salir
+      </a></li>
+    </ul>
+  </div>
 </nav>
 
 <!-- DESKTOP SIDEBAR NAV -->

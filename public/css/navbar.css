@@ -230,4 +230,67 @@
   }
 }
 
+/* =========================================
+   DROPDOWN ADMIN (Mobile)
+   ========================================= */
+
+.bottom-nav .dropdown {
+  position: relative;
+}
+
+.bottom-nav .dropdown > a {
+  color: var(--winepick-muted);
+  text-decoration: none;
+  gap: 2px;
+  font-size: 0.72rem;
+}
+
+.bottom-nav .dropdown > a i {
+  font-size: 1.25rem;
+  margin-bottom: 0;
+}
+
+.bottom-nav .dropdown > a span {
+  line-height: 1.1;
+  white-space: nowrap;
+}
+
+/* Dropdown menu */
+.bottom-nav .dropdown-menu {
+  border: 1px solid var(--border-light);
+  border-radius: 8px;
+  background: var(--bg-card);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  padding: 0.5rem 0;
+  min-width: 180px;
+  margin-bottom: 0.5rem;
+}
+
+/* Items del dropdown */
+.bottom-nav .dropdown-item {
+  padding: 0.65rem 1rem;
+  font-size: 0.875rem;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+}
+
+.bottom-nav .dropdown-item i {
+  color: var(--winepick-muted);
+  width: 20px;
+}
+
+.bottom-nav .dropdown-item:hover {
+  background-color: #f8f9fa;
+  color: var(--winepick-primary);
+}
+
+.bottom-nav .dropdown-item:hover i {
+  color: var(--winepick-primary);
+}
+
+.bottom-nav .dropdown-divider {
+  margin: 0.5rem 0;
+}
+
 
