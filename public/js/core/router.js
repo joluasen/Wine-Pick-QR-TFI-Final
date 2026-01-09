@@ -13,7 +13,7 @@ const ROUTES = {
   '#home': 'home',
   '#login': 'login',
   '#search': 'search',
-  '#admin': 'admin',
+  '#admin': 'adminMetrics', // Redirige a métricas (admin.php eliminado)
   '#admin-scan': 'adminScan',
   '#admin-search': 'adminSearch',  // buscador exclusivo admin
   '#admin-products': 'adminProducts',
