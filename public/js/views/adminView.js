@@ -73,7 +73,7 @@ export async function editProductByCode(code) {
  * @param {HTMLElement} statusEl - Elemento para mostrar estados
  */
 export function setupLogout(container, statusEl) {
-  const logoutBtns = document.querySelectorAll('#logout-btn, #logout-btn-mobile');
+  const logoutBtns = document.querySelectorAll('#logout-btn, #logout-btn-mobile, #logout-btn-desktop');
 
   logoutBtns.forEach(btn => {
     btn.addEventListener('click', async (e) => {

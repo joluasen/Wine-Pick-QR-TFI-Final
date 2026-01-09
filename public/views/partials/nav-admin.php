@@ -22,7 +22,6 @@ header('Content-Type: text/html; charset=utf-8');
     <i class="fas fa-tag"></i>
     <span>Promociones</span>
   </a>
-  <!-- Enlace directo para salir -->
   <a href="#" id="logout-btn-mobile" class="bottom-nav-item" aria-label="Salir">
     <i class="fas fa-sign-out-alt"></i>
     <span>Salir</span>
@@ -34,6 +33,10 @@ header('Content-Type: text/html; charset=utf-8');
   <a href="#admin-metrics" class="sidebar-nav-item" data-link="#admin-metrics" title="Métricas" data-bs-toggle="tooltip" data-bs-placement="right">
     <i class="fas fa-tachometer-alt"></i>
     <span>Métricas</span>
+  </a>
+  <a href="#" id="btn-new-product-desktop" class="sidebar-nav-item" title="Nuevo producto" data-bs-toggle="tooltip" data-bs-placement="right">
+    <i class="fas fa-plus-circle"></i>
+    <span>Nuevo Producto</span>
   </a>
   <a href="#admin-products" class="sidebar-nav-item" data-link="#admin-products" title="Productos" data-bs-toggle="tooltip" data-bs-placement="right">
     <i class="fas fa-boxes"></i>
