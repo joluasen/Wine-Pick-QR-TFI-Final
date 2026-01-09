@@ -12,23 +12,20 @@ function showAdminQrModal(onResult) {
       <div class="qr-manual">
         <p class="qr-manual-label">¿No podés escanear? Ingresá el código manualmente:</p>
         <form id="qr-manual-form-admin" class="qr-manual-form">
-          <input 
-            type="text" 
-            id="qr-manual-input-admin" 
-            name="code" 
-            placeholder="Ej: MALBEC-001" 
+          <input
+            type="text"
+            id="qr-manual-input-admin"
+            name="code"
+            placeholder="Ej: MALBEC-001"
             required
             autocomplete="off"
           >
           <button type="submit" class="btn-primary">Buscar</button>
         </form>
       </div>
-      <button type="button" class="modal-close" aria-label="Cerrar">Cerrar</button>
     </div>
   `;
-  const modal = modalManager.open('admin-qr-modal', content, { preventClose: true });
-  const closeBtn = modal.querySelector('.modal-close');
-  if (closeBtn) closeBtn.onclick = () => modalManager.close();
+  const modal = modalManager.open('admin-qr-modal', content);
   // Setup del formulario manual
   const form = modal.querySelector('#qr-manual-form-admin');
   if (form) {

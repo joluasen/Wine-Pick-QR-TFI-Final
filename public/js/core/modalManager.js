@@ -113,18 +113,26 @@ class ModalManager {
    */
   close() {
     if (!this.activeModal) return;
-    
-    const { modal, onClose } = this.activeModal;
-    
+
+    const { modal, onClose, id } = this.activeModal;
+
     // Detener QR scanner si está activo
     this.stopQrScanner();
-    
+
+    // Si es un modal QR y estamos en una ruta de scan, volver a la vista anterior
+    const currentHash = window.location.hash;
+    if (id === 'qr-scanner-modal' && currentHash === '#scan') {
+      window.location.hash = '#home';
+    } else if (id === 'admin-qr-modal' && currentHash === '#admin-scan') {
+      window.location.hash = '#admin-products';
+    }
+
     // Ocultar modal
     modal.style.display = 'none';
-    
+
     // Callback de cierre
     if (onClose) onClose();
-    
+
     // Restaurar modal anterior si existe
     if (this.modalStack.length > 0) {
       this.activeModal = this.modalStack.pop();
