@@ -48,7 +48,7 @@ $appConfig = [
   <link rel="stylesheet" href="<?= $baseUrl ?>css/layout.css?v=2">
   <link rel="stylesheet" href="<?= $baseUrl ?>css/navbar.css">
   <link rel="stylesheet" href="<?= $baseUrl ?>css/components.css?v=2">
-  <link rel="stylesheet" href="<?= $baseUrl ?>css/product-modal.css?v=2">
+  <link rel="stylesheet" href="<?= $baseUrl ?>css/modals.css">
   <link rel="stylesheet" href="<?= $baseUrl ?>css/winepick-search.css?v=2">
   <link rel="stylesheet" href="<?= $baseUrl ?>css/admin.css">
   <link rel="stylesheet" href="<?= $baseUrl ?>css/buttons.css?v=7">
