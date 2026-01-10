@@ -77,6 +77,9 @@ class Router
 
         // GET /api/admin/promociones?product_id=... o ?limit=...&offset=... (protegido)
         $this->get('/api/admin/promociones', 'PromotionController@listPromotions');
+
+        // POST /api/admin/upload/product-image (protegido)
+        $this->post('/api/admin/upload/product-image', 'UploadController@uploadProductImage');
     }
 
     /**

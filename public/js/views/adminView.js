@@ -68,6 +68,36 @@ export async function editProductByCode(code) {
 }
 
 /**
+ * Configura los botones de "Nuevo Producto"
+ */
+export function setupNewProductButtons() {
+  const newProductBtns = document.querySelectorAll('#btn-new-product-mobile, #btn-new-product-desktop');
+
+  newProductBtns.forEach(btn => {
+    btn.addEventListener('click', async (e) => {
+      e.preventDefault();
+
+      // Verificar autenticación
+      const isAuth = await checkAuth();
+      if (!isAuth) {
+        alert('Sesión expirada. Redirigiendo a login.');
+        redirectToLogin();
+        return;
+      }
+
+      // Mostrar modal de creación de producto
+      modalManager.showCreateProduct((newProduct) => {
+        // Callback de éxito: recargar la lista de productos si estamos en esa vista
+        const currentHash = window.location.hash;
+        if (currentHash === '#admin-products') {
+          window.location.reload();
+        }
+      });
+    });
+  });
+}
+
+/**
  * Configura los botones de logout
  * @param {HTMLElement} container - Contenedor de la vista
  * @param {HTMLElement} statusEl - Elemento para mostrar estados

@@ -70,30 +70,42 @@ function getViewFromHash() {
 async function loadNavigation(viewName) {
   const navContainer = document.getElementById('nav-container');
   const sidebarContainer = document.getElementById('sidebar-container');
-  
+
   const isPublic = PUBLIC_ROUTES.includes(viewName);
-  
+
   let navFile = 'nav-public.php';
+  let isAdminNav = false;
   if (!isPublic) {
     const isAuth = await checkAuth();
-    navFile = isAuth ? 'nav-admin.php' : 'nav-public.php';
+    if (isAuth) {
+      navFile = 'nav-admin.php';
+      isAdminNav = true;
+    } else {
+      navFile = 'nav-public.php';
+    }
   }
-  
+
   try {
     const baseUrl = getBaseUrl();
-    const response = await fetch(`${baseUrl}views/partials/${navFile}`, { 
+    const response = await fetch(`${baseUrl}views/partials/${navFile}`, {
       cache: 'no-store',
       credentials: 'same-origin'
     });
-    
+
     if (response.ok) {
       const html = await response.text();
-      
+
       if (navContainer) navContainer.innerHTML = html;
       if (sidebarContainer) sidebarContainer.innerHTML = html;
-      
+
       setupNavigationListeners();
       updateActiveNavItem();
+
+      // Configurar botones específicos de admin
+      if (isAdminNav) {
+        const { setupNewProductButtons } = await import('../views/adminView.js');
+        setupNewProductButtons();
+      }
     }
   } catch (err) {
     console.error('Error cargando navegación:', err);
