@@ -477,7 +477,7 @@ class ModalManager {
                 class="form-control"
                 placeholder="Ej: MALBEC-2021-001"
                 required
-                pattern="[A-Z0-9-]+"
+                pattern="[A-Z0-9\\-]+"
                 title="Solo mayúsculas, números y guiones"
               >
               <div class="invalid-feedback">Este campo es requerido</div>
@@ -711,7 +711,6 @@ class ModalManager {
           this.showFormStatus(statusEl, 'Imagen subida correctamente', 'success');
 
         } catch (error) {
-          console.error('Error uploading image:', error);
           this.showFormStatus(statusEl, `Error al subir imagen: ${error.message}`, 'error');
           imagePreview.innerHTML = `<i class="fas fa-image"></i><p>Error al subir</p>`;
           uploadedImageUrl = null;
@@ -781,7 +780,6 @@ class ModalManager {
           }, 1000);
 
         } catch (error) {
-          console.error('Error creating product:', error);
           this.showFormStatus(statusEl, `Error: ${error.message}`, 'error');
           submitBtn.disabled = false;
           submitBtn.innerHTML = '<i class="fas fa-save me-1"></i>Crear producto';

@@ -363,7 +363,7 @@ class Product
         //        varietal(s), origin(s), vintage_year(i), short_description(s),
         //        base_price(d), visible_stock(i), image_url(s), is_active(i),
         //        created_at(s), updated_at(s), last_modified_by_admin_id(i)
-        $types = 'ssssssissdisssi';
+        $types = 'ssssssisdissssi';
 
         try {
             $this->db->execute($query, $params, $types);

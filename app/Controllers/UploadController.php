@@ -88,7 +88,7 @@ class UploadController
         }
 
         // Generar URL pública
-        $publicUrl = BASE_URL . 'uploads/products/' . $filename;
+        $publicUrl = rtrim(BASE_URL, '/') . '/uploads/products/' . $filename;
 
         ApiResponse::success([
             'filename' => $filename,
