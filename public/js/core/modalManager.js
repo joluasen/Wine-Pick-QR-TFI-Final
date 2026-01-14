@@ -455,8 +455,11 @@ class ModalManager {
                 ${imageUrl
                   ? `<img src="${escapeHtml(imageUrl)}" alt="Producto" class="image-preview-thumb" id="current-product-image">`
                   : `<div class="image-placeholder">
-                       <i class="fas fa-wine-bottle"></i>
-                       <p>Sin imagen</p>
+                       <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                         <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                         <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                         <line x1="12" y1="22.08" x2="12" y2="12"></line>
+                       </svg>
                      </div>`
                 }
               </div>
@@ -837,8 +840,11 @@ class ModalManager {
           this.showFormStatus(statusEl, `Error al subir imagen: ${error.message}`, 'error');
           imageDisplay.innerHTML = `
             <div class="image-placeholder">
-              <i class="fas fa-wine-bottle"></i>
-              <p>Error al subir</p>
+              <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                <line x1="12" y1="22.08" x2="12" y2="12"></line>
+              </svg>
             </div>
           `;
           uploadedImageUrl = null;
@@ -916,6 +922,11 @@ class ModalManager {
     const method = isEdit ? 'PUT' : 'POST';
     const actionText = isEdit ? 'Guardando' : 'Creando';
     const successText = isEdit ? 'Producto actualizado con éxito' : 'Producto creado con éxito';
+
+    // Si es edición, agregar el ID al payload
+    if (isEdit) {
+      payload.id = productId;
+    }
 
     // Deshabilitar botón
     submitBtn.disabled = true;

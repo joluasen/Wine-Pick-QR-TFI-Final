@@ -66,7 +66,10 @@ class Router
         // POST /api/admin/productos (protegido)
         $this->post('/api/admin/productos', 'ProductController@create');
 
-        // POST /api/admin/productos/actualizar (protegido)
+        // PUT /api/admin/productos/{id} (protegido, RESTful)
+        $this->put('/api/admin/productos/{id}', 'ProductController@update');
+
+        // POST /api/admin/productos/actualizar (protegido, legacy)
         $this->post('/api/admin/productos/actualizar', 'ProductController@update');
 
         // GET /api/admin/productos?limit=...&offset=... (protegido, listar con paginación)
@@ -95,13 +98,35 @@ class Router
 
     /**
      * Registrar ruta POST.
-     * 
+     *
      * @param string $pattern
      * @param string $handler
      */
     private function post(string $pattern, string $handler): void
     {
         $this->routes['POST'][$pattern] = $handler;
+    }
+
+    /**
+     * Registrar ruta PUT.
+     *
+     * @param string $pattern
+     * @param string $handler
+     */
+    private function put(string $pattern, string $handler): void
+    {
+        $this->routes['PUT'][$pattern] = $handler;
+    }
+
+    /**
+     * Registrar ruta DELETE.
+     *
+     * @param string $pattern
+     * @param string $handler
+     */
+    private function delete(string $pattern, string $handler): void
+    {
+        $this->routes['DELETE'][$pattern] = $handler;
     }
 
     /**
