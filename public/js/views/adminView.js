@@ -8,7 +8,6 @@
  * - Delega renderizado a componentes
  */
 
-import { renderAdminProductCard } from './adminProductCard.js';
 import { renderAdminProductModalView } from './adminProductModalView.js';
 import { modalManager } from '../core/modalManager.js';
 import { setStatus } from '../core/utils.js';
@@ -18,7 +17,6 @@ import { checkAuth, logout, redirectToLogin, redirectToHome } from '../admin/ser
 import { searchProductByCode } from '../admin/services/productService.js';
 
 // Componentes
-import { setupProductCreateForm, setupProductEditForm } from '../admin/components/ProductFormHandler.js';
 import { setupPromotionCreateForm, loadProductsIntoSelect } from '../admin/components/PromotionFormHandler.js';
 
 /**
@@ -55,12 +53,14 @@ export async function editProductByCode(code) {
       const editBtn = modal.querySelector('#admin-edit-product-btn');
       if (editBtn) {
         editBtn.onclick = () => {
-          // Reemplazar contenido por formulario de edición
-          modal.querySelector('.modal-body').innerHTML = renderAdminProductCard(product);
-          const form = modal.querySelector('#admin-edit-product-form');
-          if (form) {
-            setupProductEditForm(form, product);
-          }
+          // Cerrar modal actual y abrir modal de edición
+          modalManager.close();
+
+          // Abrir modal de edición unificado
+          modalManager.showEditProduct(product, (updatedProduct) => {
+            // Recargar la vista si es necesario
+            console.log('Producto actualizado:', updatedProduct);
+          });
         };
       }
     }

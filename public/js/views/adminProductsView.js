@@ -16,8 +16,6 @@ import {
 } from "../admin/services/promotionService.js";
 import { showToast } from "../admin/components/Toast.js";
 import { modalManager } from "../core/modalManager.js";
-import { renderAdminProductCard } from "./adminProductCard.js";
-import { setupProductEditForm } from "../admin/components/ProductFormHandler.js";
 import { setupPromotionCreateForm } from "../admin/components/PromotionFormHandler.js";
 
 /**
@@ -175,59 +173,10 @@ export async function initAdminProductsView(_container) {
           return;
         }
 
-        // Abrir modal con formulario de edición
-        modalManager.open(
-          "admin-product-modal",
-          renderAdminProductCard(product),
-          {
-            preventClose: true,
-            onOpen: (modal) => {
-              const form = modal.querySelector("#admin-edit-product-form");
-              let formChanged = false;
-
-              // Detectar cambios en el formulario
-              if (form) {
-                form.addEventListener("input", () => {
-                  formChanged = true;
-                });
-              }
-
-              // Función para cerrar con confirmación
-              const closeWithConfirmation = () => {
-                if (formChanged) {
-                  if (
-                    confirm("¿Estás seguro de cerrar sin guardar los cambios?")
-                  ) {
-                    modalManager.close("admin-product-modal");
-                  }
-                } else {
-                  modalManager.close("admin-product-modal");
-                }
-              };
-
-              // Configurar botón X
-              const closeBtn = modal.querySelector("[data-close-modal]");
-              if (closeBtn) {
-                closeBtn.onclick = closeWithConfirmation;
-              }
-
-              // Configurar botón cancelar
-              const cancelBtn = modal.querySelector("[data-dismiss-modal]");
-              if (cancelBtn) {
-                cancelBtn.onclick = closeWithConfirmation;
-              }
-
-              // Configurar formulario
-              if (form) {
-                setupProductEditForm(form, product, () => {
-                  formChanged = false; // Resetear flag al guardar
-                  modalManager.close("admin-product-modal");
-                  loadProducts(currentPage);
-                });
-              }
-            },
-          }
-        );
+        // Abrir modal de edición unificado
+        modalManager.showEditProduct(product, () => {
+          loadProducts(currentPage);
+        });
       };
     });
 

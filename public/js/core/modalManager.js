@@ -429,6 +429,273 @@ class ModalManager {
   }
 
   // ============================================
+  // HELPERS PARA MODALES DE PRODUCTO
+  // ============================================
+
+  /**
+   * Genera la estructura HTML base para modales de producto (crear/editar)
+   */
+  _generateProductModalHTML(mode, product = null) {
+    const isEdit = mode === 'edit';
+    const currentYear = new Date().getFullYear();
+    const imageUrl = isEdit && product?.image_url && product.image_url !== '0' ? product.image_url : '';
+
+    return `
+      <div class="product-modal-wrapper">
+        <h2 class="product-modal-title">
+          <i class="fas fa-${isEdit ? 'edit' : 'plus-circle'} me-2"></i>${isEdit ? 'Editar' : 'Nuevo'} Producto
+        </h2>
+
+        <form id="${isEdit ? 'admin-edit' : 'product-create'}-product-form" class="product-modal-form" novalidate>
+          <!-- Sección de imagen -->
+          <div class="form-image-section">
+            <label class="form-label">Imagen del producto</label>
+            <div class="image-upload-container">
+              <div class="image-preview-box" id="${isEdit ? 'edit' : 'create'}-image-display">
+                ${imageUrl
+                  ? `<img src="${escapeHtml(imageUrl)}" alt="Producto" class="image-preview-thumb" id="current-product-image">`
+                  : `<div class="image-placeholder">
+                       <i class="fas fa-wine-bottle"></i>
+                       <p>Sin imagen</p>
+                     </div>`
+                }
+              </div>
+              <div class="image-upload-actions">
+                <div>
+                  <h5>${imageUrl ? 'Cambiar imagen' : 'Agregar imagen'}</h5>
+                  <p>Seleccione una foto que represente el producto</p>
+                </div>
+                <input
+                  type="file"
+                  id="${isEdit ? 'edit' : 'create'}-product-image"
+                  accept="image/jpeg,image/png,image/webp"
+                  class="d-none"
+                >
+                <button type="button" class="btn-upload-image" id="${isEdit ? 'edit' : 'create'}-select-image-btn">
+                  <i class="fas fa-upload"></i>${imageUrl ? 'Cambiar' : 'Seleccionar archivo'}
+                </button>
+                <p class="form-text mb-0">
+                  <i class="fas fa-info-circle"></i>JPG, PNG o WebP · Máximo 5MB
+                </p>
+              </div>
+            </div>
+          </div>
+
+          ${this._generateProductFormFields(isEdit, product, currentYear)}
+
+          <!-- Mensaje de estado -->
+          <div id="${isEdit ? 'edit' : 'create'}-form-status" class="alert d-none mb-3" role="alert"></div>
+
+          <!-- Botones -->
+          <div class="d-flex gap-2 justify-content-end mt-4 pt-3 border-top">
+            <button type="button" class="btn-modal btn-modal-secondary" data-dismiss-modal>
+              <i class="fas fa-times me-1"></i>Cancelar
+            </button>
+            <button type="submit" class="btn-modal btn-modal-primary" id="${isEdit ? 'save' : 'create'}-product-btn">
+              <i class="fas fa-${isEdit ? 'save' : 'plus'} me-1"></i>${isEdit ? 'Guardar cambios' : 'Crear producto'}
+            </button>
+          </div>
+        </form>
+      </div>
+    `;
+  }
+
+  /**
+   * Genera los campos del formulario de producto
+   */
+  _generateProductFormFields(isEdit, product, currentYear) {
+    const p = product || {};
+    const descriptionLength = (p.short_description || '').length;
+
+    return `
+      <!-- Identificación -->
+      <div class="form-section mb-4">
+        <h4 class="form-section-title">Identificación</h4>
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label for="${isEdit ? 'edit' : 'create'}-public-code" class="form-label">
+              Código público <span class="text-danger">*</span>
+            </label>
+            <input
+              type="text"
+              class="form-control"
+              id="${isEdit ? 'edit' : 'create'}-public-code"
+              name="public_code"
+              value="${escapeHtml(p.public_code || '')}"
+              ${isEdit ? 'readonly title="El código no puede modificarse"' : 'required pattern="[A-Z0-9\\\\-]+" placeholder="Ej: MALBEC-2021-001"'}
+            >
+            ${isEdit
+              ? '<small class="form-text text-muted">Este código es único e inmutable</small>'
+              : '<div class="invalid-feedback">Solo mayúsculas, números y guiones</div>'
+            }
+          </div>
+          <div class="col-md-6">
+            <label for="${isEdit ? 'edit' : 'create'}-name" class="form-label">
+              Nombre <span class="text-danger">*</span>
+            </label>
+            <input
+              type="text"
+              class="form-control"
+              id="${isEdit ? 'edit' : 'create'}-name"
+              name="name"
+              value="${escapeHtml(p.name || '')}"
+              required
+              minlength="3"
+              maxlength="100"
+              placeholder="Ej: Malbec Reserva 2020"
+            >
+            <div class="invalid-feedback">El nombre debe tener entre 3 y 100 caracteres</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Información del producto -->
+      <div class="form-section mb-4">
+        <h4 class="form-section-title">Información del Producto</h4>
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label for="${isEdit ? 'edit' : 'create'}-winery" class="form-label">
+              Bodega/Destilería <span class="text-danger">*</span>
+            </label>
+            <input
+              type="text"
+              class="form-control"
+              id="${isEdit ? 'edit' : 'create'}-winery"
+              name="winery_distillery"
+              value="${escapeHtml(p.winery_distillery || '')}"
+              required
+              minlength="2"
+              maxlength="100"
+              placeholder="Ej: Bodega Catena Zapata"
+            >
+            <div class="invalid-feedback">Ingrese el nombre de la bodega o destilería</div>
+          </div>
+          <div class="col-md-6">
+            <label for="${isEdit ? 'edit' : 'create'}-drink-type" class="form-label">
+              Tipo de bebida <span class="text-danger">*</span>
+            </label>
+            <select class="form-select" id="${isEdit ? 'edit' : 'create'}-drink-type" name="drink_type" required>
+              <option value="">Seleccione un tipo</option>
+              <option value="vino" ${p.drink_type === 'vino' ? 'selected' : ''}>Vino</option>
+              <option value="espumante" ${p.drink_type === 'espumante' ? 'selected' : ''}>Espumante</option>
+              <option value="whisky" ${p.drink_type === 'whisky' ? 'selected' : ''}>Whisky</option>
+              <option value="gin" ${p.drink_type === 'gin' ? 'selected' : ''}>Gin</option>
+              <option value="cerveza" ${p.drink_type === 'cerveza' ? 'selected' : ''}>Cerveza</option>
+              <option value="licor" ${p.drink_type === 'licor' ? 'selected' : ''}>Licor</option>
+            </select>
+            <div class="invalid-feedback">Seleccione el tipo de bebida</div>
+          </div>
+        </div>
+
+        <div class="row g-3 mt-2">
+          <div class="col-md-6">
+            <label for="${isEdit ? 'edit' : 'create'}-varietal" class="form-label">Varietal</label>
+            <input
+              type="text"
+              class="form-control"
+              id="${isEdit ? 'edit' : 'create'}-varietal"
+              name="varietal"
+              value="${escapeHtml(p.varietal || '')}"
+              maxlength="50"
+              placeholder="Ej: Malbec, Cabernet Sauvignon"
+            >
+          </div>
+          <div class="col-md-6">
+            <label for="${isEdit ? 'edit' : 'create'}-origin" class="form-label">Origen</label>
+            <input
+              type="text"
+              class="form-control"
+              id="${isEdit ? 'edit' : 'create'}-origin"
+              name="origin"
+              value="${escapeHtml(p.origin || '')}"
+              maxlength="100"
+              placeholder="Ej: Mendoza, Argentina"
+            >
+          </div>
+        </div>
+      </div>
+
+      <!-- Precio y stock -->
+      <div class="form-section mb-4">
+        <h4 class="form-section-title">Precio y Stock</h4>
+        <div class="row g-3">
+          <div class="col-md-4">
+            <label for="${isEdit ? 'edit' : 'create'}-vintage" class="form-label">Año de cosecha</label>
+            <input
+              type="number"
+              class="form-control"
+              id="${isEdit ? 'edit' : 'create'}-vintage"
+              name="vintage_year"
+              value="${escapeHtml(p.vintage_year || '')}"
+              min="1900"
+              max="${currentYear + 1}"
+              placeholder="Ej: ${currentYear - 3}"
+            >
+          </div>
+          <div class="col-md-4">
+            <label for="${isEdit ? 'edit' : 'create'}-price" class="form-label">
+              Precio base <span class="text-danger">*</span>
+            </label>
+            <div class="input-group">
+              <span class="input-group-text">$</span>
+              <input
+                type="number"
+                class="form-control"
+                id="${isEdit ? 'edit' : 'create'}-price"
+                name="base_price"
+                step="0.01"
+                value="${escapeHtml(p.base_price || '')}"
+                required
+                min="0.01"
+                max="999999.99"
+                placeholder="0.00"
+              >
+            </div>
+            <div class="invalid-feedback">Ingrese un precio válido mayor a 0</div>
+          </div>
+          <div class="col-md-4">
+            <label for="${isEdit ? 'edit' : 'create'}-stock" class="form-label">Stock visible</label>
+            <input
+              type="number"
+              class="form-control"
+              id="${isEdit ? 'edit' : 'create'}-stock"
+              name="visible_stock"
+              value="${escapeHtml(p.visible_stock || '')}"
+              min="0"
+              max="99999"
+              placeholder="0"
+            >
+          </div>
+        </div>
+      </div>
+
+      <!-- Descripción -->
+      <div class="form-section mb-4">
+        <h4 class="form-section-title">Descripción</h4>
+        <div class="row g-3">
+          <div class="col-12">
+            <label for="${isEdit ? 'edit' : 'create'}-description" class="form-label">Descripción corta</label>
+            <textarea
+              class="form-control"
+              id="${isEdit ? 'edit' : 'create'}-description"
+              name="short_description"
+              rows="4"
+              maxlength="200"
+              placeholder="Breve descripción del producto (opcional)"
+            >${escapeHtml(p.short_description || '')}</textarea>
+            <div class="d-flex justify-content-between align-items-center mt-1">
+              <small class="form-text text-muted">Máximo 200 caracteres</small>
+              <small class="form-text">
+                <span id="char-count">${descriptionLength}</span>/200
+              </small>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  // ============================================
   // MODAL DE CREAR PRODUCTO
   // ============================================
 
@@ -436,227 +703,77 @@ class ModalManager {
    * Muestra el modal de creación de producto
    */
   async showCreateProduct(onSuccess = null) {
-    const content = `
-      <div class="product-form-modal">
-        <h2 class="modal-title">Nuevo Producto</h2>
-        <p class="modal-subtitle">Complete los datos del producto</p>
+    const content = this._generateProductModalHTML('create');
 
-        <form id="product-create-form" class="product-form" novalidate>
-          <!-- Imagen del producto -->
-          <div class="form-section">
-            <h3 class="form-section-title">Imagen del producto</h3>
-            <div class="image-upload-area">
-              <div class="image-preview" id="image-preview">
-                <i class="fas fa-image"></i>
-                <p>Ninguna imagen seleccionada</p>
-              </div>
-              <input
-                type="file"
-                id="product-image"
-                name="product_image"
-                accept="image/jpeg,image/png,image/webp"
-                class="d-none"
-              >
-              <button type="button" class="btn-modal btn-modal-secondary btn-sm" id="select-image-btn">
-                <i class="fas fa-upload me-1"></i>Seleccionar imagen
-              </button>
-              <p class="form-text">Formatos: JPG, PNG, WebP (máx. 5MB)</p>
-            </div>
-          </div>
-
-          <!-- Información básica -->
-          <div class="form-section">
-            <h3 class="form-section-title">Información básica</h3>
-
-            <div class="form-group">
-              <label for="product-code" class="form-label">Código público <span class="text-danger">*</span></label>
-              <input
-                type="text"
-                id="product-code"
-                name="public_code"
-                class="form-control"
-                placeholder="Ej: MALBEC-2021-001"
-                required
-                pattern="[A-Z0-9\\-]+"
-                title="Solo mayúsculas, números y guiones"
-              >
-              <div class="invalid-feedback">Este campo es requerido</div>
-            </div>
-
-            <div class="form-group">
-              <label for="product-name" class="form-label">Nombre del producto <span class="text-danger">*</span></label>
-              <input
-                type="text"
-                id="product-name"
-                name="name"
-                class="form-control"
-                placeholder="Ej: Trapiche Malbec Reserva"
-                required
-              >
-              <div class="invalid-feedback">Este campo es requerido</div>
-            </div>
-
-            <div class="form-row">
-              <div class="form-group">
-                <label for="product-type" class="form-label">Tipo de bebida <span class="text-danger">*</span></label>
-                <select id="product-type" name="drink_type" class="form-control" required>
-                  <option value="">Seleccionar...</option>
-                  <option value="vino">Vino</option>
-                  <option value="espumante">Espumante</option>
-                  <option value="whisky">Whisky</option>
-                  <option value="gin">Gin</option>
-                  <option value="licor">Licor</option>
-                  <option value="cerveza">Cerveza</option>
-                  <option value="otro">Otro</option>
-                </select>
-                <div class="invalid-feedback">Seleccione un tipo</div>
-              </div>
-
-              <div class="form-group">
-                <label for="product-price" class="form-label">Precio base <span class="text-danger">*</span></label>
-                <input
-                  type="number"
-                  id="product-price"
-                  name="base_price"
-                  class="form-control"
-                  placeholder="0.00"
-                  step="0.01"
-                  min="0.01"
-                  required
-                >
-                <div class="invalid-feedback">Ingrese un precio válido</div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Detalles del producto -->
-          <div class="form-section">
-            <h3 class="form-section-title">Detalles del producto</h3>
-
-            <div class="form-group">
-              <label for="product-winery" class="form-label">Bodega/Destilería <span class="text-danger">*</span></label>
-              <input
-                type="text"
-                id="product-winery"
-                name="winery_distillery"
-                class="form-control"
-                placeholder="Ej: Bodega Trapiche"
-                required
-              >
-              <div class="invalid-feedback">Este campo es requerido</div>
-            </div>
-
-            <div class="form-row">
-              <div class="form-group">
-                <label for="product-varietal" class="form-label">Varietal/Tipo</label>
-                <input
-                  type="text"
-                  id="product-varietal"
-                  name="varietal"
-                  class="form-control"
-                  placeholder="Ej: Malbec"
-                >
-              </div>
-
-              <div class="form-group">
-                <label for="product-origin" class="form-label">Origen</label>
-                <input
-                  type="text"
-                  id="product-origin"
-                  name="origin"
-                  class="form-control"
-                  placeholder="Ej: Mendoza, Argentina"
-                >
-              </div>
-            </div>
-
-            <div class="form-row">
-              <div class="form-group">
-                <label for="product-year" class="form-label">Año de cosecha</label>
-                <input
-                  type="number"
-                  id="product-year"
-                  name="vintage_year"
-                  class="form-control"
-                  placeholder="2021"
-                  min="1900"
-                  max="2100"
-                >
-              </div>
-
-              <div class="form-group">
-                <label for="product-stock" class="form-label">Stock visible</label>
-                <input
-                  type="number"
-                  id="product-stock"
-                  name="visible_stock"
-                  class="form-control"
-                  placeholder="0"
-                  min="0"
-                >
-              </div>
-            </div>
-
-            <div class="form-group">
-              <label for="product-description" class="form-label">Descripción breve</label>
-              <textarea
-                id="product-description"
-                name="short_description"
-                class="form-control"
-                rows="3"
-                maxlength="200"
-                placeholder="Descripción del producto (máx. 200 caracteres)"
-              ></textarea>
-              <small class="form-text"><span id="char-count">0</span>/200 caracteres</small>
-            </div>
-          </div>
-
-          <!-- Estado del formulario -->
-          <div id="form-status" class="alert d-none" role="alert"></div>
-
-          <!-- Botones de acción -->
-          <div class="modal-actions">
-            <button type="button" class="btn-modal btn-modal-secondary" id="cancel-create-btn">
-              Cancelar
-            </button>
-            <button type="submit" class="btn-modal btn-modal-primary" id="submit-create-btn">
-              <i class="fas fa-save me-1"></i>Crear producto
-            </button>
-          </div>
-        </form>
-      </div>
-    `;
-
-    const modal = this.open('create-product-modal', content, {
+    this.open('create-product-modal', content, {
       disableClickOutside: true,
       onOpen: (modalEl) => {
         modalEl.classList.add('admin-modal');
-        this.initCreateProductForm(modalEl, onSuccess);
+        this._setupProductFormLogic('create', null, modalEl, onSuccess);
       }
     });
   }
 
+  // ============================================
+  // MODAL DE EDITAR PRODUCTO
+  // ============================================
+
   /**
-   * Inicializa el formulario de creación de producto
+   * Muestra el modal de edición de producto
    */
-  initCreateProductForm(modal, onSuccess) {
-    const form = modal.querySelector('#product-create-form');
-    const imageInput = modal.querySelector('#product-image');
-    const imagePreview = modal.querySelector('#image-preview');
-    const selectImageBtn = modal.querySelector('#select-image-btn');
-    const cancelBtn = modal.querySelector('#cancel-create-btn');
-    const submitBtn = modal.querySelector('#submit-create-btn');
-    const statusEl = modal.querySelector('#form-status');
-    const descriptionTextarea = modal.querySelector('#product-description');
+  async showEditProduct(product, onSuccess = null) {
+    if (!product || !product.id) {
+      console.error('Product data is required for edit modal');
+      return;
+    }
+
+    const content = this._generateProductModalHTML('edit', product);
+
+    this.open('edit-product-modal', content, {
+      disableClickOutside: true,
+      onOpen: (modalEl) => {
+        modalEl.classList.add('admin-modal');
+        this._setupProductFormLogic('edit', product, modalEl, onSuccess);
+      }
+    });
+  }
+
+  // ============================================
+  // LÓGICA COMÚN DE FORMULARIOS DE PRODUCTO
+  // ============================================
+
+  /**
+   * Configura la lógica del formulario de producto (crear/editar)
+   * @param {string} mode - 'create' o 'edit'
+   * @param {Object|null} product - Datos del producto (null para create)
+   * @param {HTMLElement} modal - Elemento del modal
+   * @param {Function|null} onSuccess - Callback de éxito
+   */
+  _setupProductFormLogic(mode, product, modal, onSuccess) {
+    const isEdit = mode === 'edit';
+    const prefix = isEdit ? 'edit' : 'create';
+
+    // Seleccionar elementos del DOM
+    const form = modal.querySelector(`#${isEdit ? 'admin-edit' : 'product-create'}-product-form`);
+    const imageInput = modal.querySelector(`#${prefix}-product-image`);
+    const imageDisplay = modal.querySelector(`#${prefix}-image-display`);
+    const selectImageBtn = modal.querySelector(`#${prefix}-select-image-btn`);
+    const submitBtn = modal.querySelector(`#${isEdit ? 'save' : 'create'}-product-btn`);
+    const statusEl = modal.querySelector(`#${prefix}-form-status`);
+    const descriptionTextarea = modal.querySelector(`#${prefix}-description`);
     const charCount = modal.querySelector('#char-count');
 
-    let uploadedImageUrl = null;
+    // Botones de cancelar
+    const closeBtn = modal.querySelector('[data-close-modal]');
+    const dismissBtn = modal.querySelector('[data-dismiss-modal]');
 
-    // Contador de caracteres
+    let uploadedImageUrl = isEdit && product?.image_url ? product.image_url : null;
+    let hasChangedImage = false;
+
+    // Contador de caracteres de descripción
     if (descriptionTextarea && charCount) {
       descriptionTextarea.addEventListener('input', () => {
-        const length = descriptionTextarea.value.length;
-        charCount.textContent = length;
+        charCount.textContent = descriptionTextarea.value.length;
       });
     }
 
@@ -683,14 +800,14 @@ class ModalManager {
         // Preview de la imagen
         const reader = new FileReader();
         reader.onload = (e) => {
-          imagePreview.innerHTML = `<img src="${e.target.result}" alt="Preview" style="max-width: 100%; max-height: 200px; border-radius: 8px;">`;
+          imageDisplay.innerHTML = `<img src="${e.target.result}" alt="Preview" class="image-preview-thumb">`;
         };
         reader.readAsDataURL(file);
 
         // Subir imagen al servidor
         this.showFormStatus(statusEl, 'Subiendo imagen...', 'info');
         selectImageBtn.disabled = true;
-        selectImageBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Subiendo...';
+        selectImageBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Subiendo...';
 
         try {
           const formData = new FormData();
@@ -708,22 +825,36 @@ class ModalManager {
           }
 
           uploadedImageUrl = data.data.url;
+          hasChangedImage = true;
+
+          // Actualizar preview con la URL del servidor
+          imageDisplay.innerHTML = `<img src="${uploadedImageUrl}" alt="Producto" class="image-preview-thumb">`;
+
           this.showFormStatus(statusEl, 'Imagen subida correctamente', 'success');
+          selectImageBtn.innerHTML = '<i class="fas fa-upload"></i>Cambiar';
 
         } catch (error) {
           this.showFormStatus(statusEl, `Error al subir imagen: ${error.message}`, 'error');
-          imagePreview.innerHTML = `<i class="fas fa-image"></i><p>Error al subir</p>`;
+          imageDisplay.innerHTML = `
+            <div class="image-placeholder">
+              <i class="fas fa-wine-bottle"></i>
+              <p>Error al subir</p>
+            </div>
+          `;
           uploadedImageUrl = null;
+          selectImageBtn.innerHTML = '<i class="fas fa-upload"></i>Seleccionar archivo';
         } finally {
           selectImageBtn.disabled = false;
-          selectImageBtn.innerHTML = '<i class="fas fa-upload me-1"></i>Seleccionar imagen';
         }
       });
     }
 
-    // Cancelar
-    if (cancelBtn) {
-      cancelBtn.addEventListener('click', () => this.close());
+    // Botones de cancelar
+    if (closeBtn) {
+      closeBtn.addEventListener('click', () => this.close());
+    }
+    if (dismissBtn) {
+      dismissBtn.addEventListener('click', () => this.close());
     }
 
     // Enviar formulario
@@ -739,53 +870,135 @@ class ModalManager {
           return;
         }
 
-        // Preparar datos
-        const formData = new FormData(form);
-        const payload = Object.fromEntries(formData.entries());
+        // Si es edición y cambió la imagen, preguntar qué hacer con la anterior
+        if (isEdit && hasChangedImage && product?.image_url && product.image_url !== '0') {
+          const shouldDelete = await this._showImageActionDialog(product.image_url);
 
-        // Agregar URL de imagen si fue subida
-        if (uploadedImageUrl) {
-          payload.image_url = uploadedImageUrl;
-        }
+          // Preparar datos
+          const formData = new FormData(form);
+          const payload = Object.fromEntries(formData.entries());
 
-        // Eliminar campo de archivo (ya subimos la imagen)
-        delete payload.product_image;
-
-        // Deshabilitar botón
-        submitBtn.disabled = true;
-        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Creando...';
-        this.showFormStatus(statusEl, 'Creando producto...', 'info');
-
-        try {
-          const response = await fetch('./api/admin/productos', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(payload)
-          });
-
-          const data = await response.json();
-
-          if (!response.ok) {
-            throw new Error(data.message || 'Error al crear el producto');
+          // Agregar URL de imagen
+          if (uploadedImageUrl) {
+            payload.image_url = uploadedImageUrl;
           }
 
-          this.showFormStatus(statusEl, 'Producto creado con éxito', 'success');
+          // Agregar flag de eliminación de imagen anterior
+          if (shouldDelete) {
+            payload.delete_old_image = true;
+            payload.old_image_url = product.image_url;
+          }
 
-          // Esperar un momento y cerrar
-          setTimeout(() => {
-            this.close();
-            if (onSuccess) onSuccess(data.data);
-          }, 1000);
+          // Enviar actualización
+          await this._submitProductForm(isEdit, product?.id, payload, submitBtn, statusEl, onSuccess);
+        } else {
+          // Preparar datos normales
+          const formData = new FormData(form);
+          const payload = Object.fromEntries(formData.entries());
 
-        } catch (error) {
-          this.showFormStatus(statusEl, `Error: ${error.message}`, 'error');
-          submitBtn.disabled = false;
-          submitBtn.innerHTML = '<i class="fas fa-save me-1"></i>Crear producto';
+          // Agregar URL de imagen si existe
+          if (uploadedImageUrl) {
+            payload.image_url = uploadedImageUrl;
+          }
+
+          // Enviar
+          await this._submitProductForm(isEdit, product?.id, payload, submitBtn, statusEl, onSuccess);
         }
       });
     }
+  }
+
+  /**
+   * Envía el formulario de producto al servidor
+   */
+  async _submitProductForm(isEdit, productId, payload, submitBtn, statusEl, onSuccess) {
+    const endpoint = isEdit ? `./api/admin/productos/${productId}` : './api/admin/productos';
+    const method = isEdit ? 'PUT' : 'POST';
+    const actionText = isEdit ? 'Guardando' : 'Creando';
+    const successText = isEdit ? 'Producto actualizado con éxito' : 'Producto creado con éxito';
+
+    // Deshabilitar botón
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = `<i class="fas fa-spinner fa-spin me-1"></i>${actionText}...`;
+    this.showFormStatus(statusEl, `${actionText} producto...`, 'info');
+
+    try {
+      const response = await fetch(endpoint, {
+        method,
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(payload)
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || `Error al ${isEdit ? 'actualizar' : 'crear'} el producto`);
+      }
+
+      this.showFormStatus(statusEl, successText, 'success');
+
+      // Esperar un momento y cerrar
+      setTimeout(() => {
+        this.close();
+        if (onSuccess) onSuccess(data.data);
+      }, 1000);
+
+    } catch (error) {
+      this.showFormStatus(statusEl, `Error: ${error.message}`, 'error');
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = `<i class="fas fa-${isEdit ? 'save' : 'plus'} me-1"></i>${isEdit ? 'Guardar cambios' : 'Crear producto'}`;
+    }
+  }
+
+  /**
+   * Muestra un diálogo para elegir qué hacer con la imagen anterior
+   * @returns {Promise<boolean>} true si se debe eliminar, false si se debe conservar
+   */
+  async _showImageActionDialog(oldImageUrl) {
+    return new Promise((resolve) => {
+      const dialogContent = `
+        <div class="image-action-dialog">
+          <div class="dialog-icon">
+            <i class="fas fa-images fa-3x text-warning"></i>
+          </div>
+          <h3 class="dialog-title">Imagen anterior detectada</h3>
+          <p class="dialog-message">
+            Has subido una nueva imagen. ¿Qué deseas hacer con la imagen anterior?
+          </p>
+          <div class="old-image-preview">
+            <img src="${escapeHtml(oldImageUrl)}" alt="Imagen anterior" style="max-width: 200px; border-radius: 8px;">
+          </div>
+          <div class="dialog-actions">
+            <button type="button" class="btn-modal btn-modal-secondary" id="keep-old-image">
+              <i class="fas fa-save me-1"></i>Conservar
+            </button>
+            <button type="button" class="btn-modal btn-modal-danger" id="delete-old-image">
+              <i class="fas fa-trash-alt me-1"></i>Eliminar del servidor
+            </button>
+          </div>
+        </div>
+      `;
+
+      const dialogModal = this.open('image-action-dialog-modal', dialogContent, {
+        disableClickOutside: true,
+        preventClose: true
+      });
+
+      const keepBtn = dialogModal.querySelector('#keep-old-image');
+      const deleteBtn = dialogModal.querySelector('#delete-old-image');
+
+      keepBtn?.addEventListener('click', () => {
+        this.close();
+        resolve(false);
+      });
+
+      deleteBtn?.addEventListener('click', () => {
+        this.close();
+        resolve(true);
+      });
+    });
   }
 
   /**

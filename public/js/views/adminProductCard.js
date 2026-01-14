@@ -13,25 +13,50 @@ export function renderAdminProductCard(product, onEdit) {
   const currentYear = new Date().getFullYear();
   const descriptionLength = (product.short_description || '').length;
 
+  const imageUrl = product.image_url && product.image_url !== '0' ? product.image_url : '';
+
   return `
-    <div class="admin-product-card-wrapper overflow-auto">
-      <div class="admin-product-card">
-        <div class="modal-header border-bottom pb-3 mb-4">
-          <h3 class="modal-title mb-0">
+    <div class="admin-product-edit-modal">
+      <!-- Sección de imagen (igual que el modal público) -->
+      <div class="product-image-section-edit">
+        <div class="product-image-wrapper-edit" id="edit-image-display">
+          ${imageUrl
+            ? `<img src="${escapeHtml(imageUrl)}" alt="${escapeHtml(product.name)}" class="product-image-edit" id="current-product-image">`
+            : `<div class="product-image-placeholder-edit">
+                 <i class="fas fa-image fa-4x text-muted"></i>
+                 <p class="text-muted mt-3">Sin imagen</p>
+               </div>`
+          }
+        </div>
+        <div class="change-image-overlay">
+          <input
+            type="file"
+            id="edit-product-image"
+            accept="image/jpeg,image/png,image/webp"
+            class="d-none"
+          >
+          <button type="button" class="btn-change-image" id="select-new-image-btn">
+            <i class="fas fa-camera me-2"></i>Cambiar imagen
+          </button>
+        </div>
+      </div>
+
+      <!-- Sección de contenido (formulario) -->
+      <div class="product-content-section-edit">
+        <div class="modal-header-edit">
+          <h3 class="modal-title-edit">
             <i class="fas fa-edit me-2"></i>Editar Producto
           </h3>
           <button type="button" class="btn-close-custom" data-close-modal aria-label="Cerrar">&times;</button>
         </div>
 
         <form id="admin-edit-product-form" novalidate>
-          <!-- Código e identificación -->
+          <!-- Identificación -->
           <div class="form-section mb-4">
             <h4 class="form-section-title">Identificación</h4>
             <div class="row g-3">
               <div class="col-md-6">
-                <label for="edit-public-code" class="form-label">
-                  <i class="fas fa-qrcode me-1"></i>Código público
-                </label>
+                <label for="edit-public-code" class="form-label">Código público</label>
                 <input
                   type="text"
                   class="form-control"
@@ -44,9 +69,7 @@ export function renderAdminProductCard(product, onEdit) {
                 <small class="form-text text-muted">Este código es único e inmutable</small>
               </div>
               <div class="col-md-6">
-                <label for="edit-name" class="form-label">
-                  <i class="fas fa-wine-bottle me-1"></i>Nombre <span class="text-danger">*</span>
-                </label>
+                <label for="edit-name" class="form-label">Nombre <span class="text-danger">*</span></label>
                 <input
                   type="text"
                   class="form-control"
