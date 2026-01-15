@@ -24,7 +24,7 @@ WINE-PICK-QR se centra en cuatro grupos principales de información:
    Reglas simples asociadas a productos individuales para comunicar un **precio final con promoción aplicada**.
 
 3. **Eventos de consulta**  
-   Registros de las veces que un producto es consultado (por **QR** o por **búsqueda**), para obtener métricas agregadas sin manejar datos personales.
+  Registros de las veces que un producto es consultado (por **QR** o por **búsqueda**) en la tabla `consult_events`, para obtener métricas agregadas sin manejar datos personales.
 
 4. **Usuarios administradores**  
    Personas autorizadas para acceder al panel de administración y gestionar catálogo, promociones y métricas.
@@ -33,14 +33,14 @@ A partir de estos grupos se proponen las siguientes entidades principales:
 
 - `Producto`
 - `PromocionProducto`
-- `EventoConsulta`
+-- `ConsultEvent`
 - `UsuarioAdministrador`
 
 En el modelo lógico, estas entidades se corresponden con tablas:
 
 - `productos`
 - `promociones`
-- `eventos_consulta`
+-- `consult_events`
 - `usuarios_admin`
 
 ---
@@ -92,7 +92,7 @@ Rol en el sistema:
   - “Consultas por día.”
   - “Porcentaje de consultas por QR vs búsqueda.”
 
-Se diseña explícitamente para **no almacenar datos personales**, alineado con el objetivo de registrar solo métricas agregadas.
+Se almacena en la tabla `consult_events` y se diseña explícitamente para **no almacenar datos personales**, alineado con el objetivo de registrar solo métricas agregadas.
 
 ### 2.4 Usuario administrador
 
@@ -246,36 +246,37 @@ Almacena las promociones asociadas a productos. En el MVP se contempla **una pro
 
 ---
 
-### 3.3 Tabla `eventos_consulta`
+
+### 3.3 Tabla `consult_events`
 
 Registra cada consulta de ficha de producto, ya sea por QR o por búsqueda. Es la base para las métricas agregadas.
 
-**Nombre de tabla:** `eventos_consulta`
+**Nombre de tabla:** `consult_events`
 
-**Campos sugeridos:**
+**Campos reales:**
 
-- `id_evento` (PK, `INT` autoincremental)  
+- `id` (PK, `INT` autoincremental)  
   Identificador interno del evento.
 
-- `id_producto` (`INT`, NOT NULL, FK)  
+- `product_id` (`INT`, NOT NULL, FK)  
   Producto al que corresponde la consulta.
 
-- `fecha_hora` (`DATETIME`, NOT NULL)  
+- `occurred_at` (`DATETIME`, NOT NULL)  
   Momento exacto de la consulta.
 
-- `canal` (`ENUM('QR','BUSQUEDA')`, NOT NULL)  
+- `channel` (`ENUM('QR','BUSQUEDA')`, NOT NULL)  
   Indica si la consulta provino de:
   - Escaneo de código QR (`QR`).
   - Búsqueda por texto (`BUSQUEDA`).
 
-- `contexto` (`VARCHAR(100)`, NULLABLE)  
+- `context_info` (`VARCHAR(100)`, NULLABLE)  
   Campo genérico para extensiones futuras (por ejemplo, “sucursal_1”, “demo_tienda”, etc.).  
   No se recomienda almacenar datos personales ni identificadores directos de clientes.
 
 **Claves y restricciones:**
 
-- **PK:** `id_evento`
-- **FK:** `id_producto` → `productos.id_producto`
+- **PK:** `id`
+- **FK:** `product_id` → `productos.id_producto`
 
 **Consideraciones de privacidad:**
 
@@ -284,39 +285,42 @@ Registra cada consulta de ficha de producto, ya sea por QR o por búsqueda. Es l
 
 ---
 
-### 3.4 Tabla `usuarios_admin`
+### 3.4 Tabla `admin_users`
 
 Almacena los datos de los usuarios autorizados para ingresar al panel de administración.
 
-**Nombre de tabla:** `usuarios_admin`
+**Nombre de tabla:** `admin_users`
 
-**Campos sugeridos:**
+**Campos reales:**
 
-- `id_admin` (PK, `INT` autoincremental)  
+- `id` (PK, `INT` autoincremental)  
   Identificador interno del administrador.
 
-- `usuario` (`VARCHAR(50)`, UNIQUE, NOT NULL)  
+- `username` (`VARCHAR(50)`, UNIQUE, NOT NULL)  
   Nombre de usuario para iniciar sesión.
 
-- `contrasena_hash` (`VARCHAR(255)`, NOT NULL)  
-  Contraseña almacenada mediante un algoritmo de hash adecuado (no se guardan contraseñas en texto plano).
+- `password_hash` (`VARCHAR(255)`, NOT NULL)  
+  Hash de la contraseña del administrador.
 
-- `nombre_completo` (`VARCHAR(150)`, NULLABLE)  
-  Nombre de la persona (opcional, para identificar a quien realiza cambios).
+- `full_name` (`VARCHAR(150)`, NULL)  
+  Nombre y apellido del administrador.
 
-- `email` (`VARCHAR(150)`, NULLABLE)  
-  Correo de contacto o recuperación (según políticas del sistema).
+- `email` (`VARCHAR(150)`, NULL)  
+  Correo electrónico de contacto.
 
-- `activo` (`TINYINT(1)`, NOT NULL, default 1)  
-  Indica si el usuario puede o no acceder al panel.
+- `is_active` (`TINYINT(1)`, NOT NULL, default 1)  
+  Indica si el usuario está activo (1) o desactivado (0).
 
-- `fecha_creacion` (`DATETIME`, NOT NULL)  
-  Fecha de alta del usuario.
+- `created_at` (`DATETIME`, NOT NULL)  
+  Fecha y hora de creación del usuario.
 
-- `ultimo_acceso` (`DATETIME`, NULLABLE)  
-  Fecha y hora del último login exitoso.
+- `last_login_at` (`DATETIME`, NULL)  
+  Último acceso registrado.
 
 **Claves y restricciones:**
+
+- **PK:** `id`
+- **UK:** `username` (no se permiten usuarios duplicados).
 
 - **PK:** `id_admin`
 - **UK:** `usuario` (no se permiten usuarios duplicados).
@@ -335,9 +339,9 @@ A nivel conceptual, las relaciones principales son:
 
 2. **Producto – Evento de consulta**
 
-   - Un `Producto` puede haber sido consultado **cero o muchas** veces.
-   - Cada `EventoConsulta` pertenece a **exactamente un** producto.
-   - Cardinalidad: `Producto (1) — (0..N) EventoConsulta`
+  - Un `Producto` puede haber sido consultado **cero o muchas** veces.
+  - Cada `ConsultEvent` pertenece a **exactamente un** producto.
+  - Cardinalidad: `Producto (1) — (0..N) ConsultEvent`
 
 3. **Usuario administrador – Producto / Promoción**
 
