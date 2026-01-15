@@ -8,7 +8,6 @@
  * - Delega renderizado a componentes
  */
 
-import { renderAdminProductModalView } from './adminProductModalView.js';
 import { modalManager } from '../core/modalManager.js';
 import { setStatus } from '../core/utils.js';
 
@@ -37,33 +36,14 @@ export async function editProductByCode(code) {
   const product = await searchProductByCode(code);
 
   if (!product) {
-    modalManager.open('admin-product-modal', `
-      <div class="admin-product-card-error">
-        <h2>Producto no encontrado</h2>
-        <p>No se encontró ningún producto con ese código. Intenta con otro código o revisa la conexión.</p>
-        <button type="button" class="modal-close" aria-label="Cerrar" onclick="document.querySelector('.modal-close').click()">Cerrar</button>
-      </div>
-    `);
+    alert('No se encontró ningún producto con ese código.');
     return;
   }
 
-  // Mostrar ficha pública con botón Editar
-  modalManager.open('admin-product-modal', renderAdminProductModalView(product), {
-    onOpen: (modal) => {
-      const editBtn = modal.querySelector('#admin-edit-product-btn');
-      if (editBtn) {
-        editBtn.onclick = () => {
-          // Cerrar modal actual y abrir modal de edición
-          modalManager.close();
-
-          // Abrir modal de edición unificado
-          modalManager.showEditProduct(product, (updatedProduct) => {
-            // Recargar la vista si es necesario
-            console.log('Producto actualizado:', updatedProduct);
-          });
-        };
-      }
-    }
+  // Abrir directamente el modal de edición
+  modalManager.showEditProduct(product, (updatedProduct) => {
+    // Recargar la vista si es necesario
+    console.log('Producto actualizado:', updatedProduct);
   });
 }
 

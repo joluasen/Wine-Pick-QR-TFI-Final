@@ -156,7 +156,7 @@ export async function initAdminProductsView(_container) {
           (p) => String(p.id) === String(productId)
         );
         if (product) {
-          modalManager.showProduct(product);
+          modalManager.showProductAdmin(product);
         }
       };
     });

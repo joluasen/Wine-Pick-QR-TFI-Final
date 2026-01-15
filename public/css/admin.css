@@ -214,34 +214,11 @@
 }
 
 /* =========================================
-   MODAL DE PRODUCTO (CREAR/EDITAR)
+   FORMULARIO DE PRODUCTO (CREAR/EDITAR)
+   Estilos específicos para subida de imagen
    ========================================= */
 
-/* Ajustar tamaño del modal-content para modales de admin */
-.admin-modal .modal-content {
-  max-width: 900px;
-  width: 95%;
-}
-
-.product-modal-wrapper {
-  max-width: 100%;
-  margin: 0 auto;
-}
-
-.product-modal-title {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: #4A0E1A;
-  margin: 0 0 1.5rem 0;
-  padding-bottom: 1rem;
-  border-bottom: 2px solid #e9ecef;
-}
-
-.product-modal-form {
-  /* Formulario ocupa todo el ancho */
-}
-
-/* Sección de imagen - acorde al diseño de la aplicación */
+/* Sección de imagen */
 .form-image-section {
   margin-bottom: 1.5rem;
   padding-bottom: 1.5rem;

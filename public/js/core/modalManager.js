@@ -71,11 +71,13 @@ class ModalManager {
     if (!modal) {
       modal = document.createElement('div');
       modal.id = id;
-      modal.className = 'modal';
       modal.setAttribute('role', 'dialog');
       modal.setAttribute('aria-modal', 'true');
       document.getElementById('modal-container').appendChild(modal);
     }
+
+    // Reset clases (limpia clases de tamaño anteriores)
+    modal.className = 'modal';
 
     modal.innerHTML = `
       <div class="modal-overlay"></div>
@@ -171,26 +173,31 @@ class ModalManager {
    */
   showProduct(product) {
     const content = this.renderProductCard(product);
-    
-    this.open('product-modal', content, {
-      onOpen: (modal) => {
-        modal.classList.add('product-modal');
-      }
-    });
+    this.open('product-modal', content);
+  }
+
+  /**
+   * Muestra el modal de producto para admin (mismo modal, mismo estilo)
+   * @param {Object} product - Datos del producto
+   */
+  showProductAdmin(product) {
+    // Usa exactamente el mismo método - misma ficha, mismo estilo
+    this.showProduct(product);
   }
 
   /**
    * Renderiza la ficha de producto
+   * @param {Object} product - Datos del producto
    */
   renderProductCard(product) {
     const priceData = calculatePromoPrice(product);
     const basePrice = parseFloat(product.base_price);
     const imageUrl = product.image_url || '';
-    
+
     let badge = '';
     let savingsText = '';
     let originalPrice = '';
-    
+
     if (priceData.hasPromo) {
       switch (priceData.type) {
         case 'porcentaje':
@@ -217,9 +224,9 @@ class ModalManager {
           break;
       }
     }
-    
-    const validUntil = product.promotion?.end_at 
-      ? `<p class="promo-validity">Válido hasta: ${formatDate(product.promotion.end_at)}</p>` 
+
+    const validUntil = product.promotion?.end_at
+      ? `<p class="promo-validity">Válido hasta: ${formatDate(product.promotion.end_at)}</p>`
       : '';
 
     return `
@@ -711,7 +718,7 @@ class ModalManager {
     this.open('create-product-modal', content, {
       disableClickOutside: true,
       onOpen: (modalEl) => {
-        modalEl.classList.add('admin-modal');
+        modalEl.classList.add('modal-xl');
         this._setupProductFormLogic('create', null, modalEl, onSuccess);
       }
     });
@@ -735,7 +742,7 @@ class ModalManager {
     this.open('edit-product-modal', content, {
       disableClickOutside: true,
       onOpen: (modalEl) => {
-        modalEl.classList.add('admin-modal');
+        modalEl.classList.add('modal-xl');
         this._setupProductFormLogic('edit', product, modalEl, onSuccess);
       }
     });
