@@ -3,3 +3,4 @@ logs/debug.log
 
 # Ignorar archivos zip
 *.zip
+tmpclaude-*
