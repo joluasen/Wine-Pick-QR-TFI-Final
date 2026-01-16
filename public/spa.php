@@ -226,6 +226,9 @@ $appConfig = [
   <!-- Bootstrap 5.3 JS Bundle -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
+  <!-- Chart.js para métricas -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
   <!-- Lógica de filtros -->
   <script>
     document.getElementById('applyFiltersBtn')?.addEventListener('click', function() {

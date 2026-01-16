@@ -509,3 +509,461 @@
 .btn-dialog-danger:hover {
   background: #c82333;
 }
+
+/* =========================================
+   MÉTRICAS - DASHBOARD
+   ========================================= */
+
+.metrics-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1.5rem;
+}
+
+/* Header con título y selector */
+.metrics-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.metrics-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #4A0E1A;
+  margin: 0;
+}
+
+.metrics-title i {
+  color: #6B0F2A;
+}
+
+.metrics-period-selector {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.metrics-period-selector .form-select {
+  width: auto;
+  min-width: 160px;
+}
+
+/* Tarjetas de resumen */
+.metrics-summary {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.metric-card {
+  background: #FFFFFF;
+  border-radius: 12px;
+  padding: 1.25rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.metric-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+.metric-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #4A0E1A 0%, #6B0F2A 100%);
+  color: #FFFFFF;
+  font-size: 1.25rem;
+  flex-shrink: 0;
+}
+
+.metric-icon.icon-qr {
+  background: linear-gradient(135deg, #1E3A5F 0%, #2E5A8F 100%);
+}
+
+.metric-icon.icon-search {
+  background: linear-gradient(135deg, #2D5016 0%, #4A7A2A 100%);
+}
+
+.metric-icon.icon-products {
+  background: linear-gradient(135deg, #5A3E1B 0%, #8B6914 100%);
+}
+
+.metric-data {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.metric-value {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #333;
+  line-height: 1.2;
+}
+
+.metric-label {
+  font-size: 0.85rem;
+  color: #666;
+  margin-top: 0.125rem;
+}
+
+.metric-percent {
+  font-size: 0.8rem;
+  color: #4A0E1A;
+  font-weight: 600;
+  margin-top: 0.25rem;
+}
+
+/* Secciones de métricas */
+.metrics-section {
+  background: #FFFFFF;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  margin-bottom: 1.5rem;
+}
+
+.metrics-section-header {
+  margin-bottom: 1.25rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 2px solid #F5F5F5;
+}
+
+.metrics-section-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #4A0E1A;
+  margin: 0;
+}
+
+.metrics-section-title i {
+  color: #6B0F2A;
+}
+
+/* Contenedor de gráficos */
+.chart-container {
+  position: relative;
+  height: 300px;
+  width: 100%;
+}
+
+.chart-container-small {
+  height: 200px;
+}
+
+.chart-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+  color: #999;
+  text-align: center;
+}
+
+.chart-empty i {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  opacity: 0.3;
+}
+
+.chart-empty p {
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+/* Fila de métricas (2 columnas) */
+.metrics-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.metrics-section-half {
+  margin-bottom: 0;
+}
+
+/* Lista de progreso diaria (sin Chart.js) */
+.daily-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.daily-item {
+  display: grid;
+  grid-template-columns: 80px 1fr 60px;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.daily-date {
+  font-size: 0.85rem;
+  color: #666;
+}
+
+.daily-total {
+  font-weight: 600;
+  color: #333;
+  text-align: right;
+}
+
+.progress {
+  height: 18px;
+}
+
+.progress .progress-bar {
+  font-size: 0.75rem;
+}
+
+/* Lista de resumen */
+.metrics-summary-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.summary-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  background: #F8F9FA;
+  border-radius: 8px;
+}
+
+.summary-label {
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.summary-value {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #333;
+  text-align: right;
+  max-width: 60%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Tabla de productos más consultados */
+.metrics-section .table {
+  margin-bottom: 0;
+}
+
+.metrics-section .table th {
+  border-top: none;
+  font-weight: 600;
+  color: #4A0E1A;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 0.75rem;
+  background: #F8F9FA;
+}
+
+.metrics-section .table td {
+  padding: 0.75rem;
+  vertical-align: middle;
+  font-size: 0.9rem;
+}
+
+.metrics-section .table tbody tr:hover {
+  background: #FDF8F9;
+}
+
+/* Cards para móvil de productos */
+.top-product-card {
+  background: #F8F9FA;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.top-product-card:last-child {
+  margin-bottom: 0;
+}
+
+.top-product-rank {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #4A0E1A;
+  color: #FFFFFF;
+  font-weight: 700;
+  font-size: 0.85rem;
+  margin-right: 0.75rem;
+}
+
+.top-product-name {
+  font-weight: 600;
+  color: #333;
+  font-size: 0.95rem;
+}
+
+.top-product-winery {
+  font-size: 0.85rem;
+  color: #666;
+  margin-top: 0.25rem;
+}
+
+.top-product-stats {
+  display: flex;
+  gap: 1rem;
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid #E9ECEF;
+}
+
+.top-product-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+}
+
+.top-product-stat-value {
+  font-weight: 700;
+  color: #333;
+  font-size: 1.1rem;
+}
+
+.top-product-stat-label {
+  font-size: 0.75rem;
+  color: #666;
+  text-transform: uppercase;
+}
+
+/* Empty state */
+.empty-state {
+  text-align: center;
+  padding: 2rem;
+  color: #999;
+}
+
+.empty-state i {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  opacity: 0.3;
+}
+
+.empty-state p {
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+/* Error state */
+.error-state {
+  text-align: center;
+  padding: 3rem 2rem;
+  background: #FDF2F2;
+  border-radius: 12px;
+  color: #721c24;
+}
+
+.error-state i {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  color: #DC3545;
+}
+
+.error-state h3 {
+  font-size: 1.25rem;
+  margin-bottom: 0.5rem;
+}
+
+.error-state p {
+  margin-bottom: 1.5rem;
+  color: #666;
+}
+
+/* =========================================
+   MÉTRICAS - RESPONSIVE
+   ========================================= */
+
+@media (max-width: 991.98px) {
+  .metrics-summary {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .metrics-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 767.98px) {
+  .metrics-container {
+    padding: 1rem;
+  }
+
+  .metrics-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .metrics-title {
+    font-size: 1.25rem;
+  }
+
+  .metrics-period-selector {
+    width: 100%;
+  }
+
+  .metrics-period-selector .form-select {
+    flex: 1;
+  }
+
+  .metrics-summary {
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+  }
+
+  .metric-card {
+    padding: 1rem;
+    flex-direction: column;
+    text-align: center;
+    gap: 0.75rem;
+  }
+
+  .metric-value {
+    font-size: 1.5rem;
+  }
+
+  .metrics-section {
+    padding: 1rem;
+  }
+
+  .chart-container {
+    height: 250px;
+  }
+}
+
+@media (max-width: 575.98px) {
+  .metrics-summary {
+    grid-template-columns: 1fr;
+  }
+
+  .metric-card {
+    flex-direction: row;
+    text-align: left;
+  }
+}

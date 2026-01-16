@@ -83,6 +83,9 @@ class Router
 
         // POST /api/admin/upload/product-image (protegido)
         $this->post('/api/admin/upload/product-image', 'UploadController@uploadProductImage');
+
+        // GET /api/admin/metrics?days=... (protegido)
+        $this->get('/api/admin/metrics', 'MetricController@getMetrics');
     }
 
     /**
