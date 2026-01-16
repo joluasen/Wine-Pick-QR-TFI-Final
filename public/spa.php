@@ -64,6 +64,14 @@ $appConfig = [
 
 <body class="d-flex flex-column">
 
+  <!-- PAGE LOADER - Spinner inicial mientras carga la aplicación -->
+  <div id="page-loader" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #ffffff; z-index: 9999; display: flex; align-items: center; justify-content: center; flex-direction: column;">
+    <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+      <span class="visually-hidden">Cargando...</span>
+    </div>
+    <p class="mt-3 text-muted" style="font-size: 0.9rem;">Cargando aplicación...</p>
+  </div>
+
   <!-- HEADER -->
   <header class="bg-white border-bottom sticky-top">
     <div class="py-3">
@@ -287,6 +295,24 @@ $appConfig = [
       }
 
       window.location.hash = hash;
+    });
+  </script>
+
+  <!-- Ocultar page loader cuando la página esté lista -->
+  <script>
+    window.addEventListener('DOMContentLoaded', () => {
+      const pageLoader = document.getElementById('page-loader');
+      if (pageLoader) {
+        // Esperar 500ms antes de ocultar
+        setTimeout(() => {
+          // Fade out suave
+          pageLoader.style.transition = 'opacity 0.3s ease';
+          pageLoader.style.opacity = '0';
+          setTimeout(() => {
+            pageLoader.style.display = 'none';
+          }, 300);
+        }, 500);
+      }
     });
   </script>
 
