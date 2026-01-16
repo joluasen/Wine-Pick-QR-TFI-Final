@@ -55,6 +55,7 @@ $appConfig = [
   <link rel="stylesheet" href="<?= $baseUrl ?>css/winepick-search.css?v=2">
   <link rel="stylesheet" href="<?= $baseUrl ?>css/admin.css">
   <link rel="stylesheet" href="<?= $baseUrl ?>css/buttons.css?v=7">
+  <link rel="stylesheet" href="<?= $baseUrl ?>css/confirm-dialog.css">
 
   <!-- Configuración global para JavaScript -->
   <script>

@@ -481,5 +481,41 @@ class ProductController {
             'products' => $data,
         ], 200);
     }
+
+    /**
+     * DELETE /api/admin/productos/{id}
+     * Elimina un producto por su ID.
+     * Solo para administradores autenticados.
+     */
+    public function delete(string $id): void
+    {
+        // Proteger endpoint: requiere sesión de admin
+        if (empty($_SESSION['admin_user_id'])) {
+            ApiResponse::unauthorized('No autenticado. Inicia sesión para continuar.');
+        }
+
+        // Validar ID
+        $productId = (int) $id;
+        if ($productId <= 0) {
+            ApiResponse::validationError('ID de producto inválido.', 'id');
+        }
+
+        // Verificar que el producto existe
+        $product = $this->productModel->findById($productId);
+        if (!$product) {
+            ApiResponse::notFound('Producto no encontrado.');
+        }
+
+        // Ejecutar delete
+        $success = $this->productModel->delete($productId);
+        if (!$success) {
+            ApiResponse::serverError('Error al eliminar el producto.');
+        }
+
+        ApiResponse::success([
+            'message' => 'Producto eliminado correctamente',
+            'id' => $productId
+        ], 200);
+    }
 }
 ?>

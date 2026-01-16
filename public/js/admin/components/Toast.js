@@ -27,6 +27,7 @@ function initToastContainer() {
  * @param {string} message - Mensaje a mostrar
  * @param {('success'|'error'|'info'|'warning')} type - Tipo de mensaje
  * @param {number} duration - Duración en ms (default: 3500)
+ * @returns {HTMLElement} El elemento toast creado
  */
 export function showToast(message, type = 'info', duration = 3500) {
   const container = initToastContainer();
@@ -66,10 +67,51 @@ export function showToast(message, type = 'info', duration = 3500) {
   container.appendChild(toast);
 
   // Auto-remover después de la duración especificada
-  setTimeout(() => {
-    toast.classList.remove('show');
-    setTimeout(() => toast.remove(), 500);
-  }, duration);
+  if (duration > 0) {
+    setTimeout(() => {
+      toast.classList.remove('show');
+      setTimeout(() => toast.remove(), 500);
+    }, duration);
+  }
 
   return toast;
+}
+
+/**
+ * Muestra una secuencia de toasts con delay entre ellos
+ * Útil para operaciones que tienen múltiples fases (ej: "Cargando..." → "Completado")
+ * @param {Array<{message: string, type: string, duration?: number, delay?: number}>} sequence
+ * @returns {Promise<void>}
+ * 
+ * Ejemplo:
+ * await showToastSequence([
+ *   { message: 'Eliminando...', type: 'info', duration: 0, delay: 0 },
+ *   { message: 'Producto eliminado', type: 'success', delay: 2000 }
+ * ]);
+ */
+export async function showToastSequence(sequence) {
+  for (let i = 0; i < sequence.length; i++) {
+    const { message, type = 'info', duration = 3500, delay = 0 } = sequence[i];
+
+    // Esperar el delay (si es mayor a 0)
+    if (delay > 0) {
+      await new Promise((resolve) => setTimeout(resolve, delay));
+    }
+
+    // Si hay un toast anterior activo, removerlo
+    const container = initToastContainer();
+    const activeToasts = container.querySelectorAll('.toast.show');
+    activeToasts.forEach((toast) => {
+      toast.classList.remove('show');
+      setTimeout(() => toast.remove(), 500);
+    });
+
+    // Mostrar el nuevo toast
+    showToast(message, type, duration);
+
+    // Si no hay duración (permanente) y no es el último, esperar antes de cambiar
+    if (i < sequence.length - 1 && duration === 0) {
+      await new Promise((resolve) => setTimeout(resolve, 500));
+    }
+  }
 }

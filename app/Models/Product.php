@@ -554,5 +554,27 @@ class Product
 
         return $this->db->fetchAll($query, [$limit, $offset], 'ii');
     }
+
+    /**
+     * Eliminar un producto por su ID.
+     *
+     * @param int $id ID del producto
+     * @return bool True si se eliminó correctamente, false en caso contrario
+     */
+    public function delete(int $id): bool
+    {
+        $query = 'DELETE FROM products WHERE id = ? LIMIT 1';
+        $stmt = $this->db->getConnection()->prepare($query);
+        
+        if (!$stmt) {
+            return false;
+        }
+
+        $stmt->bind_param('i', $id);
+        $result = $stmt->execute();
+        $stmt->close();
+
+        return $result;
+    }
 }
 ?>

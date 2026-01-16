@@ -8,13 +8,14 @@
  * - Delega operaciones CRUD a servicios
  */
 
-import { getProducts } from "../admin/services/productService.js";
+import { getProducts, deleteProduct as deleteProductService } from "../admin/services/productService.js";
 import {
   getPromotions,
   deletePromotion,
   togglePromotionStatus,
 } from "../admin/services/promotionService.js";
-import { showToast } from "../admin/components/Toast.js";
+import { showToast, showToastSequence } from "../admin/components/Toast.js";
+import { showConfirmDialog } from "../admin/components/ConfirmDialog.js";
 import { modalManager } from "../core/modalManager.js";
 import { setupPromotionCreateForm } from "../admin/components/PromotionFormHandler.js";
 
@@ -182,11 +183,51 @@ export async function initAdminProductsView(_container) {
 
     // Eliminar producto
     allDeleteBtns.forEach((btn) => {
-      btn.onclick = () => {
-        showToast(
-          "La función de eliminar productos no está disponible actualmente. Contacte al administrador del sistema.",
-          "info"
+      btn.onclick = async () => {
+        const productId = btn.getAttribute("data-delete-product");
+        const product = cachedProducts.find(
+          (p) => String(p.id) === String(productId)
         );
+        if (!product) {
+          showToast("Producto no encontrado", "error");
+          return;
+        }
+
+        // Confirmar eliminación con diálogo personalizado
+        const confirmed = await showConfirmDialog({
+          title: "Eliminar producto",
+          message: `¿Estás seguro de que deseas eliminar "${product.name}"?`,
+          confirmText: "Eliminar",
+          cancelText: "Cancelar",
+          confirmClass: "btn-danger",
+        });
+
+        if (!confirmed) {
+          return;
+        }
+
+        try {
+          // Mostrar toast de inicio
+          const loadingToast = showToast("Eliminando producto...", "info", 0);
+          
+          // Llamar al servicio de eliminación
+          await deleteProductService(productId);
+          
+          // Esperar un poco para que se vea el toast de carga
+          await new Promise((resolve) => setTimeout(resolve, 800));
+          
+          // Remover toast de carga
+          loadingToast.classList.remove('show');
+          setTimeout(() => loadingToast.remove(), 300);
+          
+          // Mostrar toast de éxito
+          showToast("Producto eliminado correctamente", "success");
+          
+          // Recargar lista
+          loadProducts(currentPage);
+        } catch (error) {
+          showToast(`Error al eliminar: ${error.message}`, "error");
+        }
       };
     });
 

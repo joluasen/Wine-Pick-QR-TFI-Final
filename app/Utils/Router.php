@@ -75,6 +75,9 @@ class Router
         // GET /api/admin/productos?limit=...&offset=... (protegido, listar con paginación)
         $this->get('/api/admin/productos', 'ProductController@listAllAdmin');
 
+        // DELETE /api/admin/productos/{id} (protegido)
+        $this->delete('/api/admin/productos/{id}', 'ProductController@delete');
+
         // POST /api/admin/promociones (protegido)
         $this->post('/api/admin/promociones', 'PromotionController@create');
 
