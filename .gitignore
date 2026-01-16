@@ -4,3 +4,9 @@ logs/debug.log
 # Ignorar archivos zip
 *.zip
 tmpclaude-*
+
+# Ignorar documentación de análisis temporal
+tareas_pendientes/
+
+# Ignorar configuración de VS Code
+.vscode/
