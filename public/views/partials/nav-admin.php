@@ -7,7 +7,7 @@ header('Content-Type: text/html; charset=utf-8');
 <!-- MOBILE BOTTOM NAV -->
 <nav class="bottom-nav d-md-none">
   <a href="#admin" class="bottom-nav-item" data-link="#admin-metrics" aria-label="Métricas">
-    <i class="fas fa-tachometer-alt"></i>
+    <i class="fas fa-chart-line"></i>
     <span>Métricas</span>
   </a>
   <a href="#admin-products" class="bottom-nav-item" data-link="#admin-products" aria-label="Productos">
@@ -46,7 +46,7 @@ header('Content-Type: text/html; charset=utf-8');
 <!-- DESKTOP SIDEBAR NAV -->
 <nav class="sidebar-nav d-none d-md-flex">
   <a href="#admin-metrics" class="sidebar-nav-item" data-link="#admin-metrics" title="Métricas" data-bs-toggle="tooltip" data-bs-placement="right">
-    <i class="fas fa-tachometer-alt"></i>
+    <i class="fas fa-chart-line"></i>
     <span>Métricas</span>
   </a>
   <a href="#" id="btn-new-product-desktop" class="sidebar-nav-item" title="Nuevo producto" data-bs-toggle="tooltip" data-bs-placement="right">

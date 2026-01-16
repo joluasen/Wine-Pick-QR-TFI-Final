@@ -218,7 +218,7 @@ export async function initAdminProductsView(_container) {
     try {
       const offset = page * PAGE_SIZE;
 
-      // Crear promesas para el fetch y el delay de 2 segundos
+      // Crear promesas para el fetch y el delay de 250 milisegundos
       const fetchPromise = getProducts({ limit: PAGE_SIZE, offset });
       const delayPromise = new Promise((resolve) => setTimeout(resolve, 250));
 
@@ -305,7 +305,7 @@ export async function initAdminProductsView(_container) {
               <button type="button" class="btn-modal btn-modal-danger btn-xs fw-semibold px-2 py-1" style="font-size:0.92rem;" data-delete-promo="${
                 activePromo.id
               }"><i class="bi bi-trash me-1"></i>Eliminar</button>
-              <button type="button" class="btn-modal btn-modal-secondary btn-xs fw-semibold px-2 py-1" style="font-size:0.92rem;" data-toggle-promo="${
+              <button type="button" class="btn-modal btn-xs fw-semibold px-2 py-1" style="font-size:0.92rem;" data-toggle-promo="${
                 activePromo.id
               }"><i class="bi bi-power me-1"></i>Desactivar</button>
             </div>
@@ -360,7 +360,7 @@ export async function initAdminProductsView(_container) {
             <div id="promo-create-status-modal" class="mt-3"></div>
 
             <div class="d-flex gap-2 justify-content-end mt-4">
-              <button type="button" class="btn-modal btn-modal-secondary" data-dismiss-modal>Cancelar</button>
+              <button type="button" class="btn-modal" data-dismiss-modal>Cancelar</button>
               <button type="submit" class="btn-modal btn-modal-success">
                 <i class="bi bi-plus-circle me-1"></i>
                 Crear promoción

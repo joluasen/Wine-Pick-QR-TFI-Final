@@ -498,7 +498,7 @@ class ModalManager {
 
           <!-- Botones -->
           <div class="d-flex gap-2 justify-content-end mt-4 pt-3 border-top">
-            <button type="button" class="btn-modal btn-modal-secondary" data-dismiss-modal>
+            <button type="button" class="btn-modal" data-dismiss-modal>
               <i class="fas fa-times me-1"></i>Cancelar
             </button>
             <button type="submit" class="btn-modal btn-modal-primary" id="${isEdit ? 'save' : 'create'}-product-btn">
@@ -989,7 +989,7 @@ class ModalManager {
             <img src="${escapeHtml(oldImageUrl)}" alt="Imagen anterior" style="max-width: 200px; border-radius: 8px;">
           </div>
           <div class="dialog-actions">
-            <button type="button" class="btn-modal btn-modal-secondary" id="keep-old-image">
+            <button type="button" class="btn-modal" id="keep-old-image">
               <i class="fas fa-save me-1"></i>Conservar
             </button>
             <button type="button" class="btn-modal btn-modal-danger" id="delete-old-image">

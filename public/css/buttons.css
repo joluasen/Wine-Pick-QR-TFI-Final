@@ -296,6 +296,18 @@
   box-shadow: 0 0 0 3px rgba(74, 14, 26, 0.15);
 }
 
+/* Small size variant for pagination and inline buttons */
+.btn-modal.btn-sm,
+.btn-modal-primary.btn-sm,
+.btn-modal-secondary.btn-sm,
+.btn-modal-success.btn-sm,
+.btn-modal-danger.btn-sm {
+  padding: 0.375rem 0.75rem;
+  font-size: 0.8125rem;
+  line-height: 1.4;
+  min-height: auto;
+}
+
 /* =========================================
    UTILIDADES ADICIONALES
    ========================================= */

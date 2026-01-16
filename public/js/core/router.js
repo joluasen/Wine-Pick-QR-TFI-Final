@@ -264,16 +264,10 @@ async function loadView(viewName) {
     }
 
     // Solo mostrar loading del router si la vista no tiene su propio loading
-    const viewsWithOwnLoading = ['adminProducts', 'adminPromotions'];
+    const viewsWithOwnLoading = ['adminMetrics', 'adminProducts', 'adminPromotions'];
 
     if (!viewsWithOwnLoading.includes(viewName)) {
-      root.innerHTML = `
-        <div class="loading-view text-center py-5">
-          <div class="spinner-border text-primary" role="status">
-            <span class="visually-hidden">Cargando...</span>
-          </div>
-        </div>
-      `;
+      root.innerHTML = '';
     } else {
       // Para vistas con su propio loading, solo limpiar el contenido
       root.innerHTML = '';

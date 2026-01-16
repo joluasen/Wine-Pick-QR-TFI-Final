@@ -208,7 +208,7 @@ $appConfig = [
           </div>
         </div>
         <div class="modal-footer border-0 pt-0 gap-2">
-          <button type="button" class="btn-modal btn-modal-secondary btn-sm" data-bs-dismiss="modal">
+          <button type="button" class="btn-modal btn-sm" data-bs-dismiss="modal">
             Cancelar
           </button>
           <button type="button" class="btn-modal btn-modal-primary btn-sm" id="applyFiltersBtn" data-bs-dismiss="modal">

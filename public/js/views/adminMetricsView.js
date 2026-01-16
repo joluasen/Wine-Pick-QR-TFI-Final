@@ -298,8 +298,8 @@ export async function initAdminMetricsView(container) {
   async function loadMetrics(days) {
     showLoading();
     
-    // Tiempo mínimo de espera para el spinner (800ms)
-    const minLoadingTime = new Promise(resolve => setTimeout(resolve, 800));
+    // Tiempo mínimo de espera para el spinner (250ms)
+    const minLoadingTime = new Promise(resolve => setTimeout(resolve, 250));
     
     try {
       const dataPromise = getMetrics(days);

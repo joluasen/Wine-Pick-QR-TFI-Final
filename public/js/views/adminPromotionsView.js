@@ -20,39 +20,9 @@ import { showToast } from "../admin/components/Toast.js";
  * @param {HTMLElement} container - Contenedor de la vista
  */
 export async function initAdminPromotionsView(container) {
-  // Renderizar estructura de la tabla
-  container.innerHTML = `
-    <div class="table-responsive d-none d-md-block admin-table-wrapper">
-      <table class="table table-bordered align-middle shadow" id="admin-promos-table">
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Producto</th>
-            <th>Tipo</th>
-            <th>Valor</th>
-            <th>Texto</th>
-            <th>Inicio</th>
-            <th>Fin</th>
-            <th>Estado</th>
-            <th>Acciones</th>
-          </tr>
-        </thead>
-        <tbody><tr><td colspan='9'>Cargando...</td></tr></tbody>
-      </table>
-    </div>
-
-    <!-- Cards Mobile -->
-    <div class="d-md-none" id="admin-promos-cards">
-      <!-- Cards inyectadas dinámicamente por JS -->
-    </div>
-
-    <div class="d-flex justify-content-center align-items-center mt-2">
-      <button class="btn-modal btn-modal-secondary btn-sm mx-1" id="admin-promos-prev" disabled>Anterior</button>
-      <span id="admin-promos-page" class="mx-2"></span>
-      <button class="btn-modal btn-modal-secondary btn-sm mx-1" id="admin-promos-next" disabled>Siguiente</button>
-    </div>
-  `;
-
+  // El HTML está en adminPromotions.php, solo obtenemos referencias a los elementos existentes
+  const loadingEl = container.querySelector("#admin-promos-loading");
+  const contentEl = container.querySelector("#admin-promos-content");
   const tableBody = container.querySelector("#admin-promos-table tbody");
   const cardsContainer = container.querySelector("#admin-promos-cards");
   const paginationEl = container.querySelector("#admin-promos-page");
@@ -63,16 +33,14 @@ export async function initAdminPromotionsView(container) {
   let currentPage = 0;
   let totalPromos = 0;
 
-  /**
-   * Scroll automático a la paginación
-   */
-  function scrollToPagination() {
-    const pagDiv = container.querySelector(
-      ".d-flex.justify-content-center.align-items-center.mt-2"
-    );
-    if (pagDiv) {
-      pagDiv.scrollIntoView({ behavior: "smooth", block: "center" });
-    }
+  function showLoading() {
+    if (loadingEl) loadingEl.style.display = "block";
+    if (contentEl) contentEl.style.display = "none";
+  }
+
+  function showContent() {
+    if (loadingEl) loadingEl.style.display = "none";
+    if (contentEl) contentEl.style.display = "block";
   }
 
   /**
@@ -240,14 +208,24 @@ export async function initAdminPromotionsView(container) {
    * Carga promociones de la página especificada
    */
   async function loadPromos(page = 0) {
+    showLoading();
     tableBody.innerHTML = `<tr><td colspan='9'>Cargando...</td></tr>`;
 
     try {
       const offset = page * PAGE_SIZE;
-      const { promotions, total } = await getPromotions({
+      
+      // Crear promesas para el fetch y el delay de 250 milisegundos
+      const fetchPromise = getPromotions({
         limit: PAGE_SIZE,
         offset,
       });
+      const delayPromise = new Promise((resolve) => setTimeout(resolve, 250));
+
+      // Esperar ambas promesas
+      const [{ promotions, total }] = await Promise.all([
+        fetchPromise,
+        delayPromise,
+      ]);
 
       totalPromos = total;
 
@@ -262,11 +240,12 @@ export async function initAdminPromotionsView(container) {
       }
 
       updatePagination(page, totalPromos);
-      scrollToPagination();
+      showContent();
     } catch (err) {
       tableBody.innerHTML = `<tr><td colspan='9'>Error al cargar promociones</td></tr>`;
       showToast(`Error: ${err.message}`, "error");
       updatePagination(page, totalPromos);
+      showContent();
     }
   }
 

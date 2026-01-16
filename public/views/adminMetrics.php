@@ -3,8 +3,8 @@
   <!-- Header con título y selector de período -->
   <div class="metrics-header">
     <div>
-      <h2 class="metrics-title"><i class="fas fa-chart-line me-2"></i>Métricas y Análisis</h2>
-      <p class="metrics-subtitle">Seguimiento de consultas y comportamiento de usuarios</p>
+      <h2 class="admin-section-title"><i class="fas fa-chart-line me-2"></i>Métricas y Análisis</h2>
+      <p class="admin-section-subtitle">Seguimiento de consultas y comportamiento de usuarios</p>
     </div>
     <div class="metrics-controls">
       <label class="metrics-label">Período:</label>
