@@ -1,9 +1,23 @@
 <!-- Vista de métricas administrativas -->
-<section data-view="admin-metrics">
-  <h2>Métricas y Estadísticas</h2>
-  
-  <!-- Loading inicial -->
-  <div id="metrics-loading" class="text-center py-5">
+<section data-view="admin-metrics" class="metrics-view">
+  <!-- Header con título y selector de período -->
+  <div class="metrics-header">
+    <div>
+      <h2 class="metrics-title"><i class="fas fa-chart-line me-2"></i>Métricas y Análisis</h2>
+      <p class="metrics-subtitle">Seguimiento de consultas y comportamiento de usuarios</p>
+    </div>
+    <div class="metrics-controls">
+      <label class="metrics-label">Período:</label>
+      <div class="period-buttons">
+        <button class="period-btn" data-period="7">7 días</button>
+        <button class="period-btn active" data-period="30">30 días</button>
+        <button class="period-btn" data-period="90">90 días</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Estado de carga -->
+  <div id="metrics-loading" class="metrics-loading-container">
     <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
       <span class="visually-hidden">Cargando...</span>
     </div>
@@ -11,123 +25,81 @@
   </div>
 
   <!-- Contenido de métricas -->
-  <div id="metrics-content" style="display: none;">
+  <div id="metrics-content" class="metrics-content-container" style="display: none;">
 
-    <!-- Selector de período -->
-    <div class="mb-3">
-      <label for="metrics-period" class="form-label">Período:</label>
-      <select id="metrics-period" class="form-select" style="max-width: 200px;">
-        <option value="7">Últimos 7 días</option>
-        <option value="30" selected>Últimos 30 días</option>
-        <option value="90">Últimos 90 días</option>
-      </select>
+    <!-- KPIs Principales (3 columnas) -->
+    <div class="metrics-kpis">
+      <div class="kpi-card">
+        <div class="kpi-icon qr">
+          <i class="fas fa-qrcode"></i>
+        </div>
+        <div class="kpi-content">
+          <span class="kpi-label">Consultas QR</span>
+          <span class="kpi-value" id="total-qr">0</span>
+          <span class="kpi-percent" id="percent-qr-display">0%</span>
+        </div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-icon search">
+          <i class="fas fa-search"></i>
+        </div>
+        <div class="kpi-content">
+          <span class="kpi-label">Búsquedas</span>
+          <span class="kpi-value" id="total-search">0</span>
+          <span class="kpi-percent" id="percent-search-display">0%</span>
+        </div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-icon total">
+          <i class="fas fa-chart-bar"></i>
+        </div>
+        <div class="kpi-content">
+          <span class="kpi-label">Total Consultas</span>
+          <span class="kpi-value" id="total-consultas">0</span>
+          <span class="kpi-percent" id="daily-avg-display">0 diarias</span>
+        </div>
+      </div>
     </div>
 
-    <!-- Resumen general -->
-    <div class="table-responsive mb-4">
-      <table class="table align-middle shadow rounded-4 overflow-hidden" style="background: #fff; border-radius: 1.2rem; font-size: 0.97rem;">
-        <thead style="background: #7a003c; color: #fff;">
-          <tr>
-            <th>Total Consultas</th>
-            <th>Consultas QR</th>
-            <th>Búsqueda</th>
-            <th>Productos Únicos</th>
-          </tr>
-        </thead>
-        <tbody style="background: #fff;">
-          <tr>
-            <td id="total-consultas">0</td>
-            <td><span id="consultas-qr">0</span> <small class="text-muted">(<span id="percent-qr">0</span>%)</small></td>
-            <td><span id="consultas-busqueda">0</span> <small class="text-muted">(<span id="percent-busqueda">0</span>%)</small></td>
-            <td id="productos-consultados">0</td>
-          </tr>
-        </tbody>
-      </table>
+    <!-- Gráfico diario (Chart.js) -->
+    <div class="metrics-section">
+      <div class="section-header">
+        <h3><i class="fas fa-chart-area me-2"></i>Consultas diarias</h3>
+        <span class="section-subtitle">Evolución de QR y Búsqueda por día</span>
+      </div>
+      <div class="daily-chart-card">
+        <canvas id="daily-chart-canvas"></canvas>
+      </div>
     </div>
 
-    <!-- Consultas por día -->
-    <h3 class="h5 mb-3">Consultas por día</h3>
-    <div class="table-responsive mb-4">
-      <table class="table align-middle shadow rounded-4 overflow-hidden" style="background: #fff; border-radius: 1.2rem; font-size: 0.95rem;">
-        <thead style="background: #7a003c; color: #fff;">
-          <tr>
-            <th>Fecha</th>
-            <th>QR</th>
-            <th>Búsqueda</th>
-            <th>Total</th>
-          </tr>
-        </thead>
-        <tbody id="daily-table-body" style="background: #fff;">
-          <tr><td colspan="4">Cargando...</td></tr>
-        </tbody>
-      </table>
-    </div>
+    <!-- Dos columnas: Top Productos -->
+    <div class="metrics-grid-1">
+      <!-- Top 5 Productos -->
+      <div class="metrics-section">
+        <div class="section-header">
+          <h3><i class="fas fa-star me-2"></i>Productos más consultados</h3>
+        </div>
+        <div id="top-products-chart" class="top-products-list"></div>
+      </div>
 
-    <!-- Productos más consultados -->
-    <h3 class="h5 mb-3">Productos más consultados</h3>
-    <div class="table-responsive mb-4">
-      <table class="table align-middle shadow rounded-4 overflow-hidden" style="background: #fff; border-radius: 1.2rem; font-size: 0.95rem;">
-        <thead style="background: #7a003c; color: #fff;">
-          <tr>
-            <th style="width: 50px;">#</th>
-            <th>Producto</th>
-            <th>Bodega</th>
-            <th>QR</th>
-            <th>Búsqueda</th>
-            <th>Total</th>
-          </tr>
-        </thead>
-        <tbody id="top-products-body" style="background: #fff;">
-          <tr><td colspan="6">Cargando...</td></tr>
-        </tbody>
-      </table>
-    </div>
-
-    <!-- Resumen adicional -->
-    <div class="table-responsive mb-4">
-      <table class="table align-middle shadow rounded-4 overflow-hidden" style="background: #fff; border-radius: 1.2rem; font-size: 0.95rem;">
-        <thead style="background: #7a003c; color: #fff;">
-          <tr>
-            <th>Promedio Diario</th>
-            <th>Día Pico</th>
-            <th>Producto Más Popular</th>
-          </tr>
-        </thead>
-        <tbody style="background: #fff;">
-          <tr>
-            <td id="promedio-diario">0</td>
-            <td id="dia-max">-</td>
-            <td id="producto-top">-</td>
-          </tr>
-        </tbody>
-      </table>
     </div>
 
   </div>
 
   <!-- Error state -->
-  <div id="metrics-error" class="text-center py-5" style="display: none;">
-    <i class="fas fa-exclamation-triangle text-danger" style="font-size: 3rem;"></i>
-    <h3 class="mt-3">Error al cargar métricas</h3>
-    <p id="metrics-error-message" class="text-muted">No se pudieron cargar las métricas. Intenta de nuevo.</p>
-    <button class="btn btn-primary" id="metrics-retry">
-      <i class="fas fa-redo me-2"></i>Reintentar
-    </button>
+  <div id="metrics-error" style="display: none;">
+    <div class="error-alert">
+      <i class="fas fa-exclamation-circle"></i>
+      <div>
+        <h4>Error al cargar métricas</h4>
+        <p id="metrics-error-message">No se pudieron cargar los datos. Intenta de nuevo.</p>
+      </div>
+      <button class="btn btn-sm btn-outline-primary" id="metrics-retry">
+        <i class="fas fa-redo me-1"></i>Reintentar
+      </button>
+    </div>
   </div>
-  
-  <style>
-  [data-view="admin-metrics"] table th, 
-  [data-view="admin-metrics"] table td {
-    vertical-align: middle;
-    text-align: center;
-    padding: 0.65rem 0.5rem;
-  }
-  [data-view="admin-metrics"] table tbody tr:hover {
-    background: #f8e6ef !important;
-  }
-  [data-view="admin-metrics"] table th {
-    font-weight: 600;
-    letter-spacing: 0.03em;
-  }
-  </style>
+
 </section>

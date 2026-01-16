@@ -43,6 +43,9 @@ $appConfig = [
   <!-- Font Awesome 6 -->
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 
+  <!-- Chart.js para gráficos de líneas -->
+  <script src="https://unpkg.com/chart.js@4.4.1/dist/chart.umd.js"></script>
+
   <!-- Estilos de la aplicación (todos los originales) -->
   <link rel="stylesheet" href="<?= $baseUrl ?>css/theme.css">
   <link rel="stylesheet" href="<?= $baseUrl ?>css/layout.css?v=2">

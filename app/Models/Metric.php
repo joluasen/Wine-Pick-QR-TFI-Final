@@ -49,9 +49,10 @@ class Metric
 
     /**
      * Obtener consultas por día en un período.
+     * Rellena con 0 los días sin datos para mostrar la serie completa.
      *
      * @param int $days Número de días hacia atrás
-     * @return array [{date, total, qr_count, search_count}, ...]
+     * @return array [{date, total, qr, search}, ...]
      */
     public function getConsultsByDay(int $days = 30): array
     {
@@ -71,14 +72,30 @@ class Metric
 
         $results = $this->db->fetchAll($query, [$startDate], 's');
 
-        return array_map(function($row) {
-            return [
+        // Convertir resultados a un mapa indexado por fecha
+        $dataMap = [];
+        foreach ($results as $row) {
+            $dataMap[$row['date']] = [
                 'date' => $row['date'],
                 'total' => (int)$row['total'],
-                'qr_count' => (int)$row['qr_count'],
-                'search_count' => (int)$row['search_count'],
+                'qr' => (int)$row['qr_count'],
+                'search' => (int)$row['search_count'],
             ];
-        }, $results);
+        }
+
+        // Generar serie completa de días, rellenando con 0 los faltantes
+        $fullSeries = [];
+        for ($i = $days - 1; $i >= 0; $i--) {
+            $date = date('Y-m-d', strtotime("-{$i} days"));
+            $fullSeries[] = $dataMap[$date] ?? [
+                'date' => $date,
+                'total' => 0,
+                'qr' => 0,
+                'search' => 0,
+            ];
+        }
+
+        return $fullSeries;
     }
 
     /**
