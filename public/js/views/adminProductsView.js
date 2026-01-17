@@ -9,15 +9,9 @@
  */
 
 import { getProducts, deleteProduct as deleteProductService } from "../admin/services/productService.js";
-import {
-  getPromotions,
-  deletePromotion,
-  togglePromotionStatus,
-} from "../admin/services/promotionService.js";
 import { showToast, showToastSequence } from "../admin/components/Toast.js";
 import { showConfirmDialog } from "../admin/components/ConfirmDialog.js";
 import { modalManager } from "../core/modalManager.js";
-import { setupPromotionCreateForm } from "../admin/components/PromotionFormHandler.js";
 
 /**
  * Inicializa la vista de gestión de productos
@@ -66,7 +60,6 @@ export async function initAdminProductsView(_container) {
           <button class="btn-table" data-edit-product="${p.id}">Editar</button>
           <button class="btn-table ms-1" data-view-product="${p.id}">Ver</button>
           <button class="btn-table ms-1" data-delete-product="${p.id}">Borrar</button>
-          <button class="btn-table ms-1" data-new-promo="${p.id}">Nueva Promo</button>
         </td>
       </tr>
     `
@@ -128,10 +121,6 @@ export async function initAdminProductsView(_container) {
             <i class="fas fa-trash"></i>
             <span>Borrar</span>
           </button>
-          <button class="btn-table btn-mobile" data-new-promo="${p.id}">
-            <i class="fas fa-tag"></i>
-            <span>Promo</span>
-          </button>
         </div>
       </div>
     `
@@ -147,7 +136,6 @@ export async function initAdminProductsView(_container) {
     const allViewBtns = document.querySelectorAll("[data-view-product]");
     const allEditBtns = document.querySelectorAll("[data-edit-product]");
     const allDeleteBtns = document.querySelectorAll("[data-delete-product]");
-    const allPromoBtns = document.querySelectorAll("[data-new-promo]");
 
     // Ver producto
     allViewBtns.forEach((btn) => {
@@ -230,22 +218,6 @@ export async function initAdminProductsView(_container) {
         }
       };
     });
-
-    // Nueva promoción
-    allPromoBtns.forEach((btn) => {
-      btn.onclick = async () => {
-        const productId = btn.getAttribute("data-new-promo");
-        const product = cachedProducts.find(
-          (p) => String(p.id) === String(productId)
-        );
-        if (!product) {
-          showToast("Producto no encontrado", "error");
-          return;
-        }
-
-        await showNewPromoModal(productId, product.name);
-      };
-    });
   }
 
   /**
@@ -296,189 +268,6 @@ export async function initAdminProductsView(_container) {
       loadingEl.style.display = "none";
       contentEl.style.display = "block";
     }
-  }
-
-  /**
-   * Muestra modal para crear nueva promoción
-   */
-  async function showNewPromoModal(productId, productName) {
-    // Verificar si ya existe promoción activa
-    let activePromo = null;
-    try {
-      const { promotions } = await getPromotions({ productId });
-      activePromo = promotions.find((p) => p.is_active);
-    } catch (err) {
-      // Continuar sin promoción activa
-    }
-
-    let modalContent = "";
-
-    // Si hay promoción activa, mostrar alerta
-    if (activePromo) {
-      modalContent = `
-        <div>
-          <div class="promo-active-alert">
-            <div class="mb-3 d-flex align-items-center gap-2">
-              <i class="bi bi-exclamation-triangle-fill text-warning" style="font-size:1.5rem;"></i>
-              <span class="fw-bold" style="font-size:1.2rem;color:#7a003c;">Promoción activa</span>
-            </div>
-            <div class="mb-2" style="font-size:1.05rem;">
-              <span class="fw-semibold">${activePromo.promotion_type
-                .replace("_", " ")
-                .toUpperCase()}</span>
-              <span class="mx-2">|</span>
-              <span class="fw-semibold">Valor:</span> <span>${
-                activePromo.parameter_value
-              }</span>
-              <span class="mx-2">|</span>
-              <span class="fw-semibold">Vigencia:</span> <span>${
-                activePromo.start_at ? activePromo.start_at.split(" ")[0] : ""
-              }${
-        activePromo.end_at ? " al " + activePromo.end_at.split(" ")[0] : ""
-      }</span>
-            </div>
-            <div class="mb-3 text-muted" style="font-size:0.97rem;">No puedes crear otra promoción hasta que la actual finalice o sea eliminada.</div>
-            <div class="mb-2 fw-semibold" style="color:#7a003c;">¿Qué acción deseas realizar sobre la promoción?</div>
-            <div class="d-flex gap-2 justify-content-start align-items-center mt-2">
-              <button type="button" class="btn-modal btn-modal-primary btn-xs fw-semibold px-2 py-1" style="font-size:0.92rem;" data-edit-promo="${
-                activePromo.id
-              }"><i class="bi bi-pencil-square me-1"></i>Editar</button>
-              <button type="button" class="btn-modal btn-modal-danger btn-xs fw-semibold px-2 py-1" style="font-size:0.92rem;" data-delete-promo="${
-                activePromo.id
-              }"><i class="bi bi-trash me-1"></i>Eliminar</button>
-              <button type="button" class="btn-modal btn-xs fw-semibold px-2 py-1" style="font-size:0.92rem;" data-toggle-promo="${
-                activePromo.id
-              }"><i class="bi bi-power me-1"></i>Desactivar</button>
-            </div>
-          </div>
-        </div>
-      `;
-    } else {
-      // Mostrar formulario de creación
-      modalContent = `
-        <div>
-          <div class="alert alert-info mb-3">
-            <strong>Producto seleccionado:</strong> ${productName}
-          </div>
-          <form id="promo-create-form-modal">
-            <div class="row g-3">
-              <div class="col-md-6">
-                <label for="promo_type_modal" class="form-label fw-semibold">Tipo de promoción <span class="text-danger">*</span></label>
-                <select id="promo_type_modal" class="form-select" required>
-                  <option value="">Selecciona tipo</option>
-                  <option value="porcentaje">Porcentaje (%)</option>
-                  <option value="precio_fijo">Precio fijo</option>
-                  <option value="2x1">2x1</option>
-                  <option value="3x2">3x2</option>
-                  <option value="nxm">N x M</option>
-                </select>
-              </div>
-              <div class="col-md-6">
-                <label for="promo_value_modal" class="form-label fw-semibold">Valor <span class="text-danger">*</span></label>
-                <input type="number" id="promo_value_modal" class="form-control" required min="0" step="0.01" placeholder="Ej: 15">
-              </div>
-            </div>
-
-            <div class="row g-3 mt-2">
-              <div class="col-12">
-                <label for="promo_text_modal" class="form-label fw-semibold">Texto visible</label>
-                <input type="text" id="promo_text_modal" class="form-control" maxlength="100" placeholder="Ej: Oferta especial">
-                <div class="form-text">Máximo 100 caracteres</div>
-              </div>
-            </div>
-
-            <div class="row g-3 mt-2">
-              <div class="col-md-6">
-                <label for="promo_start_modal" class="form-label fw-semibold">Fecha de inicio <span class="text-danger">*</span></label>
-                <input type="date" id="promo_start_modal" class="form-control" required>
-              </div>
-              <div class="col-md-6">
-                <label for="promo_end_modal" class="form-label fw-semibold">Fecha de fin</label>
-                <input type="date" id="promo_end_modal" class="form-control">
-              </div>
-            </div>
-
-            <div id="promo-create-status-modal" class="mt-3"></div>
-
-            <div class="d-flex gap-2 justify-content-end mt-4">
-              <button type="button" class="btn-modal" data-dismiss-modal>Cancelar</button>
-              <button type="submit" class="btn-modal btn-modal-success">
-                <i class="bi bi-plus-circle me-1"></i>
-                Crear promoción
-              </button>
-            </div>
-          </form>
-        </div>
-      `;
-    }
-
-    // Abrir modal
-    modalManager.open("modal-new-promo", modalContent, {
-      title: "Nueva Promoción",
-      onOpen: (modal) => {
-        // Configurar botón cancelar
-        const cancelBtn = modal.querySelector("[data-dismiss-modal]");
-        if (cancelBtn) {
-          cancelBtn.onclick = () => modalManager.close("modal-new-promo");
-        }
-
-        // Si hay promoción activa, configurar handlers
-        if (activePromo) {
-          const editBtn = modal.querySelector("[data-edit-promo]");
-          const deleteBtn = modal.querySelector("[data-delete-promo]");
-          const toggleBtn = modal.querySelector("[data-toggle-promo]");
-
-          if (editBtn) {
-            editBtn.onclick = () => {
-              showToast("Editar promoción - Por implementar", "info");
-            };
-          }
-
-          if (deleteBtn) {
-            deleteBtn.onclick = async () => {
-              if (!confirm("¿Estás seguro de eliminar esta promoción?")) return;
-
-              try {
-                await deletePromotion(activePromo.id);
-                showToast("Promoción eliminada con éxito", "success");
-                modalManager.close("modal-new-promo");
-              } catch (err) {
-                showToast(`Error al eliminar: ${err.message}`, "error");
-              }
-            };
-          }
-
-          if (toggleBtn) {
-            toggleBtn.onclick = async () => {
-              try {
-                await togglePromotionStatus(activePromo.id, false);
-                showToast("Promoción desactivada con éxito", "success");
-                modalManager.close("modal-new-promo");
-              } catch (err) {
-                showToast(`Error al desactivar: ${err.message}`, "error");
-              }
-            };
-          }
-        } else {
-          // Configurar formulario de creación
-          const form = modal.querySelector("#promo-create-form-modal");
-
-          // Crear input hidden de producto
-          const productIdInput = document.createElement("input");
-          productIdInput.type = "hidden";
-          productIdInput.id = "promo_product_id_modal";
-          productIdInput.value = productId;
-          form.appendChild(productIdInput);
-
-          if (form) {
-            setupPromotionCreateForm(modal, productIdInput, () => {
-              modalManager.close("modal-new-promo");
-              loadProducts(currentPage);
-            });
-          }
-        }
-      },
-    });
   }
 
   // Event listeners de paginación

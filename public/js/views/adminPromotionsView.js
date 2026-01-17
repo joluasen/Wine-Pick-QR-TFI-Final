@@ -71,9 +71,6 @@ export async function initAdminPromotionsView(container) {
         <td>
           <button class="btn-table" data-edit-promo="${p.id}">Editar</button>
           <button class="btn-table ms-1" data-delete-promo="${p.id}">Borrar</button>
-          <button class="btn-table ms-1" data-toggle-promo="${p.id}" data-is-active="${p.is_active}">
-            ${p.is_active ? "Deshabilitar" : "Habilitar"}
-          </button>
         </td>
       </tr>
     `
