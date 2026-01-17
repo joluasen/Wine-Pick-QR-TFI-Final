@@ -1241,7 +1241,7 @@ class ModalManager {
     this.open('create-promotion-modal', content, {
       disableClickOutside: true,
       onOpen: (modalEl) => {
-        modalEl.classList.add('modal-md');
+        modalEl.classList.add('modal-xl');
         this._setupPromotionFormLogic(modalEl, onSuccess);
       }
     });
