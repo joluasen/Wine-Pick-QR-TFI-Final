@@ -11,7 +11,6 @@
 import {
   getPromotions,
   deletePromotion,
-  togglePromotionStatus,
 } from "../admin/services/promotionService.js";
 import { showToast } from "../admin/components/Toast.js";
 
@@ -136,10 +135,6 @@ export async function initAdminPromotionsView(container) {
             <i class="fas fa-trash"></i>
             <span>Borrar</span>
           </button>
-          <button class="btn-table btn-mobile" data-toggle-promo="${p.id}" data-is-active="${p.is_active}">
-            <i class="fas fa-${p.is_active ? "toggle-off" : "toggle-on"}"></i>
-            <span>${p.is_active ? "Deshabilitar" : "Habilitar"}</span>
-          </button>
         </div>
       </div>
     `
@@ -154,7 +149,6 @@ export async function initAdminPromotionsView(container) {
     // Obtener todos los botones tanto de tabla como de cards
     const allEditBtns = container.querySelectorAll("[data-edit-promo]");
     const allDeleteBtns = container.querySelectorAll("[data-delete-promo]");
-    const allToggleBtns = container.querySelectorAll("[data-toggle-promo]");
 
     // Editar
     allEditBtns.forEach((btn) => {
@@ -177,25 +171,6 @@ export async function initAdminPromotionsView(container) {
           loadPromos(currentPage);
         } catch (err) {
           showToast(`Error al eliminar: ${err.message}`, "error");
-        }
-      };
-    });
-
-    // Activar/Desactivar
-    allToggleBtns.forEach((btn) => {
-      btn.onclick = async () => {
-        const promoId = btn.getAttribute("data-toggle-promo");
-        const isActive = btn.getAttribute("data-is-active") === "true";
-
-        try {
-          await togglePromotionStatus(promoId, !isActive);
-          showToast(
-            `Promoción ${!isActive ? "activada" : "desactivada"} con éxito`,
-            "success"
-          );
-          loadPromos(currentPage);
-        } catch (err) {
-          showToast(`Error al cambiar estado: ${err.message}`, "error");
         }
       };
     });
