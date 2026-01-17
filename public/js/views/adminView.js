@@ -16,7 +16,7 @@ import { checkAuth, logout, redirectToLogin, redirectToHome } from '../admin/ser
 import { searchProductByCode } from '../admin/services/productService.js';
 
 // Componentes
-import { setupPromotionCreateForm, loadProductsIntoSelect } from '../admin/components/PromotionFormHandler.js';
+import { setupPromotionCreateForm } from '../admin/components/PromotionFormHandler.js';
 
 /**
  * Muestra la ficha editable de un producto dado su código público
@@ -78,6 +78,47 @@ export function setupNewProductButtons() {
 }
 
 /**
+ * Configura los botones de "Nueva Promoción" en el nav
+ */
+export function setupNewPromotionButtons() {
+  const newPromoBtns = document.querySelectorAll('#btn-new-promo-mobile, #btn-new-promo-desktop');
+
+  newPromoBtns.forEach(btn => {
+    btn.addEventListener('click', async (e) => {
+      e.preventDefault();
+
+      // Verificar autenticación
+      const isAuth = await checkAuth();
+      if (!isAuth) {
+        alert('Sesión expirada. Redirigiendo a login.');
+        redirectToLogin();
+        return;
+      }
+
+      // Si el modal de promoción ya existe, abrirlo
+      let modal = document.getElementById('promotion-modal');
+      if (modal) {
+        modal.classList.add('active');
+        return;
+      }
+
+      // Si no existe, navegar a la vista de promociones donde se inicializa el modal
+      const currentHash = window.location.hash;
+      if (currentHash !== '#admin-promotions') {
+        window.location.hash = '#admin-promotions';
+        // Esperar a que se cargue la vista y abrir el modal
+        setTimeout(() => {
+          modal = document.getElementById('promotion-modal');
+          if (modal) {
+            modal.classList.add('active');
+          }
+        }, 500);
+      }
+    });
+  });
+}
+
+/**
  * Configura los botones de logout
  * @param {HTMLElement} container - Contenedor de la vista
  * @param {HTMLElement} statusEl - Elemento para mostrar estados
@@ -113,11 +154,8 @@ export async function initAdminView(container) {
     return;
   }
 
-  // Cargar productos para selector de promociones
-  await loadProductsIntoSelect(promoSelect);
-
   // Configurar formularios usando componentes
   setupProductCreateForm(container);
-  setupPromotionCreateForm(container, promoSelect);
+  setupPromotionCreateForm(container);
   setupLogout(container, statusEl);
 }

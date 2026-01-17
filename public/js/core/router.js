@@ -103,8 +103,9 @@ async function loadNavigation(viewName) {
 
       // Configurar botones específicos de admin
       if (isAdminNav) {
-        const { setupNewProductButtons } = await import('../views/adminView.js');
+        const { setupNewProductButtons, setupNewPromotionButtons } = await import('../views/adminView.js');
         setupNewProductButtons();
+        setupNewPromotionButtons();
       }
     }
   } catch (err) {

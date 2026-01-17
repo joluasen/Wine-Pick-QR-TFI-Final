@@ -108,18 +108,49 @@ function showLoginStatus(el, message, type) {
 }
 
 /**
+ * Inicializa los dropdowns del sidebar para que se muestren correctamente
+ * fuera del contenedor con overflow
+ */
+function initSidebarDropdowns() {
+  document.addEventListener('show.bs.dropdown', (e) => {
+    const toggle = e.target;
+    if (!toggle.closest('.sidebar-dropdown')) return;
+
+    const menu = toggle.nextElementSibling;
+    if (!menu || !menu.classList.contains('dropdown-menu')) return;
+
+    // Calcular posición del toggle
+    const rect = toggle.getBoundingClientRect();
+
+    // Necesitamos esperar un frame para que el menú tenga sus dimensiones
+    requestAnimationFrame(() => {
+      const menuHeight = menu.offsetHeight;
+      const toggleCenterY = rect.top + (rect.height / 2);
+      const menuTop = toggleCenterY - (menuHeight / 2);
+
+      // Posicionar el menú a la derecha del toggle, centrado verticalmente
+      menu.style.left = `${rect.right + 4}px`;
+      menu.style.top = `${Math.max(8, menuTop)}px`; // Mínimo 8px del borde superior
+    });
+  });
+}
+
+/**
  * Inicializa la aplicación cuando el DOM está listo
  */
 function init() {
   // Inicializar router (maneja toda la navegación)
   initRouter();
-  
+
   // Registrar Service Worker
   registerServiceWorker();
-  
+
   // Inicializar login modal global
   // Pequeño delay para asegurar que Bootstrap esté listo
   setTimeout(initGlobalLoginModal, 100);
+
+  // Inicializar dropdowns del sidebar
+  initSidebarDropdowns();
 }
 
 // Esperar a que el DOM esté listo
