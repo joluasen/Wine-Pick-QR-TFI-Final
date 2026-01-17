@@ -5,6 +5,7 @@
  */
 
 import { getBasePath, escapeHtml, calculatePromoPrice, formatDate } from './utils.js';
+import { showToast } from '../admin/components/Toast.js';
 
 class ModalManager {
   constructor() {
@@ -1041,6 +1042,594 @@ class ModalManager {
     }
 
     statusEl.classList.remove('d-none');
+  }
+
+  // ============================================
+  // MODAL DE CREAR PROMOCIÓN
+  // ============================================
+
+  /**
+   * Genera el HTML del formulario de promoción
+   */
+  _generatePromotionModalHTML() {
+    const today = new Date().toISOString().split('T')[0];
+
+    return `
+      <div class="promotion-modal-wrapper">
+        <h2 class="product-modal-title">
+          <i class="fas fa-tag me-2"></i>Nueva Promoción
+        </h2>
+
+        <form id="promotion-create-form" class="product-modal-form" novalidate>
+          <!-- Producto -->
+          <div class="form-section mb-4">
+            <h4 class="form-section-title">Producto</h4>
+            <div class="row g-3">
+              <div class="col-12">
+                <label for="promo-product-search" class="form-label">
+                  Buscar producto <span class="text-danger">*</span>
+                </label>
+                <div class="product-search-container">
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="promo-product-search"
+                    placeholder="Escriba para buscar por nombre o código..."
+                    autocomplete="off"
+                  >
+                  <input type="hidden" id="promo-product-id" name="product_id" required>
+                  <div id="promo-product-results" class="product-search-results"></div>
+                </div>
+                <div id="promo-selected-product" class="selected-product-badge d-none">
+                  <span class="product-name"></span>
+                  <span class="product-price"></span>
+                  <button type="button" class="btn-remove-product" title="Quitar producto">
+                    <i class="fas fa-times"></i>
+                  </button>
+                </div>
+                <div class="invalid-feedback">Seleccione un producto</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tipo de promoción -->
+          <div class="form-section mb-4">
+            <h4 class="form-section-title">Tipo de Promoción</h4>
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label for="promo-type" class="form-label">
+                  Tipo <span class="text-danger">*</span>
+                </label>
+                <select class="form-control" id="promo-type" name="promotion_type" required>
+                  <option value="">Seleccione un tipo</option>
+                  <option value="porcentaje">Descuento porcentual (%)</option>
+                  <option value="precio_fijo">Precio fijo (ARS)</option>
+                  <option value="2x1">2x1</option>
+                  <option value="3x2">3x2</option>
+                  <option value="nxm">NxM (Personalizado)</option>
+                </select>
+                <div class="invalid-feedback">Seleccione el tipo de promoción</div>
+              </div>
+              <!-- Campo valor estándar (para porcentaje, precio_fijo, 2x1, 3x2) -->
+              <div class="col-md-6" id="promo-value-container">
+                <label for="promo-value" class="form-label" id="promo-value-label">
+                  Valor <span class="text-danger">*</span>
+                </label>
+                <input
+                  type="number"
+                  class="form-control"
+                  id="promo-value"
+                  name="parameter_value"
+                  step="0.01"
+                  min="0"
+                  required
+                  placeholder="Ingrese el valor"
+                >
+                <div class="invalid-feedback">Ingrese un valor válido</div>
+                <small class="form-text text-muted" id="promo-value-hint"></small>
+              </div>
+
+              <!-- Campos N y M para tipo nxm -->
+              <div class="col-md-3 d-none" id="promo-nxm-n-container">
+                <label for="promo-nxm-n" class="form-label">
+                  Llevás (N) <span class="text-danger">*</span>
+                </label>
+                <input
+                  type="number"
+                  class="form-control"
+                  id="promo-nxm-n"
+                  min="2"
+                  step="1"
+                  placeholder="Ej: 4"
+                >
+                <div class="invalid-feedback">Ingrese un valor válido</div>
+                <small class="form-text text-muted promo-hint-reserved">Cantidad que lleva</small>
+              </div>
+              <div class="col-md-3 d-none" id="promo-nxm-m-container">
+                <label for="promo-nxm-m" class="form-label">
+                  Pagás (M) <span class="text-danger">*</span>
+                </label>
+                <input
+                  type="number"
+                  class="form-control"
+                  id="promo-nxm-m"
+                  min="1"
+                  step="1"
+                  placeholder="Ej: 3"
+                >
+                <div class="invalid-feedback">Ingrese un valor válido</div>
+                <small class="form-text text-muted promo-hint-reserved">Cantidad que paga</small>
+              </div>
+            </div>
+          </div>
+
+          <!-- Texto visible -->
+          <div class="form-section mb-4">
+            <h4 class="form-section-title">Texto Visible</h4>
+            <div class="row g-3">
+              <div class="col-12">
+                <label for="promo-text" class="form-label">
+                  Texto de la promoción <span class="text-danger">*</span>
+                </label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="promo-text"
+                  name="visible_text"
+                  maxlength="100"
+                  required
+                  placeholder="Ej: 20% OFF en vinos seleccionados"
+                >
+                <div class="invalid-feedback">Ingrese el texto de la promoción</div>
+                <small class="form-text text-muted">Este texto se mostrará al cliente</small>
+              </div>
+            </div>
+          </div>
+
+          <!-- Vigencia -->
+          <div class="form-section mb-4">
+            <h4 class="form-section-title">Vigencia</h4>
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label for="promo-start" class="form-label">
+                  Fecha de inicio <span class="text-danger">*</span>
+                </label>
+                <input
+                  type="date"
+                  class="form-control"
+                  id="promo-start"
+                  name="start_at"
+                  value="${today}"
+                  required
+                >
+                <div class="invalid-feedback">Seleccione la fecha de inicio</div>
+              </div>
+              <div class="col-md-6">
+                <label for="promo-end" class="form-label">
+                  Fecha de fin <span class="text-muted">(opcional)</span>
+                </label>
+                <input
+                  type="date"
+                  class="form-control"
+                  id="promo-end"
+                  name="end_at"
+                >
+                <small class="form-text text-muted">Dejar vacío para sin fecha límite</small>
+              </div>
+            </div>
+          </div>
+
+          <!-- Botones -->
+          <div class="d-flex gap-2 justify-content-end mt-4 pt-3 border-top">
+            <button type="button" class="btn-modal" data-dismiss-modal>
+              <i class="fas fa-times me-1"></i>Cancelar
+            </button>
+            <button type="submit" class="btn-modal btn-modal-primary" id="create-promo-btn">
+              <i class="fas fa-plus me-1"></i>Crear promoción
+            </button>
+          </div>
+        </form>
+      </div>
+    `;
+  }
+
+  /**
+   * Muestra el modal de creación de promoción
+   * @param {Function|null} onSuccess - Callback cuando se crea exitosamente
+   */
+  async showCreatePromotion(onSuccess = null) {
+    const content = this._generatePromotionModalHTML();
+
+    this.open('create-promotion-modal', content, {
+      disableClickOutside: true,
+      onOpen: (modalEl) => {
+        modalEl.classList.add('modal-md');
+        this._setupPromotionFormLogic(modalEl, onSuccess);
+      }
+    });
+  }
+
+  /**
+   * Configura la lógica del formulario de promoción
+   * @param {HTMLElement} modal - Elemento del modal
+   * @param {Function|null} onSuccess - Callback de éxito
+   */
+  async _setupPromotionFormLogic(modal, onSuccess) {
+    const form = modal.querySelector('#promotion-create-form');
+    const productSearchInput = modal.querySelector('#promo-product-search');
+    const productIdInput = modal.querySelector('#promo-product-id');
+    const productResults = modal.querySelector('#promo-product-results');
+    const selectedProductBadge = modal.querySelector('#promo-selected-product');
+    const typeSelect = modal.querySelector('#promo-type');
+    const valueInput = modal.querySelector('#promo-value');
+    const valueContainer = modal.querySelector('#promo-value-container');
+    const valueLabel = modal.querySelector('#promo-value-label');
+    const valueHint = modal.querySelector('#promo-value-hint');
+    const nxmNContainer = modal.querySelector('#promo-nxm-n-container');
+    const nxmMContainer = modal.querySelector('#promo-nxm-m-container');
+    const nxmNInput = modal.querySelector('#promo-nxm-n');
+    const nxmMInput = modal.querySelector('#promo-nxm-m');
+    const textInput = modal.querySelector('#promo-text');
+    const startInput = modal.querySelector('#promo-start');
+    const endInput = modal.querySelector('#promo-end');
+    const submitBtn = modal.querySelector('#create-promo-btn');
+    const dismissBtn = modal.querySelector('[data-dismiss-modal]');
+
+    // Configurar buscador de productos
+    this._setupProductSearch(productSearchInput, productIdInput, productResults, selectedProductBadge);
+
+    // Configurar cambio dinámico de labels según tipo
+    this._setupPromotionTypeLabels(typeSelect, valueInput, valueContainer, valueLabel, valueHint, nxmNContainer, nxmMContainer, nxmNInput, nxmMInput, textInput);
+
+    // Botón cancelar
+    if (dismissBtn) {
+      dismissBtn.addEventListener('click', () => this.close());
+    }
+
+    // Enviar formulario
+    if (form) {
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        // Validar que se haya seleccionado un producto
+        if (!productIdInput.value) {
+          showToast('Debe seleccionar un producto', 'error');
+          productSearchInput.focus();
+          return;
+        }
+
+        // Validación HTML5
+        if (!form.checkValidity()) {
+          e.stopPropagation();
+          form.classList.add('was-validated');
+          showToast('Por favor, complete todos los campos requeridos', 'error');
+          return;
+        }
+
+        // Validar fecha fin > fecha inicio
+        if (endInput.value && endInput.value < startInput.value) {
+          showToast('La fecha de fin debe ser posterior a la de inicio', 'error');
+          return;
+        }
+
+        // Validar campos NxM si el tipo es nxm
+        const promoType = typeSelect.value;
+        if (promoType === 'nxm') {
+          const nVal = parseInt(nxmNInput.value);
+          const mVal = parseInt(nxmMInput.value);
+          if (!nVal || nVal < 2) {
+            showToast('El valor N (llevás) debe ser al menos 2', 'error');
+            nxmNInput.focus();
+            return;
+          }
+          if (!mVal || mVal < 1) {
+            showToast('El valor M (pagás) debe ser al menos 1', 'error');
+            nxmMInput.focus();
+            return;
+          }
+          if (mVal >= nVal) {
+            showToast('El valor M (pagás) debe ser menor que N (llevás)', 'error');
+            nxmMInput.focus();
+            return;
+          }
+        }
+
+        // Preparar payload
+        // Para nxm: parameter_value = M (cantidad que paga), y guardamos N en visible_text o usamos formato especial
+        let parameterValue;
+        if (promoType === 'nxm') {
+          parameterValue = parseInt(nxmMInput.value);
+        } else {
+          parameterValue = parseFloat(valueInput.value);
+        }
+
+        const payload = {
+          product_id: parseInt(productIdInput.value),
+          promotion_type: promoType,
+          parameter_value: parameterValue,
+          visible_text: textInput.value.trim(),
+          start_at: startInput.value ? `${startInput.value} 00:00:00` : null,
+          end_at: endInput.value ? `${endInput.value} 23:59:59` : null
+        };
+
+        // Para nxm, agregar el valor N como campo adicional
+        if (promoType === 'nxm') {
+          payload.nxm_n = parseInt(nxmNInput.value);
+        }
+
+        // Enviar
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Creando...';
+
+        try {
+          console.log('Payload promoción:', payload);
+
+          const response = await fetch('./api/admin/promociones', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'same-origin',
+            body: JSON.stringify(payload)
+          });
+
+          const data = await response.json();
+          console.log('Respuesta:', response.status, data);
+
+          if (!response.ok) {
+            // Extraer mensaje de error del backend (estructura: { ok, data, error: { code, message } })
+            const errorMessage = data.error?.message || data.message || 'Error al crear la promoción';
+            throw new Error(errorMessage);
+          }
+
+          showToast('Promoción creada con éxito', 'success');
+
+          // Cerrar y callback
+          setTimeout(() => {
+            this.close();
+            if (onSuccess) onSuccess(data.data);
+          }, 800);
+
+        } catch (error) {
+          showToast(error.message, 'error');
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = '<i class="fas fa-plus me-1"></i>Crear promoción';
+        }
+      });
+    }
+  }
+
+  /**
+   * Configura el buscador de productos con autocompletado
+   */
+  _setupProductSearch(searchInput, hiddenInput, resultsContainer, selectedBadge) {
+    if (!searchInput || !hiddenInput || !resultsContainer) return;
+
+    let debounceTimer = null;
+    let selectedProduct = null;
+
+    // Buscar productos mientras escribe
+    searchInput.addEventListener('input', () => {
+      const query = searchInput.value.trim();
+
+      clearTimeout(debounceTimer);
+
+      if (query.length < 2) {
+        resultsContainer.innerHTML = '';
+        resultsContainer.classList.remove('show');
+        return;
+      }
+
+      debounceTimer = setTimeout(async () => {
+        try {
+          const params = new URLSearchParams({ search: query, limit: 10 });
+          const response = await fetch(`./api/public/productos?${params.toString()}`);
+          const data = await response.json();
+          const products = data?.data?.products || [];
+
+          if (products.length === 0) {
+            resultsContainer.innerHTML = '<div class="search-no-results">No se encontraron productos</div>';
+          } else {
+            resultsContainer.innerHTML = products.map(p => `
+              <div class="search-result-item" data-id="${p.id}" data-name="${escapeHtml(p.name)}" data-price="${p.base_price}">
+                <span class="result-name">${escapeHtml(p.name)}</span>
+                <span class="result-price">$${parseFloat(p.base_price).toFixed(2)}</span>
+              </div>
+            `).join('');
+          }
+          resultsContainer.classList.add('show');
+        } catch (err) {
+          console.error('Error buscando productos:', err);
+          resultsContainer.innerHTML = '<div class="search-no-results">Error al buscar</div>';
+          resultsContainer.classList.add('show');
+        }
+      }, 300);
+    });
+
+    // Seleccionar producto del resultado
+    resultsContainer.addEventListener('click', (e) => {
+      const item = e.target.closest('.search-result-item');
+      if (!item) return;
+
+      selectedProduct = {
+        id: item.dataset.id,
+        name: item.dataset.name,
+        price: item.dataset.price
+      };
+
+      // Actualizar campos
+      hiddenInput.value = selectedProduct.id;
+      searchInput.value = '';
+      searchInput.classList.add('d-none');
+      resultsContainer.innerHTML = '';
+      resultsContainer.classList.remove('show');
+
+      // Mostrar badge del producto seleccionado
+      if (selectedBadge) {
+        selectedBadge.querySelector('.product-name').textContent = selectedProduct.name;
+        selectedBadge.querySelector('.product-price').textContent = `$${parseFloat(selectedProduct.price).toFixed(2)}`;
+        selectedBadge.classList.remove('d-none');
+      }
+    });
+
+    // Quitar producto seleccionado
+    if (selectedBadge) {
+      const removeBtn = selectedBadge.querySelector('.btn-remove-product');
+      if (removeBtn) {
+        removeBtn.addEventListener('click', () => {
+          selectedProduct = null;
+          hiddenInput.value = '';
+          searchInput.classList.remove('d-none');
+          searchInput.value = '';
+          searchInput.focus();
+          selectedBadge.classList.add('d-none');
+        });
+      }
+    }
+
+    // Cerrar resultados al hacer clic fuera
+    document.addEventListener('click', (e) => {
+      if (!searchInput.contains(e.target) && !resultsContainer.contains(e.target)) {
+        resultsContainer.classList.remove('show');
+      }
+    });
+
+    // Cerrar resultados con Escape
+    searchInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        resultsContainer.classList.remove('show');
+      }
+    });
+  }
+
+  /**
+   * Configura los labels dinámicos según el tipo de promoción
+   */
+  _setupPromotionTypeLabels(typeSelect, valueInput, valueContainer, valueLabel, valueHint, nxmNContainer, nxmMContainer, nxmNInput, nxmMInput, textInput) {
+    if (!typeSelect || !valueInput || !valueLabel) return;
+
+    // El texto siempre es editable por el usuario
+    textInput.readOnly = false;
+
+    // Función para sugerir texto según el tipo y valor (no bloquea edición)
+    const suggestVisibleText = () => {
+      const type = typeSelect.value;
+      const value = valueInput.value;
+
+      // Solo sugerir si el campo está vacío o tiene un texto auto-generado previo
+      const currentText = textInput.value.trim();
+      const isAutoGenerated = currentText === '' ||
+        currentText.match(/^\d+% OFF$/) ||
+        currentText.match(/^Precio especial \$[\d.,]+$/) ||
+        currentText.match(/^[23]x[12] - Llevá \d+ y pagá solo \d+$/) ||
+        currentText.match(/^\d+x\d+ - Llevá \d+ y pagá solo \d+$/);
+
+      if (!isAutoGenerated) return; // No sobrescribir texto personalizado
+
+      if (type === 'porcentaje' && value) {
+        textInput.value = `${value}% OFF`;
+      } else if (type === 'precio_fijo' && value) {
+        textInput.value = `Precio especial $${parseFloat(value).toLocaleString('es-AR')}`;
+      } else if (type === '2x1') {
+        textInput.value = '2x1 - Llevá 2 y pagá solo 1';
+      } else if (type === '3x2') {
+        textInput.value = '3x2 - Llevá 3 y pagá solo 2';
+      }
+    };
+
+    // Función para sugerir texto NxM
+    const suggestNxmText = () => {
+      const n = nxmNInput.value;
+      const m = nxmMInput.value;
+
+      // Solo sugerir si está vacío o tiene formato auto-generado
+      const currentText = textInput.value.trim();
+      const isAutoGenerated = currentText === '' ||
+        currentText.match(/^\d+x\d+ - Llevá \d+ y pagá solo \d+$/);
+
+      if (!isAutoGenerated) return;
+
+      if (n && m) {
+        textInput.value = `${n}x${m} - Llevá ${n} y pagá solo ${m}`;
+      }
+    };
+
+    const updateLabels = () => {
+      const type = typeSelect.value;
+
+      const labels = {
+        'porcentaje': 'Porcentaje de descuento',
+        'precio_fijo': 'Precio promocional (ARS)',
+        '2x1': 'Valor',
+        '3x2': 'Valor',
+        'nxm': 'Cantidad a pagar (M)'
+      };
+
+      const hints = {
+        'porcentaje': 'Ej: 15 para 15% de descuento',
+        'precio_fijo': 'Ej: 2999.99 precio final',
+        '2x1': '',
+        '3x2': '',
+        'nxm': ''
+      };
+
+      const placeholders = {
+        'porcentaje': 'Ej: 15',
+        'precio_fijo': 'Ej: 2999.99',
+        '2x1': '1',
+        '3x2': '2',
+        'nxm': ''
+      };
+
+      // Mostrar/ocultar campos según tipo
+      if (type === 'nxm') {
+        // Ocultar campo valor estándar
+        valueContainer.classList.add('d-none');
+        valueInput.removeAttribute('required');
+        valueInput.disabled = false;
+        // Mostrar campos N y M
+        nxmNContainer.classList.remove('d-none');
+        nxmMContainer.classList.remove('d-none');
+        nxmNInput.setAttribute('required', 'required');
+        nxmMInput.setAttribute('required', 'required');
+        // Limpiar texto para nueva sugerencia
+        textInput.value = '';
+      } else if (type === '2x1' || type === '3x2') {
+        // Mostrar campo valor pero bloquearlo (no editable)
+        valueContainer.classList.remove('d-none');
+        valueInput.removeAttribute('required');
+        valueInput.disabled = true;
+        // Ocultar campos N y M
+        nxmNContainer.classList.add('d-none');
+        nxmMContainer.classList.add('d-none');
+        nxmNInput.removeAttribute('required');
+        nxmMInput.removeAttribute('required');
+        // Setear valor interno y sugerir texto
+        valueInput.value = type === '2x1' ? '1' : '2';
+        suggestVisibleText();
+      } else {
+        // porcentaje o precio_fijo
+        valueContainer.classList.remove('d-none');
+        valueInput.setAttribute('required', 'required');
+        valueInput.disabled = false;
+        // Ocultar campos N y M
+        nxmNContainer.classList.add('d-none');
+        nxmMContainer.classList.add('d-none');
+        nxmNInput.removeAttribute('required');
+        nxmMInput.removeAttribute('required');
+        // Limpiar texto para nueva sugerencia
+        textInput.value = '';
+      }
+
+      valueLabel.innerHTML = `${labels[type] || 'Valor'} <span class="text-danger">*</span>`;
+      valueInput.placeholder = placeholders[type] || '';
+      valueHint.textContent = hints[type] || '';
+      valueInput.step = type === 'porcentaje' ? '1' : '0.01';
+    };
+
+    // Eventos
+    typeSelect.addEventListener('change', updateLabels);
+    valueInput.addEventListener('input', suggestVisibleText);
+    nxmNInput.addEventListener('input', suggestNxmText);
+    nxmMInput.addEventListener('input', suggestNxmText);
   }
 }
 

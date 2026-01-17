@@ -50,6 +50,15 @@ class PromotionController
         $endAt = !empty($body['end_at']) ? trim($body['end_at']) : null;
         $adminId = (int)$_SESSION['admin_user_id'];
 
+        // Validar tipo de promoción (valores permitidos)
+        $validTypes = ['porcentaje', 'precio_fijo', '2x1', '3x2', 'nxm'];
+        if (!in_array($type, $validTypes, true)) {
+            ApiResponse::validationError(
+                'Tipo de promoción inválido. Valores permitidos: ' . implode(', ', $validTypes) . '.',
+                'promotion_type'
+            );
+        }
+
         // Validar que el producto existe
         $product = $this->productModel->findById($productId);
         if (!$product) {
@@ -93,6 +102,21 @@ class PromotionController
         // Validar texto visible
         if (strlen($text) < 3 || strlen($text) > 255) {
             ApiResponse::validationError('El texto de promoción debe tener entre 3 y 255 caracteres.', 'visible_text');
+        }
+
+        // RF12: Validar que no exista otra promoción activa para el mismo producto en el mismo período
+        $overlapping = $this->promotionModel->findOverlappingPromotion($productId, $startAt, $endAt);
+        if ($overlapping) {
+            $conflictInfo = sprintf(
+                '"%s" (vigente desde %s hasta %s)',
+                $overlapping['visible_text'],
+                $overlapping['start_at'],
+                $overlapping['end_at'] ?? 'sin fecha de fin'
+            );
+            ApiResponse::validationError(
+                'Ya existe una promoción activa para este producto en el período indicado: ' . $conflictInfo,
+                'start_at'
+            );
         }
 
         // Crear promoción

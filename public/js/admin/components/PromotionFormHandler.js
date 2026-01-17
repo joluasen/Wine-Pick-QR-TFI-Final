@@ -74,8 +74,8 @@ export function setupPromotionCreateForm(container, selectEl, onSuccess = null) 
     // Texto por defecto para combos
     if (!text) {
       const defaults = {
-        '2x1': 'Llevate 2 y pagas 1',
-        '3x2': 'Llevate 3 y pagas 2',
+        '2x1': 'Llevas 2 y pagas 1',
+        '3x2': 'Llevas 3 y pagas 2',
         'nxm': 'Combo especial'
       };
       text = defaults[type] || 'Promoción';

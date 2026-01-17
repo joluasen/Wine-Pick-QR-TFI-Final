@@ -95,25 +95,15 @@ export function setupNewPromotionButtons() {
         return;
       }
 
-      // Si el modal de promoción ya existe, abrirlo
-      let modal = document.getElementById('promotion-modal');
-      if (modal) {
-        modal.classList.add('active');
-        return;
-      }
-
-      // Si no existe, navegar a la vista de promociones donde se inicializa el modal
-      const currentHash = window.location.hash;
-      if (currentHash !== '#admin-promotions') {
-        window.location.hash = '#admin-promotions';
-        // Esperar a que se cargue la vista y abrir el modal
-        setTimeout(() => {
-          modal = document.getElementById('promotion-modal');
-          if (modal) {
-            modal.classList.add('active');
-          }
-        }, 500);
-      }
+      // Mostrar modal de creación de promoción
+      modalManager.showCreatePromotion((newPromotion) => {
+        // Callback de éxito: recargar la lista de promociones si estamos en esa vista
+        const currentHash = window.location.hash;
+        if (currentHash === '#admin-promotions') {
+          // Recargar la vista de promociones
+          window.location.reload();
+        }
+      });
     });
   });
 }

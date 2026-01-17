@@ -151,5 +151,51 @@ class Promotion
         $sql = "SELECT * FROM promotions WHERE id = ? LIMIT 1";
         return $this->db->fetchOne($sql, [$id], 'i');
     }
+
+    /**
+     * Verificar si existe una promoción activa que se solape con el rango de fechas dado.
+     * RF12: Un producto no puede tener más de una promoción vigente al mismo tiempo.
+     *
+     * @param int $productId ID del producto
+     * @param string $startAt Fecha de inicio de la nueva promoción
+     * @param string|null $endAt Fecha de fin de la nueva promoción (null = sin fin)
+     * @param int|null $excludeId ID de promoción a excluir (para edición)
+     * @return array|null Retorna la promoción existente que se solapa, o null si no hay conflicto
+     */
+    public function findOverlappingPromotion(int $productId, string $startAt, ?string $endAt, ?int $excludeId = null): ?array
+    {
+        // Lógica de solapamiento:
+        // Dos rangos [A_start, A_end] y [B_start, B_end] se solapan si:
+        // A_start <= B_end AND B_start <= A_end
+        // Considerando que end puede ser NULL (sin fin), tratamos NULL como infinito futuro.
+
+        $sql = "
+            SELECT id, promotion_type, visible_text, start_at, end_at
+            FROM promotions
+            WHERE product_id = ?
+            AND is_active = 1
+            AND (
+                -- La nueva promoción empieza antes de que termine la existente
+                ? <= COALESCE(end_at, '9999-12-31 23:59:59')
+                AND
+                -- La existente empieza antes de que termine la nueva
+                start_at <= COALESCE(?, '9999-12-31 23:59:59')
+            )
+        ";
+
+        $params = [$productId, $startAt, $endAt];
+        $types = 'iss';
+
+        // Excluir una promoción específica (útil para edición)
+        if ($excludeId !== null) {
+            $sql .= " AND id != ?";
+            $params[] = $excludeId;
+            $types .= 'i';
+        }
+
+        $sql .= " LIMIT 1";
+
+        return $this->db->fetchOne($sql, $params, $types);
+    }
 }
 ?>
