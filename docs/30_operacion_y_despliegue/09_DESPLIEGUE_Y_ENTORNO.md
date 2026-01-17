@@ -37,8 +37,11 @@ Describir cómo ejecutar y desplegar WINE-PICK-QR tanto en entorno local de desa
 
 2. **Ubicar el código en el servidor web local:**
 
-   - Copiar la carpeta del proyecto dentro del directorio `htdocs` (o equivalente) de XAMPP.
-   - Por ejemplo: `C:\xampp\htdocs\wine-pick-qr` o `/opt/lampp/htdocs/wine-pick-qr`.
+  - Copiar la carpeta del proyecto dentro del directorio `htdocs` (o equivalente) de XAMPP.
+  - Ejemplos:
+    - Windows: `C:\xampp\htdocs\proyectos\Wine-Pick-QR-TFI`
+    - Alternativo: `C:\xampp\htdocs\wine-pick-qr`
+    - Linux (LAMPP): `/opt/lampp/htdocs/wine-pick-qr`
 
 3. **Configurar la base de datos:**
 

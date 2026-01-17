@@ -8,11 +8,11 @@
 
 ## Documentación
 
-- [Proyecto y alcance](docs/00_proyecto_y_alcance/00_PROJECT_BRIEF.md)
-- [Diseño técnico](docs/10_diseno_tecnico/ARQUITECTURA_TECNICA.md)
-- [Proceso y gestión ágil](docs/20_proceso_y_gestion/06_GESTION_AGIL_Y_BACKLOG.md)
-- [Despliegue y uso](docs/30_operacion_y_despliegue/09_DESPLIEGUE_Y_ENTORNO.md)
-- [Informe final TFI](docs/40_cierre_y_resultados/10_INFORME_FINAL_TFI.md)
+- [Proyecto y alcance](00_proyecto_y_alcance/00_PROJECT_BRIEF.md)
+- [Diseño técnico](10_diseno_tecnico/ARQUITECTURA_TECNICA.md)
+- [Proceso y gestión ágil](20_proceso_y_gestion/06_GESTION_AGIL_Y_BACKLOG.md)
+- [Despliegue y uso](30_operacion_y_despliegue/09_DESPLIEGUE_Y_ENTORNO.md)
+- [Informe final TFI](40_cierre_y_resultados/10_INFORME_FINAL_TFI.md)
 
 ---
 

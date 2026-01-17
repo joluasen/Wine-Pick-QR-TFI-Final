@@ -424,8 +424,8 @@ Este documento se relaciona directamente con:
   - Los flujos de interacción (consulta por QR, búsqueda por texto, operaciones administrativas).
   - La forma en que la API utiliza el modelo de datos para responder en JSON.
 
-- `API_REST.md` (pendiente de elaboración)  
-  Donde se detallarán:
+`API_REST.md`  
+  Donde se detallan:
   - Endpoints disponibles (productos, promociones, métricas, autenticación).
   - Parámetros de entrada.
   - Esquemas de respuesta JSON.

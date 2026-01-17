@@ -101,3 +101,4 @@ Este plan de pruebas se conecta con:
 - `API_REST.md` – base para pruebas funcionales de endpoints.
 - `09_DESPLIEGUE_Y_ENTORNO.md` – contexto de entornos donde se ejecutarán las pruebas.
 - `10_INFORME_FINAL_TFI.md` – donde se resumirán resultados, métricas de pruebas y hallazgos principales.
+ - `pruebaspostman.md` – colección/guía de pruebas de API con Postman.

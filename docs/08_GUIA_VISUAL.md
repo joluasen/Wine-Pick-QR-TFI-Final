@@ -4,6 +4,8 @@
 **Fecha:** 12 de diciembre de 2025  
 **Propósito:** Consolidar y documentar la identidad visual de la PWA para mantener coherencia en todas las pantallas y componentes.
 
+> Nota: La guía visual completa y canónica se encuentra en [15_diseno_y_ui/01_GUIA_VISUAL.md](15_diseno_y_ui/01_GUIA_VISUAL.md). Este documento funciona como resumen ejecutivo.
+
 ---
 
 ## 1. Paleta de Colores

@@ -413,6 +413,41 @@ POST /api/admin/productos
 
 ---
 
+### 5.3 Subir imagen de producto
+
+**Endpoint:**
+```http
+POST /api/admin/upload/product-image
+```
+
+**Requiere:** Autenticación de administrador.
+
+**Descripción:** Sube una imagen asociada a un producto y devuelve la **URL pública**.
+
+**Body (multipart/form-data):**
+- `image` (file, requerido) – formatos permitidos: JPEG, PNG, WebP
+
+**Respuesta exitosa (201 Created):**
+```json
+{
+  "ok": true,
+  "data": {
+    "filename": "product_1737123456_abcd1234efgh5678.jpg",
+    "url": "http://localhost/proyectos/Wine-Pick-QR-TFI/uploads/products/product_...jpg",
+    "size": 245678,
+    "type": "image/jpeg"
+  },
+  "error": null
+}
+```
+
+**Errores:**
+- `400 Bad Request` → no se envió archivo, tamaño excedido o tipo no permitido.
+- `401 Unauthorized` → sin autenticación.
+- `500 Internal Server Error` → fallo al guardar imagen.
+
+---
+
 ## 6. Endpoints administrativos - Promociones
 
 ### 6.1 Listar promociones
