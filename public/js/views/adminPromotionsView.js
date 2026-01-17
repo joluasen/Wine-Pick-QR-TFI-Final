@@ -13,6 +13,7 @@ import {
   deletePromotion,
 } from "../admin/services/promotionService.js";
 import { showToast } from "../admin/components/Toast.js";
+import { showConfirmDialog } from "../admin/components/ConfirmDialog.js";
 
 /**
  * Inicializa la vista de gestión de promociones
@@ -163,11 +164,38 @@ export async function initAdminPromotionsView(container) {
     allDeleteBtns.forEach((btn) => {
       btn.onclick = async () => {
         const promoId = btn.getAttribute("data-delete-promo");
-        if (!confirm("¿Estás seguro de eliminar esta promoción?")) return;
+        
+        // Confirmar eliminación con diálogo personalizado
+        const confirmed = await showConfirmDialog({
+          title: "Eliminar promoción",
+          message: `¿Estás seguro de que deseas eliminar esta promoción?`,
+          confirmText: "Eliminar",
+          cancelText: "Cancelar",
+          confirmClass: "btn-danger",
+        });
+
+        if (!confirmed) {
+          return;
+        }
 
         try {
+          // Mostrar toast de inicio
+          const loadingToast = showToast("Eliminando promoción...", "info", 0);
+          
+          // Llamar al servicio de eliminación
           await deletePromotion(promoId);
-          showToast("Promoción eliminada con éxito", "success");
+          
+          // Esperar un poco para que se vea el toast de carga
+          await new Promise((resolve) => setTimeout(resolve, 800));
+          
+          // Remover toast de carga
+          loadingToast.classList.remove('show');
+          setTimeout(() => loadingToast.remove(), 300);
+          
+          // Mostrar toast de éxito
+          showToast("Promoción eliminada correctamente", "success");
+          
+          // Recargar lista
           loadPromos(currentPage);
         } catch (err) {
           showToast(`Error al eliminar: ${err.message}`, "error");
