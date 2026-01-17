@@ -84,6 +84,9 @@ class Router
         // GET /api/admin/promociones?product_id=... o ?limit=...&offset=... (protegido)
         $this->get('/api/admin/promociones', 'PromotionController@listPromotions');
 
+        // DELETE /api/admin/promociones/{id} (protegido)
+        $this->delete('/api/admin/promociones/{id}', 'PromotionController@delete');
+
         // POST /api/admin/upload/product-image (protegido)
         $this->post('/api/admin/upload/product-image', 'UploadController@uploadProductImage');
 

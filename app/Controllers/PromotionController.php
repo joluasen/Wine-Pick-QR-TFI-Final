@@ -213,6 +213,49 @@ class PromotionController
     }
 
     /**
+     * DELETE /api/admin/promociones/{id}
+     * 
+     * Eliminar una promoción existente.
+     * 
+     * @return void JSON con confirmación o error.
+     */
+    public function delete(string $id): void
+    {
+        // Proteger: requiere sesión de admin
+        if (empty($_SESSION['admin_user_id'])) {
+            ApiResponse::unauthorized('Requiere autenticación de administrador.');
+        }
+
+        // Validar ID
+        $promotionId = (int)$id;
+        if ($promotionId <= 0) {
+            ApiResponse::validationError('ID de promoción inválido.', 'id');
+        }
+
+        // Verificar que la promoción existe
+        $promotion = $this->promotionModel->findById($promotionId);
+        if (!$promotion) {
+            ApiResponse::notFound('Promoción no encontrada.');
+        }
+
+        // Eliminar promoción
+        try {
+            $success = $this->promotionModel->delete($promotionId);
+
+            if (!$success) {
+                ApiResponse::serverError('No se pudo eliminar la promoción.');
+            }
+
+            ApiResponse::success([
+                'message' => 'Promoción eliminada exitosamente.',
+                'id' => $promotionId
+            ], 200);
+        } catch (\Exception $e) {
+            ApiResponse::serverError('Error al eliminar promoción: ' . $e->getMessage());
+        }
+    }
+
+    /**
      * Validar formato de fecha Y-m-d H:i:s
      */
     private function isValidDate(string $date): bool

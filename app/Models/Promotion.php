@@ -144,6 +144,16 @@ class Promotion
     }
 
     /**
+     * Eliminar una promoción permanentemente.
+     */
+    public function delete(int $id): bool
+    {
+        $sql = "DELETE FROM promotions WHERE id = ?";
+        $this->db->execute($sql, [$id], 'i');
+        return true;
+    }
+
+    /**
      * Obtener promoción por ID.
      */
     public function findById(int $id): ?array
