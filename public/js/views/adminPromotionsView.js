@@ -14,6 +14,7 @@ import {
 } from "../admin/services/promotionService.js";
 import { showToast } from "../admin/components/Toast.js";
 import { showConfirmDialog } from "../admin/components/ConfirmDialog.js";
+import { modalManager } from "../core/modalManager.js";
 
 /**
  * Inicializa la vista de gestión de promociones
@@ -155,8 +156,30 @@ export async function initAdminPromotionsView(container) {
     allEditBtns.forEach((btn) => {
       btn.onclick = async () => {
         const promoId = btn.getAttribute("data-edit-promo");
-        // TODO: Implementar edición
-        showToast(`Editar promoción ${promoId} - Por implementar`, "info");
+        
+        try {
+          // Buscar la promoción en la lista actual
+          const { promotions } = await getPromotions({
+            limit: PAGE_SIZE,
+            offset: currentPage * PAGE_SIZE,
+          });
+          
+          const promotion = promotions.find(p => p.id == promoId);
+          
+          if (!promotion) {
+            showToast("No se pudo cargar la promoción", "error");
+            return;
+          }
+          
+          // Abrir modal de edición
+          modalManager.showEditPromotion(promotion, () => {
+            // Recargar lista después de editar
+            loadPromos(currentPage);
+          });
+          
+        } catch (err) {
+          showToast(`Error al cargar promoción: ${err.message}`, "error");
+        }
       };
     });
 

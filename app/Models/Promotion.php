@@ -21,7 +21,7 @@ class Promotion
     public function findAllWithProduct(int $limit = 10, int $offset = 0): array
     {
         $sql = "
-            SELECT p.*, pr.name AS product_name
+            SELECT p.*, pr.name AS product_name, pr.base_price AS product_price
             FROM promotions p
             JOIN products pr ON p.product_id = pr.id
             ORDER BY p.id ASC
@@ -129,7 +129,7 @@ class Promotion
             WHERE id = ?
         ";
 
-        $this->db->execute($sql, [$type, $value, $text, $startAt, $endAt, $id], 'sdssi');
+        $this->db->execute($sql, [$type, $value, $text, $startAt, $endAt, $id], 'sdsssi');
         return true;
     }
 

@@ -81,6 +81,9 @@ class Router
         // POST /api/admin/promociones (protegido)
         $this->post('/api/admin/promociones', 'PromotionController@create');
 
+        // PUT /api/admin/promociones/{id} (protegido, RESTful)
+        $this->put('/api/admin/promociones/{id}', 'PromotionController@update');
+
         // GET /api/admin/promociones?product_id=... o ?limit=...&offset=... (protegido)
         $this->get('/api/admin/promociones', 'PromotionController@listPromotions');
 

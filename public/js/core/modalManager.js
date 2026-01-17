@@ -1048,26 +1048,33 @@ class ModalManager {
 
   /**
    * Genera el HTML del formulario de promoción
+   * @param {Object|null} promotion - Datos de promoción para edición (null = crear nueva)
    */
-  _generatePromotionModalHTML() {
+  _generatePromotionModalHTML(promotion = null) {
     const today = new Date().toISOString().split('T')[0];
+    const isEdit = promotion !== null;
+    const productLabel = isEdit ? 'Producto' : 'Buscar producto';
+    const productSearchClass = isEdit ? 'd-none' : '';
+    const selectedBadgeClass = isEdit ? '' : 'd-none';
+    const title = isEdit ? 'Editar Promoción' : 'Nueva Promoción';
+    const btnText = isEdit ? 'Guardar cambios' : 'Crear promoción';
+    const btnIcon = isEdit ? 'fa-save' : 'fa-plus';
 
     return `
       <div class="promotion-modal-wrapper">
         <h2 class="product-modal-title">
-          <i class="fas fa-tag me-2"></i>Nueva Promoción
+          <i class="fas fa-tag me-2"></i>${title}
         </h2>
 
         <form id="promotion-create-form" class="product-modal-form" novalidate>
           <!-- Producto -->
           <div class="form-section mb-4">
-            <h4 class="form-section-title">Producto</h4>
             <div class="row g-3">
               <div class="col-12">
                 <label for="promo-product-search" class="form-label">
-                  Buscar producto <span class="text-danger">*</span>
+                  ${productLabel}${isEdit ? '' : ' <span class="text-danger">*</span>'}
                 </label>
-                <div class="product-search-container">
+                <div class="product-search-container ${productSearchClass}">
                   <input
                     type="text"
                     class="form-control"
@@ -1078,7 +1085,7 @@ class ModalManager {
                   <input type="hidden" id="promo-product-id" name="product_id" required>
                   <div id="promo-product-results" class="product-search-results"></div>
                 </div>
-                <div id="promo-selected-product" class="selected-product-badge d-none">
+                <div id="promo-selected-product" class="selected-product-badge ${selectedBadgeClass}">
                   <span class="product-name"></span>
                   <span class="product-price"></span>
                   <button type="button" class="btn-remove-product" title="Quitar producto">
@@ -1092,11 +1099,10 @@ class ModalManager {
 
           <!-- Tipo de promoción -->
           <div class="form-section mb-4">
-            <h4 class="form-section-title">Tipo de Promoción</h4>
             <div class="row g-3">
               <div class="col-md-6">
                 <label for="promo-type" class="form-label">
-                  Tipo <span class="text-danger">*</span>
+                  Tipo de promoción <span class="text-danger">*</span>
                 </label>
                 <select class="form-control" id="promo-type" name="promotion_type" required>
                   <option value="">Seleccione un tipo</option>
@@ -1163,7 +1169,6 @@ class ModalManager {
 
           <!-- Texto visible -->
           <div class="form-section mb-4">
-            <h4 class="form-section-title">Texto Visible</h4>
             <div class="row g-3">
               <div class="col-12">
                 <label for="promo-text" class="form-label">
@@ -1186,7 +1191,6 @@ class ModalManager {
 
           <!-- Vigencia -->
           <div class="form-section mb-4">
-            <h4 class="form-section-title">Vigencia</h4>
             <div class="row g-3">
               <div class="col-md-6">
                 <label for="promo-start" class="form-label">
@@ -1223,7 +1227,7 @@ class ModalManager {
               <i class="fas fa-times me-1"></i>Cancelar
             </button>
             <button type="submit" class="btn-modal btn-modal-primary" id="create-promo-btn">
-              <i class="fas fa-plus me-1"></i>Crear promoción
+              <i class="fas ${btnIcon} me-1"></i>${btnText}
             </button>
           </div>
         </form>
@@ -1248,11 +1252,29 @@ class ModalManager {
   }
 
   /**
+   * Muestra modal para editar una promoción existente
+   * @param {Object} promotion - Datos de la promoción a editar
+   * @param {Function|null} onSuccess - Callback de éxito
+   */
+  async showEditPromotion(promotion, onSuccess = null) {
+    const content = this._generatePromotionModalHTML(promotion);
+
+    this.open('edit-promotion-modal', content, {
+      disableClickOutside: true,
+      onOpen: (modalEl) => {
+        modalEl.classList.add('modal-xl');
+        this._setupPromotionFormLogic(modalEl, onSuccess, promotion);
+      }
+    });
+  }
+
+  /**
    * Configura la lógica del formulario de promoción
    * @param {HTMLElement} modal - Elemento del modal
    * @param {Function|null} onSuccess - Callback de éxito
+   * @param {Object|null} promotion - Datos de promoción para edición
    */
-  async _setupPromotionFormLogic(modal, onSuccess) {
+  async _setupPromotionFormLogic(modal, onSuccess, promotion = null) {
     const form = modal.querySelector('#promotion-create-form');
     const productSearchInput = modal.querySelector('#promo-product-search');
     const productIdInput = modal.querySelector('#promo-product-id');
@@ -1273,11 +1295,90 @@ class ModalManager {
     const submitBtn = modal.querySelector('#create-promo-btn');
     const dismissBtn = modal.querySelector('[data-dismiss-modal]');
 
-    // Configurar buscador de productos
-    this._setupProductSearch(productSearchInput, productIdInput, productResults, selectedProductBadge);
+    const isEdit = promotion !== null;
 
-    // Configurar cambio dinámico de labels según tipo
-    this._setupPromotionTypeLabels(typeSelect, valueInput, valueContainer, valueLabel, valueHint, nxmNContainer, nxmMContainer, nxmNInput, nxmMInput, textInput);
+    // Helper para sugerir texto visible inicial (mismo criterio que en labels dinámicos)
+    const suggestInitialText = () => {
+      const type = typeSelect.value;
+      const current = textInput.value.trim();
+      const isAuto = current === '' ||
+        current.match(/^\d+% OFF$/) ||
+        current.match(/^Precio especial \$[\d.,]+$/) ||
+        current.match(/^[23]x[12] - Llevá \d+ y pagá solo \d+$/) ||
+        current.match(/^\d+x\d+ - Llevá \d+ y pagá solo \d+$/);
+
+      if (!isAuto) return;
+
+      if (type === 'porcentaje' && valueInput.value) {
+        textInput.value = `${valueInput.value}% OFF`;
+      } else if (type === 'precio_fijo' && valueInput.value) {
+        textInput.value = `Precio especial $${parseFloat(valueInput.value).toLocaleString('es-AR')}`;
+      } else if (type === '2x1') {
+        textInput.value = '2x1 - Llevá 2 y pagá solo 1';
+      } else if (type === '3x2') {
+        textInput.value = '3x2 - Llevá 3 y pagá solo 2';
+      } else if (type === 'nxm' && nxmNInput.value && nxmMInput.value) {
+        const n = nxmNInput.value;
+        const m = nxmMInput.value;
+        textInput.value = `${n}x${m} - Llevá ${n} y pagá solo ${m}`;
+      }
+    };
+
+    // Configurar listeners de tipo antes de precargar datos
+    this._setupPromotionTypeLabels(
+      typeSelect,
+      valueInput,
+      valueContainer,
+      valueLabel,
+      valueHint,
+      nxmNContainer,
+      nxmMContainer,
+      nxmNInput,
+      nxmMInput,
+      textInput
+    );
+
+    // Si es edición, pre-llenar campos
+    if (isEdit) {
+      const productName = promotion.product_name || `Producto #${promotion.product_id}`;
+      const productPrice = promotion.product_price !== undefined && promotion.product_price !== null
+        ? `$${parseFloat(promotion.product_price).toFixed(2)}`
+        : '';
+
+      productIdInput.value = promotion.product_id;
+      typeSelect.value = promotion.promotion_type;
+      valueInput.value = promotion.parameter_value;
+      textInput.value = promotion.visible_text;
+      
+      // Formatear fechas (quitar hora si existe)
+      if (promotion.start_at) {
+        startInput.value = promotion.start_at.split(' ')[0];
+      }
+      if (promotion.end_at) {
+        endInput.value = promotion.end_at.split(' ')[0];
+      }
+
+      // Deshabilitar búsqueda de producto (no se puede cambiar en edición) y mostrar info
+      if (productSearchInput) {
+        productSearchInput.disabled = true;
+        productSearchInput.value = productName;
+      }
+      selectedProductBadge.classList.remove('d-none');
+      selectedProductBadge.querySelector('.product-name').textContent = productName;
+      selectedProductBadge.querySelector('.product-price').textContent = productPrice;
+      const removeBtn = selectedProductBadge.querySelector('.btn-remove-product');
+      if (removeBtn) removeBtn.style.display = 'none';
+      
+      // Trigger change para actualizar labels según tipo (con manejadores ya configurados)
+      typeSelect.dispatchEvent(new Event('change'));
+      suggestInitialText();
+    } else {
+      // Configurar buscador de productos solo para creación
+      this._setupProductSearch(productSearchInput, productIdInput, productResults, selectedProductBadge);
+      // Sugerir texto inicial para creación
+      typeSelect.dispatchEvent(new Event('change'));
+      suggestInitialText();
+    }
 
     // Botón cancelar
     if (dismissBtn) {
@@ -1357,13 +1458,20 @@ class ModalManager {
 
         // Enviar
         submitBtn.disabled = true;
-        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Creando...';
+        const loadingText = isEdit ? 'Guardando...' : 'Creando...';
+        const iconClass = isEdit ? 'fa-save' : 'fa-plus';
+        submitBtn.innerHTML = `<i class="fas fa-spinner fa-spin me-1"></i>${loadingText}`;
 
         try {
           console.log('Payload promoción:', payload);
 
-          const response = await fetch('./api/admin/promociones', {
-            method: 'POST',
+          const url = isEdit 
+            ? `./api/admin/promociones/${promotion.id}` 
+            : './api/admin/promociones';
+          const method = isEdit ? 'PUT' : 'POST';
+
+          const response = await fetch(url, {
+            method: method,
             headers: { 'Content-Type': 'application/json' },
             credentials: 'same-origin',
             body: JSON.stringify(payload)
@@ -1374,11 +1482,12 @@ class ModalManager {
 
           if (!response.ok) {
             // Extraer mensaje de error del backend (estructura: { ok, data, error: { code, message } })
-            const errorMessage = data.error?.message || data.message || 'Error al crear la promoción';
+            const errorMessage = data.error?.message || data.message || `Error al ${isEdit ? 'actualizar' : 'crear'} la promoción`;
             throw new Error(errorMessage);
           }
 
-          showToast('Promoción creada con éxito', 'success');
+          const successMsg = isEdit ? 'Promoción actualizada con éxito' : 'Promoción creada con éxito';
+          showToast(successMsg, 'success');
 
           // Cerrar y callback
           setTimeout(() => {
@@ -1389,7 +1498,9 @@ class ModalManager {
         } catch (error) {
           showToast(error.message, 'error');
           submitBtn.disabled = false;
-          submitBtn.innerHTML = '<i class="fas fa-plus me-1"></i>Crear promoción';
+          const btnText = isEdit ? 'Guardar cambios' : 'Crear promoción';
+          const btnIcon = isEdit ? 'fa-save' : 'fa-plus';
+          submitBtn.innerHTML = `<i class="fas ${btnIcon} me-1"></i>${btnText}`;
         }
       });
     }
@@ -1615,6 +1726,8 @@ class ModalManager {
         nxmMInput.removeAttribute('required');
         // Limpiar texto para nueva sugerencia
         textInput.value = '';
+        // Sugerir texto si el valor ya existe
+        suggestVisibleText();
       }
 
       valueLabel.innerHTML = `${labels[type] || 'Valor'} <span class="text-danger">*</span>`;
