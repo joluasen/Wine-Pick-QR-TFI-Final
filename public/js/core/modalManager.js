@@ -877,7 +877,7 @@ class ModalManager {
         if (!form.checkValidity()) {
           e.stopPropagation();
           form.classList.add('was-validated');
-          this.showFormStatus(statusEl, 'Por favor, complete todos los campos requeridos', 'error');
+          showToast('Por favor, complete todos los campos requeridos', 'error');
           return;
         }
 
@@ -936,7 +936,6 @@ class ModalManager {
     // Deshabilitar botón
     submitBtn.disabled = true;
     submitBtn.innerHTML = `<i class="fas fa-spinner fa-spin me-1"></i>${actionText}...`;
-    this.showFormStatus(statusEl, `${actionText} producto...`, 'info');
 
     try {
       const response = await fetch(endpoint, {
@@ -950,19 +949,21 @@ class ModalManager {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || `Error al ${isEdit ? 'actualizar' : 'crear'} el producto`);
+        // Extraer mensaje de error del backend
+        const errorMessage = data.error?.message || data.message || `Error al ${isEdit ? 'actualizar' : 'crear'} el producto`;
+        throw new Error(errorMessage);
       }
 
-      this.showFormStatus(statusEl, successText, 'success');
+      showToast(successText, 'success');
 
       // Esperar un momento y cerrar
       setTimeout(() => {
         this.close();
         if (onSuccess) onSuccess(data.data);
-      }, 1000);
+      }, 800);
 
     } catch (error) {
-      this.showFormStatus(statusEl, `Error: ${error.message}`, 'error');
+      showToast(error.message, 'error');
       submitBtn.disabled = false;
       submitBtn.innerHTML = `<i class="fas fa-${isEdit ? 'save' : 'plus'} me-1"></i>${isEdit ? 'Guardar cambios' : 'Crear producto'}`;
     }
