@@ -40,6 +40,24 @@
   --success: #2E7D42;
   --error: #C62828;
   --info: #0277BD;
+
+  /* Tokens unificados (app-wide) */
+  --color-brand: #4A0E1A;
+  --color-brand-light: #6B0F2A;
+  --color-brand-dark: #2D0810;
+  --color-text: #1A1A1A;
+  --color-muted: #5A5A5A;
+  --color-bg: #FAFAFA;
+  --color-card: #FFFFFF;
+  --color-border: #DDDDDD;
+  --color-border-light: #EEEEEE;
+  --color-accent: #d4af37; /* acento actual (promos) */
+  --color-success: #2E7D42;
+  --color-danger: #C62828;
+  --color-info: #0277BD;
+  --radius-sm: 6px;
+  --shadow-sm: 0 1px 3px rgba(74, 14, 26, 0.08);
+  --shadow-md: 0 4px 12px rgba(74, 14, 26, 0.12);
 }
 
 /* Ajustes globales */

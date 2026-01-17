@@ -2,12 +2,7 @@
    LAYOUT.CSS - Estilos de Layout Principal
    ========================================= */
 
-:root {
-  --winepick-primary: #4A0E1A;
-  --winepick-accent: #721C2E;
-  --winepick-muted: #5A5A5A;
-  --winepick-primary-soft: #f0ebe7;
-}
+/* Consumir tokens desde theme.css para evitar duplicaciones */
 
 /* =========================================
    BODY Y CONTENEDOR PRINCIPAL
@@ -199,11 +194,11 @@ header .h5 i {
 
 /* Secciones de vistas (data-view) */
 section[data-view] {
-  background: var(--bg-card);
+  background: var(--color-card);
   padding: 10px;
   border-radius: 2px;
-  border: 1px solid var(--border-light);
-  box-shadow: 0 1px 3px var(--shadow);
+  border: 1px solid var(--color-border-light);
+  box-shadow: var(--shadow-sm);
 }
 
 section[data-view] h2 {
@@ -215,7 +210,7 @@ section[data-view] h2 {
 
 section[data-view] > p {
   font-size: 0.8rem;
-  color: var(--color-text-muted);
+  color: var(--color-muted);
   margin-bottom: 0.5rem;
   padding: 0 0.5rem;
 }

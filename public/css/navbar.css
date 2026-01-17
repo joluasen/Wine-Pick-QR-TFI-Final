@@ -46,7 +46,7 @@
   flex: 1;
   text-align: center;
   font-size: 0.72rem;
-  color: var(--winepick-muted);
+  color: var(--color-muted);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -64,7 +64,7 @@
 }
 
 .bottom-nav-item:hover {
-  color: var(--winepick-muted);
+  color: var(--color-muted);
 }
 
 /* Icono y Texto */
@@ -89,14 +89,14 @@
   width: 22px;
   height: 3px;
   border-radius: 999px;
-  background-color: var(--winepick-primary);
+  background-color: var(--color-brand);
   opacity: 0;
   transition: opacity 0.16s ease-out;
 }
 
 /* Estado Activo Mobile */
 .bottom-nav-item.active {
-  color: var(--winepick-primary);
+  color: var(--color-brand);
   font-weight: 500;
 }
 
@@ -118,8 +118,11 @@
   top: -20px;
   width: 64px;
   height: 64px;
+  min-width: 64px;
+  min-height: 64px;
+  box-sizing: border-box;
   border-radius: 50%;
-  background: var(--winepick-primary);
+  background: var(--color-brand);
   display: flex;
   align-items: center;
   justify-content: center;
