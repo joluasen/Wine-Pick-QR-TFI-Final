@@ -280,6 +280,10 @@ class PromotionController
 
         // Validaciones específicas por tipo
         if ($type === 'porcentaje') {
+            // Porcentaje debe ser entero sin decimales
+            if ($value != floor($value)) {
+                ApiResponse::validationError('El porcentaje debe ser un número entero (sin decimales).', 'parameter_value');
+            }
             if ($value >= 100) {
                 ApiResponse::validationError('El porcentaje debe ser menor a 100%.', 'parameter_value');
             }

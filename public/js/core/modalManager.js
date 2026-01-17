@@ -1433,11 +1433,29 @@ class ModalManager {
           }
         }
 
+        // Validar porcentaje (debe ser entero entre 1 y 99)
+        if (promoType === 'porcentaje') {
+          const percentValue = parseFloat(valueInput.value);
+          if (percentValue !== Math.floor(percentValue)) {
+            showToast('El porcentaje debe ser un número entero sin decimales', 'error');
+            valueInput.focus();
+            return;
+          }
+          if (percentValue < 1 || percentValue >= 100) {
+            showToast('El porcentaje debe estar entre 1 y 99', 'error');
+            valueInput.focus();
+            return;
+          }
+        }
+
         // Preparar payload
         // Para nxm: parameter_value = M (cantidad que paga), y guardamos N en visible_text o usamos formato especial
         let parameterValue;
         if (promoType === 'nxm') {
           parameterValue = parseInt(nxmMInput.value);
+        } else if (promoType === 'porcentaje') {
+          // Asegurar que es entero
+          parameterValue = Math.floor(parseFloat(valueInput.value));
         } else {
           parameterValue = parseFloat(valueInput.value);
         }
@@ -1733,11 +1751,35 @@ class ModalManager {
       valueLabel.innerHTML = `${labels[type] || 'Valor'} <span class="text-danger">*</span>`;
       valueInput.placeholder = placeholders[type] || '';
       valueHint.textContent = hints[type] || '';
-      valueInput.step = type === 'porcentaje' ? '1' : '0.01';
+      // Porcentaje: paso 1 (entero), resto: 0.01 (decimal)
+      if (type === 'porcentaje') {
+        valueInput.step = '1';
+        valueInput.min = '1';
+        valueInput.max = '99';
+      } else if (type === 'precio_fijo') {
+        valueInput.step = '0.01';
+        valueInput.min = '0.01';
+        valueInput.removeAttribute('max');
+      } else {
+        valueInput.step = '1';
+        valueInput.min = '0';
+        valueInput.removeAttribute('max');
+      }
+    };
+
+    // Limpiar decimales si es porcentaje
+    const cleanPercentageValue = () => {
+      if (typeSelect.value === 'porcentaje' && valueInput.value) {
+        const intValue = Math.floor(parseFloat(valueInput.value));
+        if (intValue >= 1 && intValue <= 99) {
+          valueInput.value = intValue;
+        }
+      }
     };
 
     // Eventos
     typeSelect.addEventListener('change', updateLabels);
+    valueInput.addEventListener('change', cleanPercentageValue);
     valueInput.addEventListener('input', suggestVisibleText);
     nxmNInput.addEventListener('input', suggestNxmText);
     nxmMInput.addEventListener('input', suggestNxmText);
