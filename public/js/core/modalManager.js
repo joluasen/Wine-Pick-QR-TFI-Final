@@ -585,7 +585,7 @@ class ModalManager {
             <label for="${isEdit ? 'edit' : 'create'}-drink-type" class="form-label">
               Tipo de bebida <span class="text-danger">*</span>
             </label>
-            <select class="form-select" id="${isEdit ? 'edit' : 'create'}-drink-type" name="drink_type" required>
+            <select class="form-control" id="${isEdit ? 'edit' : 'create'}-drink-type" name="drink_type" required>
               <option value="">Seleccione un tipo</option>
               <option value="vino" ${p.drink_type === 'vino' ? 'selected' : ''}>Vino</option>
               <option value="espumante" ${p.drink_type === 'espumante' ? 'selected' : ''}>Espumante</option>
@@ -647,21 +647,18 @@ class ModalManager {
             <label for="${isEdit ? 'edit' : 'create'}-price" class="form-label">
               Precio base <span class="text-danger">*</span>
             </label>
-            <div class="input-group">
-              <span class="input-group-text">$</span>
-              <input
-                type="number"
-                class="form-control"
-                id="${isEdit ? 'edit' : 'create'}-price"
-                name="base_price"
-                step="0.01"
-                value="${escapeHtml(p.base_price || '')}"
-                required
-                min="0.01"
-                max="999999.99"
-                placeholder="0.00"
-              >
-            </div>
+            <input
+              type="number"
+              class="form-control"
+              id="${isEdit ? 'edit' : 'create'}-price"
+              name="base_price"
+              step="0.01"
+              value="${escapeHtml(p.base_price || '')}"
+              required
+              min="0.01"
+              max="999999.99"
+              placeholder="0.00"
+            >
             <div class="invalid-feedback">Ingrese un precio válido mayor a 0</div>
           </div>
           <div class="col-md-4">

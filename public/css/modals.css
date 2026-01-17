@@ -190,6 +190,34 @@
 }
 
 /* =========================================
+   INPUT GROUP EN MODALES
+   ========================================= */
+
+.modal .input-group {
+  display: flex;
+  align-items: stretch;
+  width: 100%;
+}
+
+.modal .input-group-text {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff;
+  border: 1px solid #DDDDDD;
+  border-right: none;
+  padding: 0.625rem 0.875rem;
+  font-weight: 500;
+  color: #666;
+  border-radius: 0.375rem 0 0 0.375rem;
+  font-size: 0.95rem;
+}
+
+.modal .input-group .form-control {
+  border-radius: 0 0.375rem 0.375rem 0;
+}
+
+/* =========================================
    BOTONES EN MODALES
    ========================================= */
 
