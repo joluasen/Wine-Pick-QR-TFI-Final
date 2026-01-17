@@ -1,78 +1,79 @@
-# Guía Visual — WINE-PICK-QR (Bootstrap 5 Theming)
+# Guía Visual — WINE-PICK-QR (Inspiración Mercado Libre, CSS personalizado)
 
-**Versión:** 2.0  
-**Fecha:** 12 de diciembre de 2025  
-**Framework Base:** Bootstrap 5.3  
-**Propósito:** Definir un sistema de diseño coherente, moderno y responsivo para la PWA, basado en la personalización de Bootstrap. Esto garantiza una base robusta y facilita futuras actualizaciones visuales.
+**Versión:** 2.1  
+**Fecha:** 17 de enero de 2026  
+**Base visual:** CSS personalizado (tokens, utilidades y componentes).  
+**Propósito:** Documentar el sistema visual actual de la PWA, que prioriza **CSS propio** para mayor personalización, tomando como referencia patrones de Mercado Libre (jerarquía de precio, badges y densidad visual) pero manteniendo **identidad de marca propia**.
 
 ---
 
 ## 1. Estrategia de Diseño
 
-Utilizaremos **Bootstrap 5** como framework CSS principal para aprovechar su sistema de grilla responsiva, componentes predefinidos y utilidades. La personalización se realizará en un archivo `public/css/theme.css` que sobreescribe las variables CSS nativas de Bootstrap.
+Utilizamos **CSS personalizado como base** del sistema visual, prescindiendo de dependencias Bootstrap para mayor control y ligereza. El diseño sigue patrones comprobados de **Mercado Libre** (precio protagonista, tarjetas funcionales, badges decisivos), integrando plenamente la **identidad de marca WINE-PICK** con su paleta bordeaux y carácter premium.
 
-**Ventajas de este enfoque:**
-- **Consistencia:** Usamos componentes estándar probados.
-- **Responsividad:** El diseño es 100% adaptable a móviles, tablets y escritorio desde el inicio.
-- **Mantenibilidad:** Cambiar la paleta de colores a futuro implica modificar unas pocas variables CSS, no cientos de líneas de código.
-- **Modernidad:** Nos alineamos con las prácticas de desarrollo de aplicaciones web modernas.
+### Principios Fundamentales
+
+- **CSS-first:** variables, utilidades y componentes organizados en `public/css/` sin dependencias de frameworks externos.
+- **Bootstrap mínimo:** reservado como base de reset global. El diseño es completamente funcional sin él; su ausencia no compromete la experiencia.
+- **Arquitectura CSS estructurada:**
+  - `theme.css` → tokens de diseño (colores, espacios, sombras, tipografía).
+  - `layout.css` → contenedores, sistemas de grilla y espaciados globales.
+  - `components.css` → tarjetas, chips, precios, inputs, notificaciones.
+  - `buttons.css`, `navbar.css`, `modals.css` → componentes especializados.
+  - `winepick-search.css` → interfaz de búsqueda y resultados.
+
+### Resultados esperados
+
+Performance optimizado, legibilidad nativa en dispositivos móviles, personalización sin restricciones y consistencia visual garantizada.
 
 ---
 
 ## 2. Paleta de Colores
 
-Nuestra paleta de marca se mapea directamente a las variables de color semánticas de Bootstrap.
+La paleta mantiene el **bordeaux** como color de marca y añade un **amarillo acento** para destacar promociones al estilo marketplace.
 
-### 2.1 Mapeo de Colores Principales
+### 2.1 Tokens de Color (theme.css)
 
-| Uso Semántico | Variable Bootstrap | Color | Hex | Descripción |
-|---------------|--------------------|-------|-----|-------------|
-| **Primario** | `--bs-primary` | Bordeaux | `#4A0E1A` | Marca, headers, botones principales, links. |
-| **Secundario** | `--bs-secondary` | Gris Oscuro | `#5A5A5A` | Botones secundarios, texto de apoyo. |
-| **Éxito** | `--bs-success` | Verde | `#198754` | Mensajes de éxito, validaciones correctas. |
-| **Peligro/Error** | `--bs-danger` | Rojo | `#DC3545` | Alertas de error, acciones destructivas. |
-| **Advertencia** | `--bs-warning` | Dorado | `#d4af37` | Promociones, avisos importantes. |
-| **Información** | `--bs-info` | Azul Claro | `#0DCAF0` | Mensajes informativos. |
+| Token | Color | Hex | Uso |
+|-------|-------|-----|-----|
+| `--color-brand` | Bordeaux | `#4A0E1A` | Marca, títulos, botones principales |
+| `--color-text` | Negro suave | `#1A1A1A` | Texto principal |
+| `--color-muted` | Gris medio | `#5A5A5A` | Texto secundario |
+| `--color-bg` | Gris claro | `#FAFAFA` | Fondo app |
+| `--color-card` | Blanco | `#FFFFFF` | Tarjetas y contenedores |
+| `--color-border` | Gris claro | `#DDDDDD` | Bordes e inputs |
+| `--color-accent` | Dorado | `#d4af37` | Destacar promos/chips (estilo ML) |
+| `--color-success` | Verde | `#198754` | Éxito |
+| `--color-danger` | Rojo | `#DC3545` | Error |
 
-### 2.2 Mapeo de Colores de UI
-
-| Uso Semántico | Variable Bootstrap | Color | Hex | Descripción |
-|---------------|--------------------|-------|-----|-------------|
-| **Fondo App** | `--bs-body-bg` | Gris Claro | `#FAFAFA` | Color de fondo general. |
-| **Texto Base** | `--bs-body-color` | Negro Suave | `#1A1A1A` | Color principal para todo el texto. |
-| **Bordes** | `--bs-border-color` | Gris Claro | `#DDDDDD` | Bordes para tarjetas, inputs, separadores. |
-| **Fondo Tarjetas**| `--bs-card-bg` | Blanco | `#FFFFFF` | Fondo para todos los componentes `card`. |
-
-### 2.3 Ejemplo de Implementación (`theme.css`)
+### 2.2 Variables y ejemplo (`theme.css`)
 
 ```css
-/* public/css/theme.css */
 :root {
-  /* 1. Paleta de colores principal */
-  --bs-primary: #4A0E1A;
-  --bs-secondary: #5A5A5A;
-  --bs-success: #198754;
-  --bs-danger: #DC3545;
-  --bs-warning: #d4af37; /* Usamos nuestro dorado para promos */
-  --bs-info: #0DCAF0;
-
-  /* 2. Colores de UI y texto */
-  --bs-body-bg: #FAFAFA;
-  --bs-body-color: #1A1A1A;
-  --bs-border-color: #DDDDDD;
-  --bs-border-radius: 0.25rem; /* Bordes ligeramente redondeados */
-
-  /* 3. Links */
-  --bs-link-color: var(--bs-primary);
-  --bs-link-hover-color: #2D0810; /* Versión más oscura del primario */
+  --color-brand: #4A0E1A;
+  --color-text: #1A1A1A;
+  --color-muted: #5A5A5A;
+  --color-bg: #FAFAFA;
+  --color-card: #FFFFFF;
+  --color-border: #DDDDDD;
+  --color-accent: #FFE600;
+  --radius-sm: 6px;
+  --shadow-sm: 0 2px 8px rgba(0,0,0,0.06);
 }
+```
+
+### 2.3 Links y estados
+
+```css
+a { color: var(--color-brand); }
+a:hover { color: #2D0810; }
 ```
 
 ---
 
 ## 3. Tipografía
 
-Bootstrap 5 utiliza un "system font stack" nativo, lo cual es ideal para el rendimiento y la legibilidad. Mantenemos esta configuración.
+System font stack para rendimiento y legibilidad, con énfasis en **precio protagonista** (estilo marketplace).
 
 ### 3.1 Familia de Fuentes
 
@@ -80,133 +81,120 @@ Bootstrap 5 utiliza un "system font stack" nativo, lo cual es ideal para el rend
 font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 ```
 
-### 3.2 Jerarquía de Títulos (Clases Bootstrap)
+### 3.2 Jerarquía y precios
 
-| Elemento | Clase Bootstrap | Tamaño (aprox.) | Uso |
-|----------|-----------------|-----------------|-----|
-| Título 1 | `<h1>` o `.h1` | `2.5rem` (40px) | Título principal de la PWA. |
-| Título 2 | `<h2>` o `.h2` | `2rem` (32px) | Títulos de cada vista/sección. |
-| Título 3 | `<h3>` o `.h3` | `1.75rem` (28px) | Subtítulos importantes. |
-| Título 4 | `<h4>` o `.h4` | `1.5rem` (24px) | Títulos de tarjetas o grupos de elementos. |
-| Texto base | `<p>` | `1rem` (16px) | Párrafos y texto general. |
-| Texto pequeño | `<small>` o `.small` | `0.875rem` (14px) | Aclaraciones, metadatos. |
+| Elemento | Clase | Tamaño (aprox.) | Uso |
+|----------|-------|-----------------|-----|
+| Título 1 | `.wpq-title-1` | 40px | Título principal |
+| Título 2 | `.wpq-title-2` | 32px | Secciones |
+| Subtítulo | `.wpq-subtitle` | 20–24px | Tarjetas |
+| Texto | `.wpq-text` | 16px | Base |
+| Precio | `.wpq-price` | 28–32px | Monto principal |
+| Decimales | `.wpq-price-decimals` | 16px | Parte decimal |
+
+```css
+.wpq-price { font-weight: 600; letter-spacing: -0.02em; }
+.wpq-price-decimals { opacity: 0.7; margin-left: 2px; }
+```
 
 ---
 
 ## 4. Componentes Base
 
-A continuación se definen los estilos de los componentes clave utilizando las clases de Bootstrap.
+Componentes claves con clases propias (sin Bootstrap).
 
 ### 4.1 Botones
 
 | Tipo | Clase | Estilo |
 |---|---|---|
-| **Primario** | `.btn .btn-primary` | Fondo Bordeaux (`--bs-primary`), texto blanco. |
-| **Secundario** | `.btn .btn-secondary` | Fondo Gris (`--bs-secondary`), texto blanco. |
-| **Peligro** | `.btn .btn-danger` | Fondo Rojo (`--bs-danger`), texto blanco. |
-| **Contorno** | `.btn .btn-outline-primary` | Borde y texto Bordeaux, fondo transparente. |
+| Primario | `.wpq-btn .wpq-btn--primary` | Fondo `--color-brand`, texto blanco |
+| Secundario | `.wpq-btn .wpq-btn--secondary` | Borde `--color-brand`, fondo claro |
+| Peligro | `.wpq-btn .wpq-btn--danger` | Fondo `--color-danger`, texto blanco |
 
-**Ejemplo de Código:**
-```html
-<button type="button" class="btn btn-primary">Acción Principal</button>
-<button type="button" class="btn btn-secondary">Acción Secundaria</button>
-<button type="button" class="btn btn-outline-primary">Ver Detalles</button>
+```css
+.wpq-btn { border-radius: var(--radius-sm); padding: 10px 14px; }
+.wpq-btn--primary { background: var(--color-brand); color: #fff; }
+.wpq-btn--secondary { background: #fff; border: 1px solid var(--color-brand); color: var(--color-brand); }
+.wpq-btn--danger { background: var(--color-danger); color: #fff; }
 ```
 
 ### 4.2 Inputs de Texto
 
-Se utiliza la clase `.form-control` para todos los inputs, selects y textareas. Heredarán los colores y bordes definidos en las variables globales.
-
 | Estado | Clase | Estilo |
 |---|---|---|
-| **Normal** | `.form-control` | Borde gris (`--bs-border-color`), fondo blanco. |
-| **Focus** | `:focus` | Borde Bordeaux y una sombra sutil (`box-shadow`). |
+| Normal | `.wpq-input` | Borde `--color-border`, fondo `--color-card` |
+| Focus | `.wpq-input:focus` | Borde `--color-brand`, sombra `--shadow-sm` |
 
-**Ejemplo de Código:**
-```html
-<div class="mb-3">
-  <label for="productName" class="form-label">Nombre del Producto</label>
-  <input type="text" class="form-control" id="productName" placeholder="Ej: Malbec Reserva">
-</div>
+```css
+.wpq-input { border: 1px solid var(--color-border); border-radius: var(--radius-sm); padding: 10px 12px; }
+.wpq-input:focus { outline: none; border-color: var(--color-brand); box-shadow: var(--shadow-sm); }
 ```
 
 ### 4.3 Tarjetas (Cards)
 
-El componente `.card` es la base para mostrar contenido encapsulado, como productos en un listado.
-
 | Elemento | Clase | Estilo |
 |---|---|---|
-| **Contenedor** | `.card` | Fondo blanco, borde gris, sombra sutil. |
-| **Header** | `.card-header` | Sección superior con fondo ligeramente gris. |
-| **Cuerpo** | `.card-body` | Contenido principal de la tarjeta. |
-| **Título** | `.card-title` | Título principal dentro de la tarjeta (equivale a un `<h4>`). |
-| **Texto** | `.card-text` | Párrafos de texto dentro de la tarjeta. |
+| Contenedor | `.wpq-card` | Fondo `--color-card`, borde `--color-border`, sombra `--shadow-sm` |
+| Header | `.wpq-card__header` | Layout compacto |
+| Cuerpo | `.wpq-card__body` | Contenido principal |
+| Footer | `.wpq-card__footer` | Acciones |
 
-**Ejemplo de Código (Producto):**
 ```html
-<div class="card h-100 shadow-sm">
-  <!-- <img src="..." class="card-img-top" alt="..."> -->
-  <div class="card-body">
-    <h5 class="card-title">Malbec Reserva 750ml</h5>
-    <p class="card-text">Bodega Catena Zapata</p>
-    <p class="card-text"><small class="text-muted">Código: MALBEC-RES-750-001</small></p>
+<div class="wpq-card">
+  <div class="wpq-card__body">
+    <div class="wpq-card__title wpq-title-4">Malbec Reserva 750ml</div>
+    <div class="wpq-card__meta wpq-text">Bodega Ejemplo</div>
+    <div class="wpq-price">
+      $ 5.500<span class="wpq-price-decimals">00</span>
+    </div>
+    <span class="wpq-chip">20% OFF</span>
   </div>
-  <div class="card-footer">
-    <a href="#" class="btn btn-primary">Ver Producto</a>
+  <div class="wpq-card__footer">
+    <button class="wpq-btn wpq-btn--primary">Ver Producto</button>
   </div>
-</div>
+  </div>
 ```
 
-### 4.4 Alertas (Mensajes de Estado)
+```css
+.wpq-card { border: 1px solid var(--color-border); border-radius: var(--radius-sm); background: var(--color-card); box-shadow: var(--shadow-sm); }
+.wpq-chip { display:inline-block; background: var(--color-accent); color:#1A1A1A; border-radius: 12px; padding: 4px 8px; font-weight: 600; }
+```
 
-Para mostrar mensajes de éxito, error o información, se usan las alertas de Bootstrap.
+### 4.4 Alertas y toasts
 
-| Tipo | Clase | Estilo |
-|---|---|---|
-| **Éxito** | `.alert .alert-success` | Fondo verde claro, texto verde oscuro. |
-| **Error** | `.alert .alert-danger` | Fondo rojo claro, texto rojo oscuro. |
-| **Promoción** | `.alert .alert-warning` | Fondo dorado claro, texto oscuro. |
-
-**Ejemplo de Código:**
 ```html
-<div class="alert alert-success" role="alert">
-  ¡Producto guardado correctamente!
-</div>
+<div class="wpq-alert wpq-alert--success">¡Producto guardado correctamente!</div>
+<div class="wpq-alert wpq-alert--danger">Error: El código del producto ya existe.</div>
+```
 
-<div class="alert alert-danger" role="alert">
-  Error: El código del producto ya existe.
-</div>
-
-<div class="alert alert-warning" role="alert">
-  🔥 ¡Oferta especial! Este producto tiene un 20% de descuento.
-</div>
+```css
+.wpq-alert { border-radius: var(--radius-sm); padding: 10px 12px; }
+.wpq-alert--success { background:#D1E7DD; color:#0F5132; }
+.wpq-alert--danger { background:#F8D7DA; color:#842029; }
 ```
 
 ---
 
 ## 5. Sistema de Grilla y Layout
 
-Bootstrap utiliza un sistema de 12 columnas para crear layouts responsivos.
+Grilla propia con utilidades simples; Bootstrap se usa solo si hace falta en vistas específicas.
 
-- **Contenedor:** `.container` (ancho fijo) o `.container-fluid` (ancho completo).
-- **Fila:** `.row` para agrupar columnas.
-- **Columnas:** `.col`, `.col-md-6`, `.col-lg-4`, etc., para definir el ancho en diferentes tamaños de pantalla.
+```css
+.wpq-container { max-width: 1080px; margin: 0 auto; padding: 0 16px; }
+.wpq-grid { display:grid; grid-template-columns: repeat(12, 1fr); gap: 16px; }
+.wpq-col-12 { grid-column: span 12; }
+.wpq-col-6-md { grid-column: span 12; }
+@media (min-width: 768px) { .wpq-col-6-md { grid-column: span 6; } }
+```
 
-**Ejemplo de un listado de productos:**
 ```html
-<div class="container">
-  <div class="row g-4">
-    <!-- Producto 1 -->
-    <div class="col-12 col-md-6 col-lg-4">
-      <div class="card h-100">...</div>
+<div class="wpq-container">
+  <div class="wpq-grid">
+    <div class="wpq-col-12 wpq-col-6-md">
+      <div class="wpq-card">...</div>
     </div>
-    <!-- Producto 2 -->
-    <div class="col-12 col-md-6 col-lg-4">
-      <div class="card h-100">...</div>
-    </div>
-    <!-- Producto 3 -->
-    <div class="col-12 col-md-6 col-lg-4">
-      <div class="card h-100">...</div>
+    <div class="wpq-col-12 wpq-col-6-md">
+      <div class="wpq-card">...</div>
     </div>
   </div>
 </div>
@@ -216,8 +204,25 @@ Bootstrap utiliza un sistema de 12 columnas para crear layouts responsivos.
 
 ## 6. Próximos Pasos (Implementación)
 
-1.  **Añadir Bootstrap al `spa.html`:** Incluir el CSS y JS de Bootstrap desde un CDN.
-2.  **Crear y enlazar `theme.css`:** Crear el archivo con las variables de color personalizadas y enlazarlo en `spa.html` **después** del CSS de Bootstrap.
-3.  **Refactorizar Vistas:** Actualizar progresivamente los archivos `.html` y `.js` de las vistas para utilizar las clases de Bootstrap en lugar de los estilos personalizados anteriores.
+1. **Revisar tokens en `theme.css`** para asegurar consistencia con paleta actual.
+2. **Unificar componentes en `components.css`** (botones, chips, tarjetas, precios).
+3. **Reducir dependencias Bootstrap** donde sigan presentes; usar utilidades propias.
 
 **Fin del documento**
+ 
+---
+
+## 7. Implementación actual (clases existentes)
+
+Para mantener coherencia con el código hoy, estas son las clases ya presentes en `public/css/`:
+
+- Tarjetas: `.product-grid`, `.product-card`, `.card-title`, `.card-body`, `.card-footer`.
+- Precios: `.price-container`, `.price-final`, `.price-original`, `.price-main`, `.price-savings`.
+- Badges: `.badge-discount`, `.badge-offer`, `.badge-combo` (alias: `.discount-badge`).
+- Alertas y estados: `.status-success`, `.status-error`, `.status-info`, `.empty-state`, `.loading-state`.
+- Paginación: `.pagination-controls`, `.btn-pagination`, `.page-info`.
+- Grilla/layout: `.view-container`, `section[data-view]` y estilos en `layout.css`.
+
+Notas:
+- Los estilos consumen tokens unificados definidos en `public/css/theme.css` (`--color-brand`, `--color-card`, `--color-border`, etc.).
+- La transición hacia clases prefijadas `wpq-*` puede realizarse gradualmente; por ahora se prioriza la limpieza y unificación de variables.
