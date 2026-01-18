@@ -337,6 +337,7 @@ async function initializeView(viewName, container) {
     home: () => import('../views/homeView.js'),
     login: () => import('../views/loginView.js'),
     search: () => import('../views/searchView.js'),
+    adminSearch: () => import('../views/adminSearchView.js'),
     admin: () => import('../views/adminView.js'),
     adminProducts: () => import('../views/adminProductsView.js'),
     adminMetrics: () => import('../views/adminMetricsView.js'),

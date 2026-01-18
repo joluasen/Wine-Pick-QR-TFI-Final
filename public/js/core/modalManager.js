@@ -6,6 +6,9 @@
 
 import { getBasePath, escapeHtml, calculatePromoPrice, formatDate } from './utils.js';
 import { showToast } from '../admin/components/Toast.js';
+import { showConfirmDialog } from '../admin/components/ConfirmDialog.js';
+import { deleteProduct } from '../admin/services/productService.js';
+import { deletePromotion } from '../admin/services/promotionService.js';
 
 class ModalManager {
   constructor() {
@@ -174,7 +177,85 @@ class ModalManager {
    */
   showProduct(product) {
     const content = this.renderProductCard(product);
-    this.open('product-modal', content);
+    this.open('product-modal', content, {
+      onOpen: (modalEl) => {
+        if (!this._isAdminContext()) return;
+        const menuBtn = modalEl.querySelector('.btn-admin-actions');
+        const menu = modalEl.querySelector('.admin-actions-menu');
+        if (menuBtn && menu) {
+          menuBtn.addEventListener('click', () => {
+            const expanded = menuBtn.getAttribute('aria-expanded') === 'true';
+            menuBtn.setAttribute('aria-expanded', expanded ? 'false' : 'true');
+            menu.style.display = expanded ? 'none' : 'block';
+          });
+          const editBtn = menu.querySelector('[data-action="edit-product"]');
+          const deleteBtn = menu.querySelector('[data-action="delete-product"]');
+          const editPromoBtn = menu.querySelector('[data-action="edit-promo"]');
+          const deletePromoBtn = menu.querySelector('[data-action="delete-promo"]');
+
+          editBtn?.addEventListener('click', () => {
+            this.showEditProduct(product);
+          });
+          deleteBtn?.addEventListener('click', async () => {
+            const confirmed = await showConfirmDialog({
+              title: 'Eliminar producto',
+              message: `¿Eliminar "${product.name}"?`,
+              confirmText: 'Eliminar',
+              cancelText: 'Cancelar',
+              confirmClass: 'btn-danger'
+            });
+            if (!confirmed) return;
+            try {
+              const loadingToast = showToast('Eliminando producto...', 'info', 0);
+              await deleteProduct(product.id);
+              loadingToast.classList.remove('show');
+              setTimeout(() => loadingToast.remove(), 300);
+              showToast('Producto eliminado correctamente', 'success');
+              this.close();
+              if (window.adminView && typeof window.adminView.loadProducts === 'function') {
+                window.adminView.loadProducts();
+              }
+            } catch (err) {
+              showToast(`Error al eliminar: ${err.message}`, 'error');
+            }
+          });
+          editPromoBtn?.addEventListener('click', () => {
+            const promo = product.promotion;
+            if (!promo || !promo.id) {
+              showToast('El producto no tiene promoción asociada', 'error');
+              return;
+            }
+            this.showEditPromotion(promo, () => {
+              showToast('Promoción actualizada', 'success');
+            });
+          });
+          deletePromoBtn?.addEventListener('click', async () => {
+            const promo = product.promotion;
+            if (!promo || !promo.id) {
+              showToast('El producto no tiene promoción asociada', 'error');
+              return;
+            }
+            const confirmed = await showConfirmDialog({
+              title: 'Eliminar promoción',
+              message: '¿Eliminar la promoción asociada?',
+              confirmText: 'Eliminar',
+              cancelText: 'Cancelar',
+              confirmClass: 'btn-danger'
+            });
+            if (!confirmed) return;
+            try {
+              const loadingToast = showToast('Eliminando promoción...', 'info', 0);
+              await deletePromotion(promo.id);
+              loadingToast.classList.remove('show');
+              setTimeout(() => loadingToast.remove(), 300);
+              showToast('Promoción eliminada', 'success');
+            } catch (err) {
+              showToast(`Error al eliminar: ${err.message}`, 'error');
+            }
+          });
+        }
+      }
+    });
   }
 
   /**
@@ -230,6 +311,20 @@ class ModalManager {
       ? `<p class="promo-validity">Válido hasta: ${formatDate(product.promotion.end_at)}</p>`
       : '';
 
+    const adminMenu = this._isAdminContext() ? `
+      <div class="admin-actions-dropdown">
+        <button type="button" class="btn-admin-actions" aria-haspopup="true" aria-expanded="false">
+          <i class="fas fa-ellipsis-v"></i> Acciones
+        </button>
+        <ul class="admin-actions-menu" style="display:none">
+          <li><button type="button" data-action="edit-product">Editar producto</button></li>
+          <li><button type="button" data-action="delete-product">Eliminar producto</button></li>
+          <li><button type="button" data-action="edit-promo">Editar promoción</button></li>
+          <li><button type="button" data-action="delete-promo">Eliminar promoción</button></li>
+        </ul>
+      </div>
+    ` : '';
+
     return `
       <div class="product-card-detail">
         <div class="product-image-section">
@@ -279,6 +374,7 @@ class ModalManager {
           <div class="product-header">
             <p class="product-category">${escapeHtml(product.drink_type) || ''}${product.varietal ? ' | ' + escapeHtml(product.varietal) : ''}</p>
             <h1 class="product-title">${escapeHtml(product.name) || 'Producto'}</h1>
+            ${adminMenu}
           </div>
           
           <div class="product-price-section">
@@ -302,6 +398,11 @@ class ModalManager {
         </div>
       </div>
     `;
+  }
+
+  _isAdminContext() {
+    const h = window.location.hash.split('?')[0] || '';
+    return ['#admin', '#admin-products', '#admin-metrics', '#admin-promotions', '#admin-scan', '#admin-search'].includes(h);
   }
 
   // ============================================

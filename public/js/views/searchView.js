@@ -13,6 +13,7 @@ const PAGE_SIZE = 20;
 // Estado local de la vista
 let currentPage = 0;
 let currentQuery = '';
+let viewContainer = null;
 
 /**
  * Renderiza los resultados de búsqueda
@@ -179,8 +180,8 @@ function renderActiveFilters(container, filters) {
 /**
  * Carga los resultados de búsqueda
  */
-async function loadResults(query, page = 0) {
-  const container = document.querySelector('[data-view="search"]');
+async function loadResults(query, page = 0, containerOverride = null) {
+  const container = containerOverride || viewContainer || document.querySelector('[data-view="search"], [data-view="adminSearch"]');
   if (!container) return;
   
   const resultsEl = container.querySelector('#search-results') || container;
@@ -226,6 +227,7 @@ async function loadResults(query, page = 0) {
  * Inicializa la vista de búsqueda
  */
 export function initSearchView(container) {
+  viewContainer = container;
   const params = getHashParams();
   const query = params.query || '';
   
@@ -267,5 +269,5 @@ export function initSearchView(container) {
     }
   }, 0);
   
-  loadResults(query, 0);
+  loadResults(query, 0, container);
 }

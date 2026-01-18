@@ -115,11 +115,16 @@ function initUnifiedSearchBar() {
       setTimeout(clearDropdown, 100);
     });
 
-    newForm.addEventListener('submit', (e) => {
+    newForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       const query = newInput.value.trim();
       if (query) {
-        window.location.hash = `#search?query=${encodeURIComponent(query)}`;
+        let target = '#search';
+        try {
+          const res = await fetch('./api/admin/me', { credentials: 'same-origin' });
+          if (res.ok) target = '#admin-search';
+        } catch {}
+        window.location.hash = `${target}?query=${encodeURIComponent(query)}`;
         setTimeout(() => {
           newInput.value = query;
         }, 200);
