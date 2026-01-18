@@ -123,56 +123,7 @@ $appConfig = [
     <!-- Inyectado dinámicamente -->
   </footer>
 
-  <!-- MODAL DE LOGIN -->
-  <div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
-    <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content border-0 shadow-lg">
-        <div class="modal-header border-0 pb-2 pt-3 px-4 d-flex justify-content-end">
-          <button type="button" class="btn-close-custom" data-bs-dismiss="modal" aria-label="Cerrar">
-            <i class="fas fa-times"></i>
-          </button>
-        </div>
-        <div class="modal-body px-4 px-md-5 pt-2 pb-4">
-          <div class="text-center mb-4">
-            <h2 class="h4 fw-bold mb-2" id="loginModalLabel">Acceso Administrador</h2>
-            <p class="text-muted small mb-0">Ingresa tus credenciales para gestionar el panel</p>
-          </div>
 
-          <form id="login-form-modal">
-            <div class="mb-3">
-              <label for="login-username-modal" class="form-label small fw-semibold">Usuario</label>
-              <input
-                id="login-username-modal"
-                name="username"
-                type="text"
-                class="form-control"
-                placeholder="admin"
-                required
-                autocomplete="username">
-            </div>
-
-            <div class="mb-4">
-              <label for="login-password-modal" class="form-label small fw-semibold">Contraseña</label>
-              <input
-                id="login-password-modal"
-                name="password"
-                type="password"
-                class="form-control"
-                placeholder="••••••••"
-                required
-                autocomplete="current-password">
-            </div>
-
-            <div id="login-status-modal" class="mb-3" aria-live="polite"></div>
-
-            <button type="submit" class="btn-modal btn-modal-primary w-100 py-2 fw-semibold">
-              Ingresar
-            </button>
-          </form>
-        </div>
-      </div>
-    </div>
-  </div>
 
   <!-- MODAL DE FILTROS -->
   <div class="modal fade" id="filtersModal" tabindex="-1" aria-labelledby="filtersModalLabel" aria-hidden="true">

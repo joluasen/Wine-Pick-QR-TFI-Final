@@ -58,10 +58,10 @@ class Router
         // GET /api/public/mas-buscados - Listar productos más buscados
         $this->get('/api/public/mas-buscados', 'ProductController@listMostSearched');
 
-        // Auth
-        $this->post('/api/admin/login', 'AuthController@login');
-        $this->post('/api/admin/logout', 'AuthController@logout');
-        $this->get('/api/admin/me', 'AuthController@me');
+        // Auth - DESHABILITADO: Ya no se requiere autenticación
+        // $this->post('/api/admin/login', 'AuthController@login');
+        // $this->post('/api/admin/logout', 'AuthController@logout');
+        // $this->get('/api/admin/me', 'AuthController@me');
 
         // POST /api/admin/productos (protegido)
         $this->post('/api/admin/productos', 'ProductController@create');

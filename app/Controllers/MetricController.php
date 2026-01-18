@@ -46,11 +46,6 @@ class MetricController
      */
     public function getMetrics(): void
     {
-        // Proteger endpoint: requiere sesión de admin
-        if (empty($_SESSION['admin_user_id'])) {
-            ApiResponse::unauthorized('No autenticado. Inicia sesión para continuar.');
-        }
-
         // Validar parámetro days
         $days = isset($_GET['days']) ? (int)$_GET['days'] : 30;
         $allowedDays = [7, 30, 90];

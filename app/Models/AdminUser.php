@@ -44,7 +44,8 @@ class AdminUser
         // Hash con PASSWORD_DEFAULT (bcrypt)
         $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
         $sql = "INSERT INTO admin_users (username, password_hash) VALUES (?, ?)";
-        return $this->db->insert($sql, [$username, $hashedPassword], 'ss');
+        $this->db->execute($sql, [$username, $hashedPassword], 'ss');
+        return $this->db->getLastInsertId();
     }
 
     public function verifyCredentials(string $username, string $password): ?array

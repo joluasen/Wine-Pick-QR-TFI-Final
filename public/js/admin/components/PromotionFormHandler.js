@@ -7,7 +7,6 @@ import { setStatus } from '../../core/utils.js';
 import { createPromotion } from '../services/promotionService.js';
 import { getAllProducts } from '../services/productService.js';
 import { dateToSQL } from '../utils/dateHelpers.js';
-import { redirectToLogin } from '../services/authService.js';
 
 /**
  * Carga productos en un select
@@ -105,8 +104,7 @@ export function setupPromotionCreateForm(container, selectEl, onSuccess = null) 
 
     } catch (err) {
       if (err.status === 401) {
-        setStatus(statusEl, 'Sesión expirada. Redirigiendo...', 'error');
-        setTimeout(redirectToLogin, 400);
+        setStatus(statusEl, 'Error de conexión con la API', 'error');
       } else {
         setStatus(statusEl, `Error: ${err.message}`, 'error');
       }

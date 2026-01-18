@@ -22,14 +22,14 @@ header('Content-Type: text/html; charset=utf-8');
     <i class="fas fa-qrcode"></i>
   </a>
 
-  <a href="#promos" class="bottom-nav-item" data-link="#promos" aria-label="Promociones">
+  <a href="#promotions" class="bottom-nav-item" data-link="#promotions" aria-label="Promociones">
     <i class="fas fa-tag"></i>
     <span>Promos</span>
   </a>
 
-  <a href="#" class="bottom-nav-item bottom-nav-login" data-bs-toggle="modal" data-bs-target="#loginModal" aria-label="Ingresar">
-    <i class="fas fa-user"></i>
-    <span>Ingresar</span>
+  <a href="#admin" class="bottom-nav-item" data-link="#admin" aria-label="Administrador">
+    <i class="fas fa-cog"></i>
+    <span>Admin</span>
   </a>
 </nav>
 
@@ -52,8 +52,8 @@ header('Content-Type: text/html; charset=utf-8');
 
   <div class="sidebar-divider"></div>
 
-  <a href="#" class="sidebar-nav-item" data-bs-toggle="modal" data-bs-target="#loginModal" title="Ingresar">
-    <i class="fas fa-user"></i>
-    <span>Ingresar</span>
+  <a href="#admin" class="sidebar-nav-item" data-link="#admin" title="Administrador" data-bs-toggle="tooltip" data-bs-placement="right">
+    <i class="fas fa-cog"></i>
+    <span>Admin</span>
   </a>
 </nav>

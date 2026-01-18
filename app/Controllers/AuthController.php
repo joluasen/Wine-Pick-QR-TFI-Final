@@ -38,18 +38,10 @@ class AuthController
             ApiResponse::validationError('Usuario y contraseña son requeridos.');
         }
 
-        $user = $this->adminModel->verifyCredentials($username, $password);
-        if (!$user) {
-            ApiResponse::unauthorized('Credenciales inválidas.');
-        }
-
-        // Crear sesión
-        $_SESSION['admin_user_id'] = (int) $user['id'];
-        $_SESSION['admin_username'] = $user['username'];
-
+        // Autenticación deshabilitada: responder éxito sin sesión
         ApiResponse::success([
-            'message' => 'Login exitoso',
-            'username' => $user['username'],
+            'message' => 'Autenticación deshabilitada',
+            'username' => $username !== '' ? $username : 'public',
         ], 200);
     }
 
@@ -58,9 +50,7 @@ class AuthController
      */
     public function logout(): void
     {
-        session_unset();
-        session_destroy();
-        ApiResponse::success(['message' => 'Sesión cerrada'], 200);
+        ApiResponse::success(['message' => 'Autenticación deshabilitada'], 200);
     }
 
     /**
@@ -68,13 +58,9 @@ class AuthController
      */
     public function me(): void
     {
-        if (empty($_SESSION['admin_user_id'])) {
-            ApiResponse::unauthorized('No autenticado.');
-        }
-
         ApiResponse::success([
-            'id' => (int) $_SESSION['admin_user_id'],
-            'username' => $_SESSION['admin_username'] ?? 'admin',
+            'id' => 0,
+            'username' => 'public',
         ], 200);
     }
 }

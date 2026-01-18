@@ -11,21 +11,17 @@ import { initUnifiedSearchBar } from '../search-bar.js';
 const ROUTES = {
   '': 'home',
   '#home': 'home',
-  '#login': 'login',
   '#search': 'search',
-  '#admin': 'adminMetrics', // Redirige a métricas (admin.php eliminado)
+  '#admin': 'adminMetrics',
   '#admin-scan': 'adminScan',
-  '#admin-search': 'adminSearch',  // buscador exclusivo admin
+  '#admin-search': 'adminSearch',
   '#admin-products': 'adminProducts',
   '#admin-metrics': 'adminMetrics',
   '#admin-promotions': 'adminPromotions',
-  //'#promos': 'promotions', //porque hay dos rutas para promociones?
   '#promotions': 'promotions',
   '#scan': 'scan'
 };
 
-const PROTECTED_ROUTES = ['admin', '#admin-scan', '#admin-search', 'admin-products', 'admin-metrics', 'admin-promotions'];
-const PUBLIC_ROUTES = ['home', 'login', 'search', 'promotions', 'scan'];
 const DEFAULT_ROUTE = 'home';
 
 let currentView = null;
@@ -42,18 +38,11 @@ function getBaseUrl() {
 }
 
 /**
- * Verifica si el usuario está autenticado
+ * Verifica si el usuario está autenticado - FUNCIÓN REMOVIDA
  */
 async function checkAuth() {
-  try {
-    const response = await fetch(getBaseUrl() + 'api/admin/me', {
-      headers: { Accept: 'application/json' },
-      credentials: 'same-origin'
-    });
-    return response.ok;
-  } catch {
-    return false;
-  }
+  // Ya no se requiere autenticación
+  return true;
 }
 
 /**
@@ -71,19 +60,7 @@ async function loadNavigation(viewName) {
   const navContainer = document.getElementById('nav-container');
   const sidebarContainer = document.getElementById('sidebar-container');
 
-  const isPublic = PUBLIC_ROUTES.includes(viewName);
-
   let navFile = 'nav-public.php';
-  let isAdminNav = false;
-  if (!isPublic) {
-    const isAuth = await checkAuth();
-    if (isAuth) {
-      navFile = 'nav-admin.php';
-      isAdminNav = true;
-    } else {
-      navFile = 'nav-public.php';
-    }
-  }
 
   try {
     const baseUrl = getBaseUrl();
@@ -102,11 +79,9 @@ async function loadNavigation(viewName) {
       updateActiveNavItem();
 
       // Configurar botones específicos de admin
-      if (isAdminNav) {
-        const { setupNewProductButtons, setupNewPromotionButtons } = await import('../views/adminView.js');
-        setupNewProductButtons();
-        setupNewPromotionButtons();
-      }
+      const { setupNewProductButtons, setupNewPromotionButtons } = await import('../views/adminView.js');
+      setupNewProductButtons();
+      setupNewPromotionButtons();
     }
   } catch (err) {
     console.error('Error cargando navegación:', err);
@@ -254,16 +229,6 @@ async function loadView(viewName) {
         return;
       }
     
-    // Verificar autenticación para rutas protegidas
-    if (PROTECTED_ROUTES.includes(viewName)) {
-      const isAuth = await checkAuth();
-      if (!isAuth) {
-        isNavigating = false;
-        navigate('#login');
-        return;
-      }
-    }
-
     // Solo mostrar loading del router si la vista no tiene su propio loading
     const viewsWithOwnLoading = ['adminMetrics', 'adminProducts', 'adminPromotions'];
 

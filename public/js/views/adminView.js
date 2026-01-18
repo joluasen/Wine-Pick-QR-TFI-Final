@@ -12,7 +12,6 @@ import { modalManager } from '../core/modalManager.js';
 import { setStatus } from '../core/utils.js';
 
 // Servicios
-import { checkAuth, logout, redirectToLogin, redirectToHome } from '../admin/services/authService.js';
 import { searchProductByCode } from '../admin/services/productService.js';
 
 // Componentes
@@ -24,14 +23,6 @@ import { setupPromotionCreateForm } from '../admin/components/PromotionFormHandl
  * @param {string} code - Código público del producto
  */
 export async function editProductByCode(code) {
-  // Verificar autenticación
-  const isAuth = await checkAuth();
-  if (!isAuth) {
-    alert('Sesión expirada. Redirigiendo a login.');
-    redirectToLogin();
-    return;
-  }
-
   // Buscar producto
   const product = await searchProductByCode(code);
 
@@ -57,14 +48,6 @@ export function setupNewProductButtons() {
     btn.addEventListener('click', async (e) => {
       e.preventDefault();
 
-      // Verificar autenticación
-      const isAuth = await checkAuth();
-      if (!isAuth) {
-        alert('Sesión expirada. Redirigiendo a login.');
-        redirectToLogin();
-        return;
-      }
-
       // Mostrar modal de creación de producto
       modalManager.showCreateProduct((newProduct) => {
         // Callback de éxito: recargar la lista de productos si estamos en esa vista
@@ -87,14 +70,6 @@ export function setupNewPromotionButtons() {
     btn.addEventListener('click', async (e) => {
       e.preventDefault();
 
-      // Verificar autenticación
-      const isAuth = await checkAuth();
-      if (!isAuth) {
-        alert('Sesión expirada. Redirigiendo a login.');
-        redirectToLogin();
-        return;
-      }
-
       // Mostrar modal de creación de promoción
       modalManager.showCreatePromotion((newPromotion) => {
         // Callback de éxito: recargar la lista de promociones si estamos en esa vista
@@ -109,23 +84,12 @@ export function setupNewPromotionButtons() {
 }
 
 /**
- * Configura los botones de logout
+ * Configura los botones de logout - FUNCIÓN ELIMINADA
  * @param {HTMLElement} container - Contenedor de la vista
  * @param {HTMLElement} statusEl - Elemento para mostrar estados
  */
 export function setupLogout(container, statusEl) {
-  const logoutBtns = document.querySelectorAll('#logout-btn, #logout-btn-mobile, #logout-btn-desktop');
-
-  logoutBtns.forEach(btn => {
-    btn.addEventListener('click', async (e) => {
-      e.preventDefault();
-
-      await logout();
-      setStatus(statusEl, 'Sesión cerrada. Redirigiendo...', 'info');
-
-      setTimeout(redirectToHome, 300);
-    });
-  });
+  // FUNCIÓN ELIMINADA - Ya no se requiere autenticación
 }
 
 /**
@@ -135,14 +99,6 @@ export function setupLogout(container, statusEl) {
 export async function initAdminView(container) {
   const statusEl = container.querySelector('#product-create-status');
   const promoSelect = container.querySelector('#promo_product_id');
-
-  // Verificar autenticación
-  const isAuth = await checkAuth();
-  if (!isAuth) {
-    setStatus(statusEl, 'No autenticado. Redirigiendo...', 'error');
-    setTimeout(redirectToLogin, 400);
-    return;
-  }
 
   // Configurar formularios usando componentes
   setupPromotionCreateForm(container);

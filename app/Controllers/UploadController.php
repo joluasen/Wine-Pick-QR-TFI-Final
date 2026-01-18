@@ -21,11 +21,6 @@ class UploadController
      */
     public function uploadProductImage(): void
     {
-        // Proteger endpoint: requiere sesión de admin
-        if (empty($_SESSION['admin_user_id'])) {
-            ApiResponse::unauthorized('No autenticado. Inicia sesión para continuar.');
-        }
-
         // Validar que se envió un archivo
         if (!isset($_FILES['image']) || $_FILES['image']['error'] === UPLOAD_ERR_NO_FILE) {
             ApiResponse::validationError('No se envió ninguna imagen.', 'image');
@@ -57,10 +52,9 @@ class UploadController
             );
         }
 
-        // Validar tipo MIME
-        $finfo = finfo_open(FILEINFO_MIME_TYPE);
-        $mimeType = finfo_file($finfo, $file['tmp_name']);
-        finfo_close($finfo);
+        // Validar tipo MIME (estilo OO evita finfo_close deprecado)
+        $finfo = new \finfo(FILEINFO_MIME_TYPE);
+        $mimeType = $finfo->file($file['tmp_name']);
 
         if (!in_array($mimeType, self::ALLOWED_TYPES, true)) {
             ApiResponse::validationError(

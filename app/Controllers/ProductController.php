@@ -203,11 +203,6 @@ class ProductController {
      */
     public function create(): void
     {
-        // Proteger endpoint: requiere sesión de admin
-        if (empty($_SESSION['admin_user_id'])) {
-            ApiResponse::unauthorized('No autenticado. Inicia sesión para continuar.');
-        }
-
         // Obtener JSON del body
         $body = file_get_contents('php://input');
         $data = json_decode($body, true);
@@ -290,7 +285,7 @@ class ProductController {
 
         // Intentar crear el producto
         try {
-            $adminId = $_SESSION['admin_user_id'] ?? null;
+            $adminId = 0;
             $productId = $this->productModel->create($data, $adminId);
 
             // Recuperar el producto recién creado
@@ -407,11 +402,6 @@ class ProductController {
      */
     public function update(): void
     {
-        // Proteger endpoint: requiere sesión de admin
-        if (empty($_SESSION['admin_user_id'])) {
-            ApiResponse::unauthorized('No autenticado. Inicia sesión para continuar.');
-        }
-
         // Obtener JSON del body
         $body = file_get_contents('php://input');
         $data = json_decode($body, true);
@@ -499,7 +489,7 @@ class ProductController {
 
         // Intentar actualizar el producto
         try {
-            $adminId = $_SESSION['admin_user_id'] ?? null;
+            $adminId = 0;
             $this->productModel->update($productId, $data, $adminId);
 
             // Recuperar el producto actualizado
@@ -535,11 +525,6 @@ class ProductController {
      */
     public function listAllAdmin(): void
     {
-        // Proteger endpoint: requiere sesión de admin
-        if (empty($_SESSION['admin_user_id'])) {
-            ApiResponse::unauthorized('No autenticado. Inicia sesión para continuar.');
-        }
-
         $limit = isset($_GET['limit']) ? (int)$_GET['limit'] : 20;
         $offset = isset($_GET['offset']) ? (int)$_GET['offset'] : 0;
 
@@ -567,11 +552,6 @@ class ProductController {
      */
     public function delete(string $id): void
     {
-        // Proteger endpoint: requiere sesión de admin
-        if (empty($_SESSION['admin_user_id'])) {
-            ApiResponse::unauthorized('No autenticado. Inicia sesión para continuar.');
-        }
-
         // Validar ID
         $productId = (int) $id;
         if ($productId <= 0) {
