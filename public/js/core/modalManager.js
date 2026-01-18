@@ -843,13 +843,13 @@ class ModalManager {
 
         // Validar tipo
         if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
-          this.showFormStatus(statusEl, 'Solo se permiten imágenes JPG, PNG o WebP', 'error');
+          showToast('Solo se permiten imágenes JPG, PNG o WebP', 'error');
           return;
         }
 
         // Validar tamaño (5MB)
         if (file.size > 5 * 1024 * 1024) {
-          this.showFormStatus(statusEl, 'La imagen no debe superar 5MB', 'error');
+          showToast('La imagen no debe superar 5MB', 'error');
           return;
         }
 
@@ -963,6 +963,9 @@ class ModalManager {
       payload.id = productId;
     }
 
+    // Ocultar cualquier mensaje de estado previo
+    this.hideFormStatus(statusEl);
+
     // Deshabilitar botón
     submitBtn.disabled = true;
     submitBtn.innerHTML = `<i class="fas fa-spinner fa-spin me-1"></i>${actionText}...`;
@@ -972,8 +975,6 @@ class ModalManager {
       const imageInput = document.querySelector(`#${isEdit ? 'edit' : 'create'}-product-image`);
       if (imageInput && imageInput.tempFile) {
         try {
-          this.showFormStatus(statusEl, 'Subiendo imagen...', 'info');
-          
           const formData = new FormData();
           formData.append('image', imageInput.tempFile);
 
@@ -994,15 +995,13 @@ class ModalManager {
           imageInput.tempFile = null;
           imageInput.tempDataUrl = null;
         } catch (error) {
-          this.showFormStatus(statusEl, `Error al subir imagen: ${error.message}`, 'error');
+          showToast(`Error al subir imagen: ${error.message}`, 'error');
           submitBtn.disabled = false;
           submitBtn.innerHTML = `<i class="fas fa-${isEdit ? 'save' : 'plus'} me-1"></i>${isEdit ? 'Guardar cambios' : 'Crear producto'}`;
           return;
         }
       }
 
-      this.showFormStatus(statusEl, `${actionText}...`, 'info');
-      
       const response = await fetch(endpoint, {
         method,
         headers: {
@@ -1125,6 +1124,15 @@ class ModalManager {
     }
 
     statusEl.classList.remove('d-none');
+  }
+
+  /**
+   * Oculta mensaje de estado en formulario
+   */
+  hideFormStatus(statusEl) {
+    if (!statusEl) return;
+    statusEl.classList.add('d-none');
+    statusEl.textContent = '';
   }
 
   // ============================================

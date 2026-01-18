@@ -253,9 +253,45 @@ class ProductController {
             ApiResponse::validationError('El "base_price" debe ser mayor a 0.', 'base_price');
         }
 
+        // Validar que public_code no esté duplicado
+        $existingByCode = $this->productModel->findByPublicCode($data['public_code']);
+        if ($existingByCode) {
+            ApiResponse::conflict(
+                'Ya existe un producto con el código "' . $data['public_code'] . '".',
+                'public_code'
+            );
+        }
+
+        // Validar que no exista un producto idéntico (mismo nombre, bodega, tipo y año)
+        $vintageYear = isset($data['vintage_year']) && $data['vintage_year'] !== ''
+            ? (int)$data['vintage_year']
+            : null;
+
+        $duplicate = $this->productModel->findDuplicate(
+            $data['name'],
+            $data['winery_distillery'],
+            $data['drink_type'],
+            $vintageYear
+        );
+
+        if ($duplicate) {
+            ApiResponse::conflict(
+                'Ya existe un producto con el mismo nombre.',
+                'name',
+                [
+                    'existing_product' => [
+                        'id' => (int)$duplicate['id'],
+                        'public_code' => $duplicate['public_code'],
+                        'name' => $duplicate['name']
+                    ]
+                ]
+            );
+        }
+
         // Intentar crear el producto
         try {
-            $productId = $this->productModel->create($data, null); // TODO: obtener admin_id de sesión
+            $adminId = $_SESSION['admin_user_id'] ?? null;
+            $productId = $this->productModel->create($data, $adminId);
 
             // Recuperar el producto recién creado
             $product = $this->productModel->findById($productId);
@@ -417,6 +453,48 @@ class ProductController {
             if ($basePrice <= 0) {
                 ApiResponse::validationError('El "base_price" debe ser mayor a 0.', 'base_price');
             }
+        }
+
+        // Validar que public_code no esté duplicado (si se está actualizando)
+        if (isset($data['public_code']) && $data['public_code'] !== $existingProduct['public_code']) {
+            $existingByCode = $this->productModel->findByPublicCode($data['public_code'], $productId);
+            if ($existingByCode) {
+                ApiResponse::conflict(
+                    'Ya existe un producto con el código "' . $data['public_code'] . '".',
+                    'public_code'
+                );
+            }
+        }
+
+        // Validar que no exista un producto idéntico (mismo nombre, bodega, tipo y año)
+        // Usar valores actualizados o existentes
+        $nameToCheck = isset($data['name']) ? $data['name'] : $existingProduct['name'];
+        $wineryToCheck = isset($data['winery_distillery']) ? $data['winery_distillery'] : $existingProduct['winery_distillery'];
+        $drinkTypeToCheck = isset($data['drink_type']) ? $data['drink_type'] : $existingProduct['drink_type'];
+        $vintageYearToCheck = isset($data['vintage_year'])
+            ? ($data['vintage_year'] !== '' ? (int)$data['vintage_year'] : null)
+            : (!empty($existingProduct['vintage_year']) ? (int)$existingProduct['vintage_year'] : null);
+
+        $duplicate = $this->productModel->findDuplicate(
+            $nameToCheck,
+            $wineryToCheck,
+            $drinkTypeToCheck,
+            $vintageYearToCheck,
+            $productId // Excluir el producto actual
+        );
+
+        if ($duplicate) {
+            ApiResponse::conflict(
+                'Ya existe un producto con el mismo nombre, bodega/destilería, tipo de bebida y año.',
+                'name',
+                [
+                    'existing_product' => [
+                        'id' => (int)$duplicate['id'],
+                        'public_code' => $duplicate['public_code'],
+                        'name' => $duplicate['name']
+                    ]
+                ]
+            );
         }
 
         // Intentar actualizar el producto

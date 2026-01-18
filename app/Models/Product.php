@@ -556,6 +556,90 @@ class Product
     }
 
     /**
+     * Buscar un producto por su public_code.
+     *
+     * @param string $publicCode Código público del producto.
+     * @param int|null $excludeId ID de producto a excluir (para edición).
+     *
+     * @return array|null Datos del producto o null si no existe.
+     */
+    public function findByPublicCode(string $publicCode, ?int $excludeId = null): ?array
+    {
+        $query = "
+            SELECT id, public_code, name
+            FROM products
+            WHERE public_code = ?
+        ";
+        $params = [$publicCode];
+        $types = 's';
+
+        if ($excludeId !== null) {
+            $query .= " AND id != ?";
+            $params[] = $excludeId;
+            $types .= 'i';
+        }
+
+        $query .= " LIMIT 1";
+
+        return $this->db->fetchOne($query, $params, $types);
+    }
+
+    /**
+     * Buscar producto duplicado por atributos clave.
+     *
+     * Un producto se considera duplicado si tiene el mismo:
+     * - name
+     * - winery_distillery
+     * - drink_type
+     * - vintage_year (si ambos tienen año, deben coincidir; si alguno es NULL, se ignora)
+     *
+     * @param string $name Nombre del producto.
+     * @param string $wineryDistillery Bodega o destilería.
+     * @param string $drinkType Tipo de bebida.
+     * @param int|null $vintageYear Año de cosecha.
+     * @param int|null $excludeId ID de producto a excluir (para edición).
+     *
+     * @return array|null Datos del producto duplicado o null si no existe.
+     */
+    public function findDuplicate(
+        string $name,
+        string $wineryDistillery,
+        string $drinkType,
+        ?int $vintageYear = null,
+        ?int $excludeId = null
+    ): ?array {
+        $query = "
+            SELECT id, public_code, name, winery_distillery, drink_type, vintage_year
+            FROM products
+            WHERE LOWER(TRIM(name)) = LOWER(TRIM(?))
+            AND LOWER(TRIM(winery_distillery)) = LOWER(TRIM(?))
+            AND LOWER(TRIM(drink_type)) = LOWER(TRIM(?))
+        ";
+        $params = [$name, $wineryDistillery, $drinkType];
+        $types = 'sss';
+
+        // Manejar vintage_year: solo comparar si el nuevo producto tiene año
+        // Si el nuevo tiene año, buscar coincidencia exacta O productos sin año
+        // Si el nuevo no tiene año, buscar cualquier producto (con o sin año)
+        if ($vintageYear !== null) {
+            $query .= " AND (vintage_year = ? OR vintage_year IS NULL)";
+            $params[] = $vintageYear;
+            $types .= 'i';
+        }
+        // Si vintageYear es null, no agregamos condición de año (coincide con cualquiera)
+
+        if ($excludeId !== null) {
+            $query .= " AND id != ?";
+            $params[] = $excludeId;
+            $types .= 'i';
+        }
+
+        $query .= " LIMIT 1";
+
+        return $this->db->fetchOne($query, $params, $types);
+    }
+
+    /**
      * Eliminar un producto por su ID.
      *
      * @param int $id ID del producto
