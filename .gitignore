@@ -10,3 +10,6 @@ tareas_pendientes/
 
 # Ignorar configuración de VS Code
 .vscode/
+
+# Ignorar archivos de entorno
+.env
