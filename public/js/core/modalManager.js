@@ -455,40 +455,59 @@ class ModalManager {
         </h2>
 
         <form id="${isEdit ? 'admin-edit' : 'product-create'}-product-form" class="product-modal-form" novalidate>
-          <!-- Sección de imagen -->
-          <div class="form-image-section">
-            <label class="form-label">Imagen del producto</label>
-            <div class="image-upload-container">
-              <div class="image-preview-box" id="${isEdit ? 'edit' : 'create'}-image-display">
-                ${imageUrl
-                  ? `<img src="${escapeHtml(imageUrl)}" alt="Producto" class="image-preview-thumb" id="current-product-image">`
-                  : `<div class="image-placeholder">
-                       <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                         <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
-                         <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
-                         <line x1="12" y1="22.08" x2="12" y2="12"></line>
-                       </svg>
-                     </div>`
-                }
-              </div>
-              <div class="image-upload-actions">
-                <div>
-                  <h5>${imageUrl ? 'Cambiar imagen' : 'Agregar imagen'}</h5>
-                  <p>Seleccione una foto que represente el producto</p>
+          <!-- Sección de imagen ${isEdit ? '+ QR' : ''} -->
+          <div class="form-image-section ${isEdit ? 'form-image-qr-section' : ''}">
+            
+            <div class="image-qr-container ${isEdit ? 'two-columns-layout' : ''}">
+              <!-- Columna 1: Imagen del producto -->
+              <div class="product-image-column">
+                <div class="image-preview-box" id="${isEdit ? 'edit' : 'create'}-image-display">
+                  ${imageUrl
+                    ? `<img src="${escapeHtml(imageUrl)}" alt="Producto" class="image-preview-thumb" id="current-product-image">`
+                    : `<div class="image-placeholder">
+                         <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                           <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                           <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                           <line x1="12" y1="22.08" x2="12" y2="12"></line>
+                         </svg>
+                         <span class="placeholder-text">Sin imagen</span>
+                       </div>`
+                  }
+                  <input
+                    type="file"
+                    id="${isEdit ? 'edit' : 'create'}-product-image"
+                    accept="image/jpeg,image/png,image/webp"
+                    class="d-none"
+                  >
+                  <button type="button" class="btn-overlay btn-overlay-image" id="${isEdit ? 'edit' : 'create'}-select-image-btn" title="${imageUrl ? 'Cambiar imagen' : 'Seleccionar imagen'}">
+                    <i class="fas fa-${imageUrl ? 'sync-alt' : 'upload'}"></i>
+                    <span>${imageUrl ? 'Cambiar' : 'Agregar'}</span>
+                  </button>
+                  <span class="overlay-hint overlay-hint-image">
+                    <i class="fas fa-info-circle"></i> JPG, PNG o WebP · Máx 5MB
+                  </span>
                 </div>
-                <input
-                  type="file"
-                  id="${isEdit ? 'edit' : 'create'}-product-image"
-                  accept="image/jpeg,image/png,image/webp"
-                  class="d-none"
-                >
-                <button type="button" class="btn-upload-image" id="${isEdit ? 'edit' : 'create'}-select-image-btn">
-                  <i class="fas fa-upload"></i>${imageUrl ? 'Cambiar' : 'Seleccionar archivo'}
-                </button>
-                <p class="form-text mb-0">
-                  <i class="fas fa-info-circle"></i>JPG, PNG o WebP · Máximo 5MB
-                </p>
               </div>
+
+              ${isEdit && product?.public_code ? `
+              <!-- Columna 2: Código QR -->
+              <div class="product-qr-column">
+                <div class="qr-preview-box">
+                  <div id="edit-qr-display" class="qr-canvas-container">
+                    <div class="qr-loading">
+                      <div class="spinner-border text-wine" role="status">
+                        <span class="visually-hidden">Generando QR...</span>
+                      </div>
+                      <p class="mt-2 mb-0">Generando código QR...</p>
+                    </div>
+                  </div>
+                  <button type="button" class="btn-overlay btn-overlay-qr" id="edit-download-qr-btn" title="Descargar código QR">
+                    <i class="fas fa-download"></i>
+                    <span>Descargar</span>
+                  </button>
+                </div>
+              </div>
+              ` : ''}
             </div>
           </div>
 
@@ -533,7 +552,7 @@ class ModalManager {
               id="${isEdit ? 'edit' : 'create'}-public-code"
               name="public_code"
               value="${escapeHtml(p.public_code || '')}"
-              ${isEdit ? 'readonly title="El código no puede modificarse"' : 'required pattern="[A-Z0-9\\\\-]+" placeholder="Ej: MALBEC-2021-001"'}
+              ${isEdit ? 'readonly title="El código no puede modificarse"' : 'required placeholder="Ej: MALBEC-2021-001"'}
             >
             ${isEdit
               ? '<small class="form-text text-muted">Este código es único e inmutable</small>'
@@ -742,6 +761,26 @@ class ModalManager {
       onOpen: (modalEl) => {
         modalEl.classList.add('modal-xl');
         this._setupProductFormLogic('edit', product, modalEl, onSuccess);
+        
+        // Generar QR si estamos en modo edición
+        if (product?.public_code) {
+          setTimeout(() => {
+            const qrContainer = modalEl.querySelector('#edit-qr-display');
+            if (qrContainer) {
+              // Generar el QR
+              this.generateQRCode(product.public_code, qrContainer);
+              
+            }
+            
+            // Setup botón descargar QR
+            const downloadQRBtn = modalEl.querySelector('#edit-download-qr-btn');
+            if (downloadQRBtn) {
+              downloadQRBtn.addEventListener('click', () => {
+                this._downloadQRAsImage(product.public_code);
+              });
+            }
+          }, 100);
+        }
       }
     });
   }
@@ -770,6 +809,7 @@ class ModalManager {
     const statusEl = modal.querySelector(`#${prefix}-form-status`);
     const descriptionTextarea = modal.querySelector(`#${prefix}-description`);
     const charCount = modal.querySelector('#char-count');
+    const publicCodeInput = modal.querySelector(`#${prefix}-public-code`);
 
     // Botones de cancelar
     const closeBtn = modal.querySelector('[data-close-modal]');
@@ -782,6 +822,14 @@ class ModalManager {
     if (descriptionTextarea && charCount) {
       descriptionTextarea.addEventListener('input', () => {
         charCount.textContent = descriptionTextarea.value.length;
+      });
+    }
+
+    // Forzar mayúsculas en el código público (solo creación)
+    if (!isEdit && publicCodeInput) {
+      publicCodeInput.addEventListener('input', () => {
+        const val = publicCodeInput.value || '';
+        publicCodeInput.value = val.toUpperCase();
       });
     }
 
@@ -805,58 +853,30 @@ class ModalManager {
           return;
         }
 
-        // Preview de la imagen
+        // Preview de la imagen en memoria (sin subir aún)
         const reader = new FileReader();
         reader.onload = (e) => {
-          imageDisplay.innerHTML = `<img src="${e.target.result}" alt="Preview" class="image-preview-thumb">`;
+          // Guardar referencias al botón e hint antes de limpiar
+          const buttonRef = imageDisplay.querySelector('.btn-overlay');
+          const hintRef = imageDisplay.querySelector('.overlay-hint');
+          
+          // Limpiar y crear imagen
+          imageDisplay.innerHTML = '';
+          const img = document.createElement('img');
+          img.src = e.target.result; // Data URL en memoria
+          img.alt = 'Preview';
+          img.className = 'image-preview-thumb';
+          imageDisplay.appendChild(img);
+          
+          // Re-agregar botón e hint
+          if (buttonRef) imageDisplay.appendChild(buttonRef);
+          if (hintRef) imageDisplay.appendChild(hintRef);
+          
+          // Guardar el archivo en memoria para subir después
+          imageInput.tempFile = file;
+          imageInput.tempDataUrl = e.target.result;
         };
         reader.readAsDataURL(file);
-
-        // Subir imagen al servidor
-        this.showFormStatus(statusEl, 'Subiendo imagen...', 'info');
-        selectImageBtn.disabled = true;
-        selectImageBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Subiendo...';
-
-        try {
-          const formData = new FormData();
-          formData.append('image', file);
-
-          const response = await fetch('./api/admin/upload/product-image', {
-            method: 'POST',
-            body: formData
-          });
-
-          const data = await response.json();
-
-          if (!response.ok) {
-            throw new Error(data.message || 'Error al subir la imagen');
-          }
-
-          uploadedImageUrl = data.data.url;
-          hasChangedImage = true;
-
-          // Actualizar preview con la URL del servidor
-          imageDisplay.innerHTML = `<img src="${uploadedImageUrl}" alt="Producto" class="image-preview-thumb">`;
-
-          this.showFormStatus(statusEl, 'Imagen subida correctamente', 'success');
-          selectImageBtn.innerHTML = '<i class="fas fa-upload"></i>Cambiar';
-
-        } catch (error) {
-          this.showFormStatus(statusEl, `Error al subir imagen: ${error.message}`, 'error');
-          imageDisplay.innerHTML = `
-            <div class="image-placeholder">
-              <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
-                <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
-                <line x1="12" y1="22.08" x2="12" y2="12"></line>
-              </svg>
-            </div>
-          `;
-          uploadedImageUrl = null;
-          selectImageBtn.innerHTML = '<i class="fas fa-upload"></i>Seleccionar archivo';
-        } finally {
-          selectImageBtn.disabled = false;
-        }
       });
     }
 
@@ -879,6 +899,16 @@ class ModalManager {
           form.classList.add('was-validated');
           showToast('Por favor, complete todos los campos requeridos', 'error');
           return;
+        }
+
+        // Validación personalizada del código público (solo creación)
+        if (!isEdit && publicCodeInput) {
+          const code = (publicCodeInput.value || '').trim();
+          if (!code || !/^[A-Z0-9-]+$/.test(code)) {
+            showToast('Código público inválido: use mayúsculas, números y guiones', 'error');
+            publicCodeInput.focus();
+            return;
+          }
         }
 
         // Si es edición y cambió la imagen, preguntar qué hacer con la anterior
@@ -938,6 +968,41 @@ class ModalManager {
     submitBtn.innerHTML = `<i class="fas fa-spinner fa-spin me-1"></i>${actionText}...`;
 
     try {
+      // Si hay una imagen en memoria sin subir, subirla primero
+      const imageInput = document.querySelector(`#${isEdit ? 'edit' : 'create'}-product-image`);
+      if (imageInput && imageInput.tempFile) {
+        try {
+          this.showFormStatus(statusEl, 'Subiendo imagen...', 'info');
+          
+          const formData = new FormData();
+          formData.append('image', imageInput.tempFile);
+
+          const response = await fetch('./api/admin/upload/product-image', {
+            method: 'POST',
+            body: formData
+          });
+
+          const data = await response.json();
+
+          if (!response.ok) {
+            throw new Error(data.message || 'Error al subir la imagen');
+          }
+
+          // Actualizar payload con URL de imagen del servidor
+          payload.image_url = data.data.url;
+          // Limpiar referencia temporal
+          imageInput.tempFile = null;
+          imageInput.tempDataUrl = null;
+        } catch (error) {
+          this.showFormStatus(statusEl, `Error al subir imagen: ${error.message}`, 'error');
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = `<i class="fas fa-${isEdit ? 'save' : 'plus'} me-1"></i>${isEdit ? 'Guardar cambios' : 'Crear producto'}`;
+          return;
+        }
+      }
+
+      this.showFormStatus(statusEl, `${actionText}...`, 'info');
+      
       const response = await fetch(endpoint, {
         method,
         headers: {
@@ -956,11 +1021,31 @@ class ModalManager {
 
       showToast(successText, 'success');
 
-      // Esperar un momento y cerrar
-      setTimeout(() => {
+      // Mostrar QR modal solo al CREAR producto nuevo (no en edición)
+      const productData = data.data;
+      if (!isEdit && productData && productData.public_code) {
+        // Cerrar modal actual
         this.close();
-        if (onSuccess) onSuccess(data.data);
-      }, 800);
+
+        // Esperar a que se cierre y luego mostrar QR
+        setTimeout(() => {
+          this.showProductQRModal({
+            id: productData.id,
+            name: productData.name,
+            public_code: productData.public_code
+          });
+        }, 300);
+      } else {
+        // Si es edición o no hay public_code, solo cerrar
+        setTimeout(() => {
+          this.close();
+          if (onSuccess) onSuccess(data.data);
+          // Recargar tabla de productos
+          if (window.adminView && typeof window.adminView.loadProducts === 'function') {
+            window.adminView.loadProducts();
+          }
+        }, 800);
+      }
 
     } catch (error) {
       showToast(error.message, 'error');
@@ -1783,6 +1868,178 @@ class ModalManager {
     valueInput.addEventListener('input', suggestVisibleText);
     nxmNInput.addEventListener('input', suggestNxmText);
     nxmMInput.addEventListener('input', suggestNxmText);
+  }
+
+  /**
+   * Genera y muestra un QR Code personalizado
+   * @param {string} publicCode - Código público del producto
+   * @param {HTMLElement|string} container - Donde renderizar el QR
+   */
+  generateQRCode(publicCode, container) {
+    // Verificar que QRCode esté disponible
+    if (typeof window.QRCode === 'undefined') {
+      console.warn('QRCode library not loaded yet, trying to load from CDN');
+      // Intentar cargar dinámicamente
+      const script = document.createElement('script');
+      script.src = 'https://cdn.jsdelivr.net/npm/qrcode@latest/build/qrcode.min.js';
+      script.onload = () => {
+        this.generateQRCode(publicCode, container);
+      };
+      document.head.appendChild(script);
+      return null;
+    }
+
+    if (!publicCode) {
+      console.error('Invalid publicCode');
+      return null;
+    }
+
+    // Obtener referencia al contenedor
+    let targetContainer = container;
+    if (typeof container === 'string') {
+      targetContainer = document.getElementById(container);
+    }
+
+    if (!targetContainer) {
+      console.error('Container not found');
+      return null;
+    }
+
+    // Limpiar contenedor
+    targetContainer.innerHTML = '';
+
+    // Crear canvas para el QR
+    const canvas = document.createElement('canvas');
+    
+    try {
+      window.QRCode.toCanvas(canvas, publicCode, {
+        width: 140,
+        margin: 1,
+        color: {
+          dark: '#4A0E1A',    // Wine color
+          light: '#FFFFFF'
+        },
+        errorCorrectionLevel: 'H'
+      }, (error) => {
+        if (error) {
+          console.error('Error generating QR:', error);
+          targetContainer.innerHTML = '<p class="text-danger">Error al generar QR</p>';
+        }
+      });
+
+      targetContainer.appendChild(canvas);
+      return canvas;
+
+    } catch (error) {
+      console.error('Exception generating QR:', error);
+      targetContainer.innerHTML = '<p class="text-danger">Error al generar QR</p>';
+      return null;
+    }
+  }
+
+  /**
+   * Muestra un modal con QR Code personalizado y opciones de descarga
+   * @param {Object} product - Datos del producto {id, name, public_code}
+   */
+  async showProductQRModal(product) {
+    if (!product || !product.public_code) {
+      alert('Código de producto no disponible');
+      return;
+    }
+
+    const publicCode = product.public_code;
+
+    const qrModalContent = `
+      <div class="qr-modal-content">
+        <h2 class="qr-modal-title">
+          <i class="fas fa-qrcode me-2"></i>Código QR - ${escapeHtml(product.name)}
+        </h2>
+
+        <div class="qr-display-container">
+          <div id="qr-code-canvas" class="qr-canvas-wrapper"></div>
+
+          <div class="qr-info">
+            <p class="qr-code-label"><strong>Código:</strong> ${escapeHtml(publicCode)}</p>
+            <p class="qr-description">Escanea este código para ver los detalles del producto</p>
+          </div>
+        </div>
+
+        <div class="qr-modal-actions">
+          <button type="button" class="btn-modal btn-modal-primary" id="qr-download-png">
+            <i class="fas fa-download me-1"></i>Descargar PNG
+          </button>
+        </div>
+      </div>
+    `;
+
+    const modal = this.open('qr-display-modal', qrModalContent, {
+      disableClickOutside: false,
+      onOpen: (modalElement) => {
+        // Generar QR cuando se abre el modal
+        this.generateQRCode(publicCode, 'qr-code-canvas');
+
+        // Setup botón descargar
+        const downloadBtn = modalElement.querySelector('#qr-download-png');
+        if (downloadBtn) {
+          downloadBtn.addEventListener('click', () => {
+            this._downloadQRAsImage(publicCode);
+          });
+        }
+      },
+      onClose: () => {
+        // Recargar tabla de productos cuando se cierre el modal de QR
+        if (window.adminView && typeof window.adminView.loadProducts === 'function') {
+          window.adminView.loadProducts();
+        }
+      }
+    });
+  }
+
+  /**
+   * Descarga el QR Code como imagen PNG
+   * @param {string} publicCode - Código público del producto
+   */
+  _downloadQRAsImage(publicCode) {
+    if (typeof window.QRCode === 'undefined') {
+      alert('Librería QR no disponible');
+      return;
+    }
+
+    try {
+      // Crear un canvas temporal para generar la imagen
+      const canvas = document.createElement('canvas');
+      
+      window.QRCode.toCanvas(canvas, publicCode, {
+        width: 256,
+        margin: 2,
+        color: {
+          dark: '#4A0E1A',
+          light: '#FFFFFF'
+        },
+        errorCorrectionLevel: 'H'
+      }, (error) => {
+        if (error) {
+          console.error('Error generating QR for download:', error);
+          alert('Error al generar QR para descarga');
+          return;
+        }
+
+        // Convertir canvas a blob y descargar
+        canvas.toBlob((blob) => {
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = `QR-${publicCode}-${new Date().toISOString().split('T')[0]}.png`;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          URL.revokeObjectURL(url);
+        }, 'image/png');
+      });
+    } catch (error) {
+      console.error('Exception downloading QR:', error);
+      alert('Error al descargar QR');
+    }
   }
 }
 

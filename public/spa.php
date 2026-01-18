@@ -56,6 +56,7 @@ $appConfig = [
   <link rel="stylesheet" href="<?= $baseUrl ?>css/admin.css">
   <link rel="stylesheet" href="<?= $baseUrl ?>css/buttons.css?v=7">
   <link rel="stylesheet" href="<?= $baseUrl ?>css/confirm-dialog.css">
+  <link rel="stylesheet" href="<?= $baseUrl ?>css/qr-display.css">
 
   <!-- Configuración global para JavaScript -->
   <script>
@@ -232,8 +233,8 @@ $appConfig = [
   <div id="modal-container"></div>
 
   <!-- Librerías QR -->
-  <script src="<?= $baseUrl ?>js/lib/qrcode.min.js"></script>
   <script src="<?= $baseUrl ?>js/lib/html5-qrcode.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode@latest/build/qrcode.min.js"></script>
 
   <!-- Bootstrap 5.3 JS Bundle -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

@@ -1,0 +1,488 @@
+/* 
+  QR Code Display Styles
+  Estilos para visualización y descarga de códigos QR
+*/
+
+.qr-modal-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2rem;
+  gap: 2rem;
+}
+
+.qr-modal-title {
+  color: #4A0E1A;
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+}
+
+.qr-display-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  width: 100%;
+  max-width: 400px;
+}
+
+.qr-canvas-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  background: #f8f8f8;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  min-height: 300px;
+  width: 100%;
+}
+
+.qr-canvas-wrapper canvas {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+.qr-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  text-align: center;
+  width: 100%;
+}
+
+.qr-code-label {
+  margin: 0;
+  font-size: 0.95rem;
+  color: #333;
+  word-break: break-all;
+  font-family: 'Monaco', 'Courier New', monospace;
+  background: #f5f5f5;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+}
+
+.qr-code-label strong {
+  color: #4A0E1A;
+}
+
+.qr-description {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #666;
+  font-style: italic;
+}
+
+.qr-modal-actions {
+  display: flex;
+  gap: 1rem;
+  width: 100%;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+/* Estilos específicos para botones dentro de modales QR */
+.qr-modal-actions .btn-modal {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 4px;
+  font-size: 0.95rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.2s ease;
+  background-color: #f0f0f0;
+  color: #333;
+  font-weight: 500;
+  min-width: 140px;
+  justify-content: center;
+}
+
+.qr-modal-actions .btn-modal:hover {
+  background-color: #e0e0e0;
+  transform: translateY(-2px);
+}
+
+.qr-modal-actions .btn-modal-primary {
+  background-color: #4A0E1A;
+  color: white;
+  font-weight: 600;
+}
+
+.qr-modal-actions .btn-modal-primary:hover {
+  background-color: #6b1428;
+  box-shadow: 0 4px 12px rgba(74, 14, 26, 0.3);
+}
+
+.qr-modal-actions .btn-modal-danger {
+  background-color: #dc3545;
+  color: white;
+}
+
+.qr-modal-actions .btn-modal-danger:hover {
+  background-color: #c82333;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .qr-modal-content {
+    padding: 1.5rem;
+  }
+
+  .qr-modal-title {
+    font-size: 1.25rem;
+  }
+
+  .qr-display-container {
+    max-width: 100%;
+  }
+
+  .qr-canvas-wrapper {
+    min-height: 250px;
+    padding: 1rem;
+  }
+
+  .qr-modal-actions {
+    flex-direction: column;
+  }
+
+  .qr-modal-actions .btn-modal {
+    width: 100%;
+    min-width: auto;
+  }
+}
+
+/* =================================
+   QR en Modal de Edición de Producto
+   Layout de Dos Columnas
+   ================================= */
+
+.form-image-qr-section {
+  display: block;
+}
+
+.form-image-qr-section .form-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #4A0E1A;
+  margin-bottom: 1.25rem;
+  display: block;
+}
+
+/* Layout de dos columnas */
+.two-columns-layout {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr !important;
+  gap: 2.5rem !important;
+  align-items: start;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+/* Columna de imagen del producto */
+.product-image-column {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+/* Columna de QR */
+.product-qr-column {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+/* Preview boxes */
+.product-image-column .image-preview-box,
+.product-qr-column .qr-preview-box {
+  background: #ffffff;
+  border: 2px solid #d0d0d0;
+  border-radius: 8px;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 160px;
+  max-height: 180px;
+  aspect-ratio: 1;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.product-image-column .image-preview-box {
+  border-style: solid;
+  box-shadow: 0 4px 12px rgba(74, 14, 26, 0.1);
+}
+
+.product-image-column .image-preview-box:hover {
+  border-color: #4A0E1A;
+  background: #fcfcfc;
+  box-shadow: 0 6px 16px rgba(74, 14, 26, 0.15);
+}
+
+.product-qr-column .qr-preview-box {
+  border-color: #4A0E1A;
+  border-style: solid;
+  box-shadow: 0 4px 12px rgba(74, 14, 26, 0.1);
+  overflow: visible;
+}
+
+.product-qr-column .qr-preview-box:hover {
+  box-shadow: 0 6px 16px rgba(74, 14, 26, 0.15);
+}
+
+.image-preview-thumb {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 4px;
+  max-height: 140px;
+}
+
+.image-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  color: #999;
+}
+
+.image-placeholder .placeholder-text {
+  font-size: 0.75rem;
+  color: #999;
+}
+
+.qr-preview-box canvas {
+  max-width: 85%;
+  height: auto;
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+/* Contenedor del canvas (lo que se limpia) */
+.qr-canvas-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
+.btn-overlay-qr {
+  background: rgba(74, 14, 26, 0.9);
+  color: white;
+  z-index: 100 !important;
+  opacity: 0;
+  transform: translateY(5px);
+  transition: all 0.2s ease;
+}
+
+.btn-overlay-qr:hover {
+  background: rgba(74, 14, 26, 0.9);
+  z-index: 100 !important;
+}
+
+.qr-preview-box:hover .btn-overlay-qr {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Botones overlay */
+.btn-overlay {
+  position: absolute;
+  bottom: 0.5rem;
+  right: 0.5rem;
+  background: rgba(74, 14, 26, 0.9);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 0.4rem 0.7rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  transition: all 0.2s ease;
+  opacity: 0;
+  transform: translateY(5px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.image-preview-box:hover .btn-overlay,
+.qr-preview-box:hover .btn-overlay {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.btn-overlay:hover {
+  background: rgba(107, 20, 40, 1);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(74, 14, 26, 0.4);
+}
+
+.btn-overlay i {
+  font-size: 0.7rem;
+}
+
+.btn-overlay-image {
+  background: rgba(74, 14, 26, 0.9);
+  color: white;
+  border: none;
+}
+
+.btn-overlay-image:hover {
+  background: rgba(107, 20, 40, 1);
+  color: white;
+}
+
+/* Hint overlay (info que aparece con hover) */
+.overlay-hint {
+  position: absolute;
+  bottom: 0.5rem;
+  left: 0.5rem;
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  border-radius: 4px;
+  padding: 0.3rem 0.5rem;
+  font-size: 0.6rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  opacity: 0;
+  transform: translateY(5px);
+  transition: all 0.2s ease;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+.overlay-hint i {
+  font-size: 0.55rem;
+}
+
+.image-preview-box:hover .overlay-hint-image,
+.qr-preview-box:hover .overlay-hint-qr {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Loading state */
+.qr-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  width: 100%;
+  color: #4A0E1A;
+}
+
+.qr-loading .spinner-border {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-width: 3px;
+}
+
+.qr-loading p {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.qr-code-label-inline {
+  margin: 0;
+  padding: 0.5rem 0.75rem;
+  background: linear-gradient(135deg, #f8f4f5 0%, #faf8f9 100%);
+  border: 1px solid #4A0E1A;
+  border-radius: 6px;
+  font-size: 0.7rem;
+  color: #333;
+}
+
+.qr-code-label-inline strong {
+  color: #4A0E1A;
+  font-weight: 600;
+  margin-right: 0.4rem;
+}
+
+.qr-code-label-inline span {
+  font-family: 'Monaco', 'Courier New', monospace;
+  color: #4A0E1A;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  font-size: 0.65rem;
+}
+
+.control-title {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #333;
+  margin: 0;
+  display: flex;
+  align-items: center;
+}
+
+.control-title i {
+  color: #4A0E1A;
+  font-size: 0.65rem;
+}
+
+.control-description {
+  font-size: 0.65rem;
+  color: #666;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.control-description code {
+  display: inline-block;
+  padding: 0.15rem 0.4rem;
+  background: #ffffff;
+  border: 1px solid #d0d0d0;
+  border-radius: 4px;
+  font-family: 'Monaco', 'Courier New', monospace;
+  font-size: 0.6rem;
+  color: #4A0E1A;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  margin-left: 0.25rem;
+}
+
+.control-hint {
+  font-size: 0.6rem;
+  color: #888;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+/* Estilos de controles obsoletos - removidos (ahora se usan botones overlay) */
+
+.text-wine {
+  color: #4A0E1A !important;
+}
+
+/* Responsive: Stack en mobile */
+@media (max-width: 768px) {
+  .two-columns-layout {
+    grid-template-columns: 1fr !important;
+    gap: 2rem !important;
+  }
+
+  .product-image-column .image-preview-box,
+  .product-qr-column .qr-preview-box {
+    min-height: 280px;
+  }
+}

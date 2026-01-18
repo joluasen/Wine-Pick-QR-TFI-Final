@@ -145,7 +145,6 @@ export async function initAdminView(container) {
   }
 
   // Configurar formularios usando componentes
-  setupProductCreateForm(container);
   setupPromotionCreateForm(container);
   setupLogout(container, statusEl);
 }
