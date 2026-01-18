@@ -1960,7 +1960,9 @@ class ModalManager {
 
           <div class="qr-info">
             <p class="qr-code-label"><strong>Código:</strong> ${escapeHtml(publicCode)}</p>
-            <p class="qr-description">Escanea este código para ver los detalles del producto</p>
+            <p class="qr-description">Escanea este código para ver los detalles del producto.</p>
+            <p class="qr-description">¿Problemas el QR?</p>
+            <p class="qr-description">Visite <a href="https://www.winepickqr.com" target="_blank" rel="noopener noreferrer">www.winepickqr.com</a> y busque el producto por código o nombre.</p>
           </div>
         </div>
 
@@ -2006,15 +2008,21 @@ class ModalManager {
     }
 
     try {
-      // Crear un canvas temporal para generar la imagen
-      const canvas = document.createElement('canvas');
-      
-      window.QRCode.toCanvas(canvas, publicCode, {
-        width: 256,
+      // Canvas base del QR
+      const qrCanvas = document.createElement('canvas');
+      const qrSize = 384; // +50% sobre 256
+      const padding = 36; // +50% sobre 24
+      const textColor = '#4A0E1A';
+      const helperColor = '#333333';
+      const bgColor = '#FFFFFF';
+
+      // Generar el QR base
+      window.QRCode.toCanvas(qrCanvas, publicCode, {
+        width: qrSize,
         margin: 2,
         color: {
-          dark: '#4A0E1A',
-          light: '#FFFFFF'
+          dark: textColor,
+          light: bgColor
         },
         errorCorrectionLevel: 'H'
       }, (error) => {
@@ -2024,8 +2032,83 @@ class ModalManager {
           return;
         }
 
-        // Convertir canvas a blob y descargar
-        canvas.toBlob((blob) => {
+        // Canvas final con texto
+        const finalCanvas = document.createElement('canvas');
+        const ctx = finalCanvas.getContext('2d');
+
+        const finalWidth = qrSize + padding * 2; // 256 + 48 = 304
+        const qrTop = padding; // 36
+        const codeText = `Código: ${publicCode}`;
+        const helperText1 = '¿Problemas con el QR?';
+        const helperText2 = 'Visite www.winepickqr.com y busque el producto por código o nombre.';
+
+        // Calcular alto necesario con wrap
+        const lineHeight = 24;
+        const maxTextWidth = finalWidth - padding * 2;
+
+        const wrapText = (text, maxWidth, font) => {
+          ctx.font = font;
+          const words = text.split(' ');
+          const lines = [];
+          let line = '';
+          words.forEach((word) => {
+            const testLine = line ? `${line} ${word}` : word;
+            const metrics = ctx.measureText(testLine);
+            if (metrics.width > maxWidth && line) {
+              lines.push(line);
+              line = word;
+            } else {
+              line = testLine;
+            }
+          });
+          if (line) lines.push(line);
+          return lines;
+        };
+
+        const codeLines = wrapText(codeText, maxTextWidth, 'bold 35px "Segoe UI", Arial, sans-serif');
+        const helperLines1 = wrapText(helperText1, maxTextWidth, '17px "Segoe UI", Arial, sans-serif');
+        const helperLines2 = wrapText(helperText2, maxTextWidth, '17px "Segoe UI", Arial, sans-serif');
+
+        const textBlockHeight = (codeLines.length * lineHeight) + (helperLines1.length * lineHeight) + (helperLines2.length * lineHeight) + padding; // extra padding bajo el QR
+        const finalHeight = qrTop + qrSize + padding + textBlockHeight;
+
+        finalCanvas.width = finalWidth;
+        finalCanvas.height = finalHeight;
+
+        // Fondo
+        ctx.fillStyle = bgColor;
+        ctx.fillRect(0, 0, finalWidth, finalHeight);
+
+        // QR centrado
+        const qrX = (finalWidth - qrSize) / 2;
+        ctx.drawImage(qrCanvas, qrX, qrTop, qrSize, qrSize);
+
+        // Código público
+        let currentY = qrTop + qrSize + padding;
+        ctx.textAlign = 'center';
+        ctx.fillStyle = textColor;
+        ctx.font = 'bold 35px "Segoe UI", Arial, sans-serif';
+        codeLines.forEach((line) => {
+          ctx.fillText(line, finalWidth / 2, currentY);
+          currentY += lineHeight;
+        });
+
+        // Texto de ayuda - Parágrafo 1
+        ctx.fillStyle = helperColor;
+        ctx.font = '17px "Segoe UI", Arial, sans-serif';
+        helperLines1.forEach((line) => {
+          ctx.fillText(line, finalWidth / 2, currentY);
+          currentY += lineHeight;
+        });
+
+        // Texto de ayuda - Parágrafo 2
+        helperLines2.forEach((line) => {
+          ctx.fillText(line, finalWidth / 2, currentY);
+          currentY += lineHeight;
+        });
+
+        // Descargar PNG
+        finalCanvas.toBlob((blob) => {
           const url = URL.createObjectURL(blob);
           const link = document.createElement('a');
           link.href = url;
