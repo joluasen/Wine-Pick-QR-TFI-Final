@@ -317,8 +317,26 @@ class PromotionController
             ApiResponse::validationError('El texto de promoción debe tener entre 3 y 255 caracteres.', 'visible_text');
         }
 
-        // Nota: RF12 (validación de solapamiento) solo aplica al crear promociones, no al editarlas.
-        // El admin debe poder editar libremente una promoción existente para corregir errores de fechas.
+        // RF12: Validar que no exista otra promoción activa para el mismo producto en el mismo período
+        // Excluir la promoción actual de la verificación
+        $overlapping = $this->promotionModel->findOverlappingPromotion(
+            (int)$promotion['product_id'],
+            $startAt,
+            $endAt,
+            $promotionId
+        );
+        if ($overlapping) {
+            $conflictInfo = sprintf(
+                '"%s" (vigente desde %s hasta %s)',
+                $overlapping['visible_text'],
+                $overlapping['start_at'],
+                $overlapping['end_at'] ?? 'sin fecha de fin'
+            );
+            ApiResponse::conflict(
+                'Ya existe otra promoción activa para este producto en el período indicado: ' . $conflictInfo,
+                'start_at'
+            );
+        }
 
         // Actualizar promoción
         try {
