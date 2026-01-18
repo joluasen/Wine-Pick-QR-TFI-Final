@@ -58,10 +58,10 @@ class Router
         // GET /api/public/mas-buscados - Listar productos más buscados
         $this->get('/api/public/mas-buscados', 'ProductController@listMostSearched');
 
-        // Auth - DESHABILITADO: Ya no se requiere autenticación
-        // $this->post('/api/admin/login', 'AuthController@login');
-        // $this->post('/api/admin/logout', 'AuthController@logout');
-        // $this->get('/api/admin/me', 'AuthController@me');
+        // Auth
+        $this->post('/api/admin/login', 'AuthController@login');
+        $this->post('/api/admin/logout', 'AuthController@logout');
+        $this->get('/api/admin/me', 'AuthController@me');
 
         // POST /api/admin/productos (protegido)
         $this->post('/api/admin/productos', 'ProductController@create');
@@ -167,6 +167,19 @@ class Router
                 $params = $this->matchRoute($pattern, $uri, $method);
 
                 if ($params !== null) {
+                    // Enforce auth for admin endpoints except auth routes
+                    if (strpos($uri, '/api/admin/') === 0) {
+                        $whitelist = [
+                            '/api/admin/login',
+                            '/api/admin/logout',
+                            '/api/admin/me'
+                        ];
+                        if (!in_array($uri, $whitelist, true)) {
+                            // Validará o responderá 401
+                            Auth::assertAuthenticated();
+                        }
+                    }
+
                     $this->executeHandler($handler, $params);
                     return;
                 }

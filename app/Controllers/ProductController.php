@@ -285,7 +285,7 @@ class ProductController {
 
         // Intentar crear el producto
         try {
-            $adminId = 0;
+            $adminId = (int)($_SERVER['WPQ_USER']['sub'] ?? 0);
             $productId = $this->productModel->create($data, $adminId);
 
             // Recuperar el producto recién creado
@@ -489,7 +489,7 @@ class ProductController {
 
         // Intentar actualizar el producto
         try {
-            $adminId = 0;
+            $adminId = (int)($_SERVER['WPQ_USER']['sub'] ?? 0);
             $this->productModel->update($productId, $data, $adminId);
 
             // Recuperar el producto actualizado

@@ -43,7 +43,7 @@ class PromotionController
         $text = trim($body['visible_text']);
         $startAt = trim($body['start_at']);
         $endAt = !empty($body['end_at']) ? trim($body['end_at']) : null;
-        $adminId = 0;
+        $adminId = (int)($_SERVER['WPQ_USER']['sub'] ?? 0);
 
         // Validar tipo de promoción (valores permitidos)
         $validTypes = ['porcentaje', 'precio_fijo', '2x1', '3x2', 'nxm'];

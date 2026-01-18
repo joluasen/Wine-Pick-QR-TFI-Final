@@ -2,7 +2,6 @@
 /**
  * Navegación para usuarios públicos
  */
-header('Content-Type: text/html; charset=utf-8');
 ?>
 <!-- MOBILE BOTTOM NAV -->
 <nav class="bottom-nav d-md-none">
@@ -27,9 +26,9 @@ header('Content-Type: text/html; charset=utf-8');
     <span>Promos</span>
   </a>
 
-  <a href="#admin" class="bottom-nav-item" data-link="#admin" aria-label="Administrador">
-    <i class="fas fa-cog"></i>
-    <span>Admin</span>
+  <a href="#login" class="bottom-nav-item" data-link="#login" aria-label="Ingresar">
+    <i class="fas fa-sign-in-alt"></i>
+    <span>Ingresar</span>
   </a>
 </nav>
 
@@ -52,8 +51,8 @@ header('Content-Type: text/html; charset=utf-8');
 
   <div class="sidebar-divider"></div>
 
-  <a href="#admin" class="sidebar-nav-item" data-link="#admin" title="Administrador" data-bs-toggle="tooltip" data-bs-placement="right">
-    <i class="fas fa-cog"></i>
-    <span>Admin</span>
+  <a href="#login" class="sidebar-nav-item" data-link="#login" title="Ingresar" data-bs-toggle="tooltip" data-bs-placement="right">
+    <i class="fas fa-sign-in-alt"></i>
+    <span>Ingresar</span>
   </a>
 </nav>

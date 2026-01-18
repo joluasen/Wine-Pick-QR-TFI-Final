@@ -34,8 +34,13 @@ function registerServiceWorker() {
 /**
  * Inicializa el modal de login global (Bootstrap)
  */
-function initGlobalLoginModal() {
-  // FUNCIÓN ELIMINADA - Ya no se utiliza autenticación
+async function initGlobalLoginModal() {
+  try {
+    const { initLoginModal } = await import('./views/loginView.js');
+    initLoginModal();
+  } catch (err) {
+    console.error('Error inicializando modal de login:', err);
+  }
 }
 
 /**
@@ -82,6 +87,9 @@ function init() {
 
   // Registrar Service Worker
   registerServiceWorker();
+
+  // Inicializar modal de login global
+  initGlobalLoginModal();
 
   // Inicializar dropdowns del sidebar
   initSidebarDropdowns();

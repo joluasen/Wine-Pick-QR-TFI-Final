@@ -9,7 +9,7 @@
  */
 
 import { modalManager } from '../core/modalManager.js';
-import { setStatus } from '../core/utils.js';
+import { setStatus, fetchJSON } from '../core/utils.js';
 
 // Servicios
 import { searchProductByCode } from '../admin/services/productService.js';
@@ -89,7 +89,25 @@ export function setupNewPromotionButtons() {
  * @param {HTMLElement} statusEl - Elemento para mostrar estados
  */
 export function setupLogout(container, statusEl) {
-  // FUNCIÓN ELIMINADA - Ya no se requiere autenticación
+  const btnDesktop = document.getElementById('logout-btn-desktop');
+  const btnMobile = document.getElementById('logout-btn-mobile');
+
+  const doLogout = async () => {
+    try {
+      await fetchJSON('./api/admin/logout', { method: 'POST' });
+      setStatus(statusEl || document.createElement('div'), 'Sesión cerrada', 'success');
+      // Forzar salida a Home
+      window.location.hash = '#home';
+      // Recargar navegación pública
+      setTimeout(() => window.location.reload(), 200);
+    } catch (err) {
+      console.error('Error al cerrar sesión:', err);
+      setStatus(statusEl || document.createElement('div'), 'Error al cerrar sesión', 'error');
+    }
+  };
+
+  btnDesktop?.addEventListener('click', (e) => { e.preventDefault(); doLogout(); });
+  btnMobile?.addEventListener('click', (e) => { e.preventDefault(); doLogout(); });
 }
 
 /**

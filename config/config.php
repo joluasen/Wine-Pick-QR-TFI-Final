@@ -54,6 +54,10 @@ define('LOGS_PATH', BASE_PATH . '/logs');
 // URL base de la aplicación
 define('BASE_URL', $_ENV['BASE_URL'] ?? 'http://localhost/proyectos/Wine-Pick-QR-TFI');
 
+// Autenticación (JWT) - configurable vía .env
+define('JWT_SECRET', $_ENV['JWT_SECRET'] ?? 'change-this-in-.env');
+define('AUTH_COOKIE_NAME', $_ENV['AUTH_COOKIE_NAME'] ?? 'wpq_auth');
+
 /**
  * Registra mensajes de depuración en el archivo de logs.
  * 

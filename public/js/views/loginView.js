@@ -1,89 +1,131 @@
-// public/js/views/loginView.js
 /**
- * Vista de login de administrador
+ * loginView.js - Manejo del formulario de login
  */
 
-import { setStatus, fetchJSON } from '../core/utils.js';
+import { fetchJSON } from '../core/utils.js';
+import { showToast } from '../admin/components/Toast.js';
 
 /**
  * Maneja el proceso de login
  */
-async function handleLogin(username, password, statusEl, onSuccess) {
+async function handleLogin(username, password) {
   if (!username || !password) {
-    setStatus(statusEl, 'Ingresá usuario y contraseña.', 'error');
-    return;
+    showToast('Usuario y contraseña son requeridos.', 'error');
+    return false;
   }
-  
-  setStatus(statusEl, 'Autenticando...', 'info');
-  
+
   try {
     const data = await fetchJSON('./api/admin/login', {
       method: 'POST',
       body: JSON.stringify({ username, password })
     });
-    
-    setStatus(statusEl, 'Login exitoso. Redirigiendo...', 'success');
-    
+
+    showToast('Login exitoso. Redirigiendo...', 'success');
+
+    // Redirigir al panel admin
     setTimeout(() => {
-      if (onSuccess) onSuccess();
       window.location.hash = '#admin';
-    }, 400);
-    
+    }, 500);
+
+    return true;
   } catch (err) {
     if (err.status === 401) {
-      setStatus(statusEl, 'Credenciales inválidas', 'error');
+      showToast('Credenciales inválidas', 'error');
     } else {
-      setStatus(statusEl, `Error: ${err.message}`, 'error');
+      showToast(`Error: ${err.message}`, 'error');
     }
+    return false;
   }
 }
 
 /**
- * Inicializa la vista de login (página completa)
+ * Inicializa la vista de login
  */
 export function initLoginView(container) {
-  const form = container.querySelector('#login-form');
-  const statusEl = container.querySelector('#login-status');
-  const userInput = container.querySelector('#login-username');
-  const passInput = container.querySelector('#login-password');
-  
+  const form = document.getElementById('login-form');
   if (!form) return;
-  
+
+  const userInput = document.getElementById('login-username');
+  const passInput = document.getElementById('login-password');
+
+  const modalEl = document.getElementById('login-modal-page');
+  const closeBtn = document.getElementById('login-close-btn');
+
+  // Desactivar scroll del body al abrir el modal
+  document.body.style.overflow = 'hidden';
+
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
-    
+
     const username = userInput?.value?.trim() || '';
     const password = passInput?.value || '';
-    
-    await handleLogin(username, password, statusEl);
+
+    await handleLogin(username, password);
   });
+
+  // Cerrar modal navegando a home
+  const closeModal = () => {
+    document.body.style.overflow = '';
+    window.location.hash = '#home';
+  };
+
+  if (closeBtn) {
+    closeBtn.addEventListener('click', closeModal);
+  }
+
+  // Cerrar al clickear overlay (fuera del contenido)
+  if (modalEl) {
+    modalEl.addEventListener('click', (e) => {
+      if (e.target === modalEl) {
+        document.body.style.overflow = '';
+        closeModal();
+      }
+    });
+    // Asegurar que se muestre el modal (modals.css usa display:none por defecto)
+    modalEl.style.display = 'flex';
+  }
+
+  // Auto-focus en el campo de usuario
+  if (userInput) {
+    userInput.focus();
+  }
 }
 
 /**
- * Inicializa el modal de login (Bootstrap modal)
- * Se llama desde app.js para el modal global
+ * Inicializa el modal de login (compatibilidad)
  */
 export function initLoginModal() {
-  const modalForm = document.getElementById('login-form-modal');
-  if (!modalForm) return;
-  
-  const statusEl = document.getElementById('login-status-modal');
+  const form = document.getElementById('login-form-modal');
+  if (!form) return;
+
+  // Evitar agregar listeners múltiples
+  if (form.dataset.initialized === 'true') {
+    return;
+  }
+  form.dataset.initialized = 'true';
+
   const userInput = document.getElementById('login-username-modal');
   const passInput = document.getElementById('login-password-modal');
-  const modalEl = document.getElementById('loginModal');
-  
-  modalForm.addEventListener('submit', async (e) => {
+
+  form.addEventListener('submit', async (e) => {
     e.preventDefault();
-    
+
     const username = userInput?.value?.trim() || '';
     const password = passInput?.value || '';
+
+    const success = await handleLogin(username, password);
     
-    await handleLogin(username, password, statusEl, () => {
-      // Cerrar modal al éxito
-      if (modalEl && window.bootstrap) {
-        const modal = bootstrap.Modal.getInstance(modalEl);
-        if (modal) modal.hide();
-      }
-    });
+    if (success) {
+      // Limpiar formulario
+      form.reset();
+    }
   });
+
+  // Cerrar modal al hacer clic en el botón cancelar
+  const modalEl = document.getElementById('loginModal');
+  if (modalEl) {
+    modalEl.addEventListener('hidden.bs.modal', () => {
+      form.reset();
+    });
+  }
 }

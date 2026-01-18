@@ -11,6 +11,7 @@ import { initUnifiedSearchBar } from '../search-bar.js';
 const ROUTES = {
   '': 'home',
   '#home': 'home',
+  '#login': 'login',
   '#search': 'search',
   '#admin': 'adminMetrics',
   '#admin-scan': 'adminScan',
@@ -38,11 +39,16 @@ function getBaseUrl() {
 }
 
 /**
- * Verifica si el usuario está autenticado - FUNCIÓN REMOVIDA
+ * Verifica si el usuario está autenticado consultando /api/admin/me
  */
 async function checkAuth() {
-  // Ya no se requiere autenticación
-  return true;
+  try {
+    const baseUrl = getBaseUrl();
+    const res = await fetch(`${baseUrl}api/admin/me`, { credentials: 'same-origin' });
+    return res.ok;
+  } catch (e) {
+    return false;
+  }
 }
 
 /**
@@ -50,7 +56,19 @@ async function checkAuth() {
  */
 function getViewFromHash() {
   const hash = window.location.hash.split('?')[0] || '#home';
-  return ROUTES[hash] || DEFAULT_ROUTE;
+  
+  // Validar si la ruta existe en ROUTES
+  if (ROUTES.hasOwnProperty(hash)) {
+    return ROUTES[hash];
+  }
+  
+  // Si la ruta no existe y no es la de home, redirigir
+  if (hash !== '#home' && hash !== '') {
+    console.warn(`Ruta no encontrada: ${hash}. Redirigiendo a #home`);
+    window.location.hash = '#home';
+  }
+  
+  return DEFAULT_ROUTE;
 }
 
 /**
@@ -61,6 +79,15 @@ async function loadNavigation(viewName) {
   const sidebarContainer = document.getElementById('sidebar-container');
 
   let navFile = 'nav-public.php';
+  const isAdminView = ['admin', 'adminScan', 'adminSearch', 'adminProducts', 'adminMetrics', 'adminPromotions'].includes(viewName);
+  if (isAdminView) {
+    const authenticated = await checkAuth();
+    navFile = authenticated ? 'nav-admin.php' : 'nav-public.php';
+    if (!authenticated) {
+      // Redirigir silenciosamente a home si no está autenticado
+      window.location.hash = '#home';
+    }
+  }
 
   try {
     const baseUrl = getBaseUrl();
@@ -78,10 +105,17 @@ async function loadNavigation(viewName) {
       setupNavigationListeners();
       updateActiveNavItem();
 
-      // Configurar botones específicos de admin
-      const { setupNewProductButtons, setupNewPromotionButtons } = await import('../views/adminView.js');
-      setupNewProductButtons();
-      setupNewPromotionButtons();
+      // Configurar botones específicos de admin o login
+      if (navFile === 'nav-admin.php') {
+        try {
+          const { setupNewProductButtons, setupNewPromotionButtons, setupLogout } = await import('../views/adminView.js');
+          setupNewProductButtons();
+          setupNewPromotionButtons();
+          setupLogout(document.body, null);
+        } catch (err) {
+          console.error('Error cargando módulos admin:', err);
+        }
+      }
     }
   } catch (err) {
     console.error('Error cargando navegación:', err);
@@ -213,6 +247,18 @@ async function loadView(viewName) {
   isNavigating = true;
   
   try {
+    // Verificar autenticación para vistas admin
+    const isAdminView = ['admin', 'adminScan', 'adminSearch', 'adminProducts', 'adminMetrics', 'adminPromotions'].includes(viewName);
+    if (isAdminView) {
+      const authenticated = await checkAuth();
+      if (!authenticated) {
+        // Redirigir silenciosamente a home
+        window.location.hash = '#home';
+        isNavigating = false;
+        return;
+      }
+    }
+    
     // Ruta especial #scan (modal QR)
     if (viewName === 'scan') {
       await modalManager.showQrScanner();

@@ -197,7 +197,8 @@ export async function fetchJSON(url, options = {}) {
       'Accept': 'application/json',
       'Content-Type': 'application/json',
       ...options.headers
-    }
+    },
+    credentials: 'same-origin'
   };
   
   const response = await fetch(url, { ...defaultOptions, ...options });

@@ -181,7 +181,9 @@ $appConfig = [
   </div>
 
   <!-- CONTENEDOR DE MODALES DINÁMICOS -->
-  <div id="modal-container"></div>
+  <div id="modal-container">
+    <?php include __DIR__ . '/views/partials/login-modal.php'; ?>
+  </div>
 
   <!-- Librerías QR -->
   <script src="<?= $baseUrl ?>js/lib/html5-qrcode.min.js"></script>

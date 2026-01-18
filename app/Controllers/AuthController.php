@@ -38,10 +38,18 @@ class AuthController
             ApiResponse::validationError('Usuario y contraseña son requeridos.');
         }
 
-        // Autenticación deshabilitada: responder éxito sin sesión
+        // Verificar credenciales
+        $user = $this->adminModel->verifyCredentials($username, $password);
+        if (!$user) {
+            ApiResponse::unauthorized('Credenciales inválidas.');
+        }
+
+        // Emitir JWT y setear cookie HttpOnly
+        Auth::issueToken($user, 1800); // 30 minutos
+
         ApiResponse::success([
-            'message' => 'Autenticación deshabilitada',
-            'username' => $username !== '' ? $username : 'public',
+            'id' => (int)$user['id'],
+            'username' => $user['username'],
         ], 200);
     }
 
@@ -50,7 +58,8 @@ class AuthController
      */
     public function logout(): void
     {
-        ApiResponse::success(['message' => 'Autenticación deshabilitada'], 200);
+        Auth::clearAuthCookie();
+        ApiResponse::success(['message' => 'Sesión cerrada'], 200);
     }
 
     /**
@@ -58,9 +67,14 @@ class AuthController
      */
     public function me(): void
     {
+        $claims = Auth::getUser();
+        if (!$claims) {
+            ApiResponse::unauthorized('No autenticado');
+        }
+
         ApiResponse::success([
-            'id' => 0,
-            'username' => 'public',
+            'id' => (int)($claims['sub'] ?? 0),
+            'username' => (string)($claims['username'] ?? ''),
         ], 200);
     }
 }
