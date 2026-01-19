@@ -21,10 +21,10 @@
   top: 0;
   width: 100vw;
   height: 100vh;
-  overflow-y: auto;
   background: rgba(0, 0, 0, 0.5);
   align-items: center;
   justify-content: center;
+  overflow: hidden;
 }
 
 .modal-overlay {

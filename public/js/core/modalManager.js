@@ -314,19 +314,20 @@ class ModalManager {
     const adminMenu = this._isAdminContext() ? `
       <div class="admin-actions-dropdown">
         <button type="button" class="btn-admin-actions" aria-haspopup="true" aria-expanded="false">
-          <i class="fas fa-ellipsis-v"></i> Acciones
+          Acciones <i class="fas fa-chevron-down"></i>
         </button>
         <ul class="admin-actions-menu" style="display:none">
-          <li><button type="button" data-action="edit-product">Editar producto</button></li>
-          <li><button type="button" data-action="delete-product">Eliminar producto</button></li>
-          <li><button type="button" data-action="edit-promo">Editar promoción</button></li>
-          <li><button type="button" data-action="delete-promo">Eliminar promoción</button></li>
+          <li><button type="button" data-action="edit-product"><i class="fas fa-edit"></i> Editar producto</button></li>
+          <li><button type="button" data-action="delete-product"><i class="fas fa-trash"></i> Eliminar producto</button></li>
+          <li><button type="button" data-action="edit-promo"><i class="fas fa-tag"></i> Editar promoción</button></li>
+          <li><button type="button" data-action="delete-promo"><i class="fas fa-times-circle"></i> Eliminar promoción</button></li>
         </ul>
       </div>
     ` : '';
 
     return `
       <div class="product-card-detail">
+        <!-- SECCIÓN DE IMAGEN (MÓVIL Y DESKTOP) -->
         <div class="product-image-section">
           <div class="product-image-wrapper">
             ${imageUrl 
@@ -342,7 +343,8 @@ class ModalManager {
               <span>Sin imagen</span>
             </div>
           </div>
-          
+
+          <!-- CARACTERÍSTICAS (MÓVIL: abajo de imagen, DESKTOP: en sidebar) -->
           <div class="product-specs">
             <h3 class="specs-title">Características</h3>
             <dl class="specs-list">
@@ -362,21 +364,22 @@ class ModalManager {
                   <dd>${product.vintage_year}</dd>
                 </div>
               ` : ''}
-              <div class="spec-item">
-                <dt>Código</dt>
-                <dd>${escapeHtml(product.public_code)}</dd>
-              </div>
             </dl>
           </div>
         </div>
-        
+
+        <!-- SECCIÓN DE INFORMACIÓN -->
         <div class="product-info-section">
-          <div class="product-header">
-            <p class="product-category">${escapeHtml(product.drink_type) || ''}${product.varietal ? ' | ' + escapeHtml(product.varietal) : ''}</p>
-            <h1 class="product-title">${escapeHtml(product.name) || 'Producto'}</h1>
-            ${adminMenu}
-          </div>
-          
+          <!-- CATEGORÍA (MÓVIL Y DESKTOP) -->
+          <p class="product-category">${escapeHtml(product.drink_type) || ''}${product.varietal ? ' | ' + escapeHtml(product.varietal) : ''}</p>
+
+          <!-- CÓDIGO DEL PRODUCTO (MÓVIL Y DESKTOP) -->
+          <p class="product-code-label"><small>${escapeHtml(product.public_code)}</small></p>
+
+          <!-- NOMBRE DEL PRODUCTO (MÓVIL Y DESKTOP) -->
+          <h1 class="product-title">${escapeHtml(product.name) || 'Producto'}</h1>
+
+          <!-- PRECIO Y PROMOCIÓN (MÓVIL Y DESKTOP) -->
           <div class="product-price-section">
             ${badge}
             ${originalPrice}
@@ -388,13 +391,17 @@ class ModalManager {
             ${savingsText}
             ${validUntil}
           </div>
-          
+
+          <!-- DESCRIPCIÓN (MÓVIL Y DESKTOP) -->
           ${product.short_description ? `
             <div class="product-description">
               <h2 class="description-title">Descripción</h2>
               <p>${escapeHtml(product.short_description)}</p>
             </div>
           ` : ''}
+
+          <!-- ACCIONES ADMIN (MÓVIL Y DESKTOP) -->
+          ${adminMenu ? `<div class="product-actions-section">${adminMenu}</div>` : ''}
         </div>
       </div>
     `;
