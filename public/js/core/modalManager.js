@@ -2075,9 +2075,6 @@ class ModalManager {
 
           <div class="qr-info">
             <p class="qr-code-label"><strong>Código:</strong> ${escapeHtml(publicCode)}</p>
-            <p class="qr-description">Escanea este código para ver los detalles del producto.</p>
-            <p class="qr-description">¿Problemas el QR?</p>
-            <p class="qr-description">Visite <a href="https://www.winepickqr.com" target="_blank" rel="noopener noreferrer">www.winepickqr.com</a> y busque el producto por código o nombre.</p>
           </div>
         </div>
 
@@ -2153,9 +2150,9 @@ class ModalManager {
 
         const finalWidth = qrSize + padding * 2; // 256 + 48 = 304
         const qrTop = padding; // 36
-        const codeText = `Código: ${publicCode}`;
+        const codeText = `${publicCode}`;
         const helperText1 = '¿Problemas con el QR?';
-        const helperText2 = 'Visite www.winepickqr.com y busque el producto por código o nombre.';
+        const helperText2 = 'Visite www.winepickqr.com y realice la busqueda del producto manualmente.';
 
         // Calcular alto necesario con wrap
         const lineHeight = 24;
