@@ -20,7 +20,7 @@ function showAdminQrModal(onResult) {
             required
             autocomplete="off"
           >
-          <button type="submit" class="btn-primary">Buscar</button>
+          <button type="submit" class="btn-modal btn-modal-primary">Buscar</button>
         </form>
       </div>
     </div>
@@ -34,10 +34,8 @@ function showAdminQrModal(onResult) {
       const code = form.querySelector('#qr-manual-input-admin')?.value?.trim();
       if (code) {
         modalManager.close();
-        const module = await import('../views/adminView.js');
-        if (module && typeof module.editProductByCode === 'function') {
-          module.editProductByCode(code);
-        }
+        // Reutiliza la lógica del buscador del header: navega a admin-search con el query
+        window.location.hash = `#admin-search?query=${encodeURIComponent(code)}`;
       }
     });
   }

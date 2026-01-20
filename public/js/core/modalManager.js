@@ -438,7 +438,7 @@ class ModalManager {
               required
               autocomplete="off"
             >
-            <button type="submit" class="btn-primary">Buscar</button>
+            <button type="submit" class="btn-modal btn-modal-primary">Buscar</button>
           </form>
         </div>
       </div>

@@ -140,18 +140,25 @@ function renderPagination(container, currentPage, hasMore, onPageChange) {
   const controls = document.createElement('div');
   controls.className = 'pagination-controls';
   
-  if (currentPage > 0) {
-    const prevBtn = document.createElement('button');
-    prevBtn.type = 'button';
-    prevBtn.className = 'btn-pagination';
-    prevBtn.textContent = '← Anterior';
+  // Botón anterior SIEMPRE visible, deshabilitado en la primera página
+  const prevBtn = document.createElement('button');
+  prevBtn.type = 'button';
+  prevBtn.className = 'btn-pagination';
+  prevBtn.textContent = '← Anterior';
+  if (currentPage === 0) {
+    prevBtn.disabled = true;
+  } else {
     prevBtn.addEventListener('click', () => onPageChange(currentPage - 1));
-    controls.appendChild(prevBtn);
   }
+  controls.appendChild(prevBtn);
   
   const pageInfo = document.createElement('span');
   pageInfo.className = 'page-info';
-  pageInfo.textContent = `Página ${currentPage + 1}`;
+  if (typeof window.promotionsTotalPages === 'number' && window.promotionsTotalPages > 0) {
+    pageInfo.textContent = `${currentPage + 1} de ${window.promotionsTotalPages}`;
+  } else {
+    pageInfo.textContent = `${currentPage + 1}`;
+  }
   controls.appendChild(pageInfo);
   
   if (hasMore) {
@@ -179,9 +186,12 @@ async function loadPage(container, page = 0) {
   try {
     const offset = page * PAGE_SIZE;
     const data = await fetchJSON(`./api/public/promociones?limit=${PAGE_SIZE}&offset=${offset}`);
-    
-    const products = data?.data?.products || [];
-    
+
+    // Compatibilidad: puede venir como 'products' o 'promotions'
+    const products = data?.data?.products || data?.data?.promotions || [];
+    const total = data?.data?.total || null;
+    window.promotionsTotalPages = total ? Math.ceil(total / PAGE_SIZE) : null;
+
     if (products.length === 0 && page === 0) {
       setStatus(statusEl, 'No hay promociones disponibles.', 'info');
       if (resultsEl) {
@@ -189,17 +199,17 @@ async function loadPage(container, page = 0) {
       }
       return;
     }
-    
+
     if (products.length === 0) {
       setStatus(statusEl, 'No hay más promociones.', 'info');
       renderPagination(container, page, false, (p) => loadPage(container, p));
       return;
     }
-    
+
     const from = page * PAGE_SIZE + 1;
     const to = from + products.length - 1;
     setStatus(statusEl, `Mostrando promociones ${from} al ${to}`, 'success');
-    
+
     renderPromotions(resultsEl, products);
     renderPagination(container, page, products.length === PAGE_SIZE, (p) => loadPage(container, p));
     

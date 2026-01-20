@@ -17,12 +17,23 @@ declare(strict_types=1);
 class Product
 {
     /**
-     * Obtener el producto con promoción vigente más consultada.
-     * Devuelve los datos del producto y la promoción vigente.
-     *
-     * @return array|null
+     * Devuelve el total de productos activos (para paginación de más buscados)
+     * @return int
      */
-    public function getMostConsultedPromotionProduct(): ?array
+    public function getMostSearchedProductsTotal(): int
+    {
+        $query = "SELECT COUNT(*) as total FROM products WHERE is_active = 1";
+        $row = $this->db->fetchOne($query);
+    return $row ? (int)$row['total'] : 0;
+}
+
+/**
+ * Obtener el producto con promoción vigente más consultada.
+ * Devuelve los datos del producto y la promoción vigente.
+ *
+ * @return array|null
+ */
+public function getMostConsultedPromotionProduct(): ?array
     {
         $now = date('Y-m-d H:i:s');
         $query = "

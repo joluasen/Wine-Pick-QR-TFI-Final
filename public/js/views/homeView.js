@@ -135,31 +135,37 @@ function createProductCard(product) {
 /**
  * Renderiza los controles de paginación
  */
-function renderPagination(container, currentPage, hasMore, onPageChange) {
+function renderPagination(container, currentPage, hasMore, onPageChange, totalPages = null) {
   const paginationEl = container.querySelector('#home-pagination');
   if (!paginationEl) return;
-  
+
   paginationEl.innerHTML = '';
-  
+
   const controls = document.createElement('div');
   controls.className = 'pagination-controls';
-  
-  // Botón anterior
-  if (currentPage > 0) {
-    const prevBtn = document.createElement('button');
-    prevBtn.type = 'button';
-    prevBtn.className = 'btn-pagination';
-    prevBtn.innerHTML = '← Anterior';
+
+  // Botón anterior SIEMPRE visible, deshabilitado en la primera página
+  const prevBtn = document.createElement('button');
+  prevBtn.type = 'button';
+  prevBtn.className = 'btn-pagination';
+  prevBtn.innerHTML = '← Anterior';
+  if (currentPage === 0) {
+    prevBtn.disabled = true;
+  } else {
     prevBtn.addEventListener('click', () => onPageChange(currentPage - 1));
-    controls.appendChild(prevBtn);
   }
-  
-  // Indicador de página
+  controls.appendChild(prevBtn);
+
+  // Indicador de página con total
   const pageInfo = document.createElement('span');
   pageInfo.className = 'page-info';
-  pageInfo.textContent = `Página ${currentPage + 1}`;
+  if (totalPages && totalPages > 0) {
+    pageInfo.textContent = `${currentPage + 1} de ${totalPages}`;
+  } else {
+    pageInfo.textContent = `${currentPage + 1}`;
+  }
   controls.appendChild(pageInfo);
-  
+
   // Botón siguiente
   if (hasMore) {
     const nextBtn = document.createElement('button');
@@ -169,7 +175,7 @@ function renderPagination(container, currentPage, hasMore, onPageChange) {
     nextBtn.addEventListener('click', () => onPageChange(currentPage + 1));
     controls.appendChild(nextBtn);
   }
-  
+
   paginationEl.appendChild(controls);
 }
 
@@ -179,16 +185,19 @@ function renderPagination(container, currentPage, hasMore, onPageChange) {
 async function loadPage(container, page = 0) {
   const statusEl = container.querySelector('#home-status');
   const resultsEl = container.querySelector('#home-results');
-  
+
   setStatus(statusEl, 'Cargando productos destacados...', 'info');
   if (resultsEl) resultsEl.innerHTML = '';
-  
+
   try {
     const offset = page * PAGE_SIZE;
     const data = await fetchJSON(`./api/public/mas-buscados?limit=${PAGE_SIZE}&offset=${offset}`);
-    
+
     const products = data?.data?.products || [];
-    
+    // Intentar obtener el total de productos si la API lo provee
+    const totalItems = data?.data?.total ?? null;
+    const totalPages = totalItems ? Math.ceil(totalItems / PAGE_SIZE) : null;
+
     if (products.length === 0 && page === 0) {
       setStatus(statusEl, 'No hay productos para mostrar aún.', 'info');
       if (resultsEl) {
@@ -196,20 +205,20 @@ async function loadPage(container, page = 0) {
       }
       return;
     }
-    
+
     if (products.length === 0) {
       setStatus(statusEl, 'No hay más productos.', 'info');
-      renderPagination(container, page, false, (p) => loadPage(container, p));
+      renderPagination(container, page, false, (p) => loadPage(container, p), totalPages);
       return;
     }
-    
+
     const from = page * PAGE_SIZE + 1;
     const to = from + products.length - 1;
     setStatus(statusEl, `Mostrando productos ${from} al ${to}`, 'success');
-    
+
     renderProducts(resultsEl, products);
-    renderPagination(container, page, products.length === PAGE_SIZE, (p) => loadPage(container, p));
-    
+    renderPagination(container, page, products.length === PAGE_SIZE, (p) => loadPage(container, p), totalPages);
+
   } catch (err) {
     console.error('Error cargando productos:', err);
     setStatus(statusEl, `Error: ${err.message}`, 'error');

@@ -50,9 +50,9 @@ header('Content-Type: text/html; charset=utf-8');
 
       <!-- Paginación -->
       <div class="d-flex justify-content-center align-items-center admin-pagination">
-        <button class="btn-modal btn-sm mx-1" id="admin-promos-prev" disabled>Anterior</button>
+        <button class="btn-pagination" id="admin-promos-prev" disabled>Anterior</button>
         <span id="admin-promos-page" class="mx-2"></span>
-        <button class="btn-modal btn-sm mx-1" id="admin-promos-next" disabled>Siguiente</button>
+        <button class="btn-pagination" id="admin-promos-next" disabled>Siguiente</button>
       </div>
     </div>
   </div>

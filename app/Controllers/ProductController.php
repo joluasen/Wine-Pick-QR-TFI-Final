@@ -108,6 +108,7 @@ class ProductController {
 
         // Obtener lista de productos más buscados
         $rows = $this->productModel->getMostSearchedProducts($limit, $offset);
+        $total = $this->productModel->getMostSearchedProductsTotal();
 
         // Transformar cada resultado agregando promoción vigente (si existe)
         $data = array_map(function ($product) {
@@ -117,6 +118,7 @@ class ProductController {
 
         ApiResponse::success([
             'count' => count($data),
+            'total' => $total,
             'products' => $data,
         ], 200);
     }

@@ -37,7 +37,7 @@ export async function initAdminProductsView(_container) {
    */
   function updatePagination(page, total) {
     const totalPages = Math.ceil(total / PAGE_SIZE) || 1;
-    paginationEl.textContent = `Página ${page + 1} de ${totalPages}`;
+    paginationEl.textContent = `${page + 1} de ${totalPages}`;
     prevBtn.disabled = page <= 0;
     nextBtn.disabled = page >= totalPages - 1;
   }
