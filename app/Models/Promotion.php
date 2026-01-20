@@ -85,7 +85,7 @@ class Promotion
             SELECT *
             FROM promotions
             WHERE product_id = ?
-            ORDER BY created_at DESC
+            ORDER BY id ASC
         ";
 
         return $this->db->fetchAll($sql, [$productId], 'i') ?: [];

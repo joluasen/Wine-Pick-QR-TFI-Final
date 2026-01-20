@@ -222,7 +222,7 @@ class Product
                 updated_at
             FROM products
             WHERE is_active = 1
-            ORDER BY created_at DESC
+            ORDER BY id ASC
             LIMIT ? OFFSET ?
         ";
         $products = $this->db->fetchAll($query, [$limit, $offset], 'ii');
