@@ -468,9 +468,9 @@ class ModalManager {
   async initQrScanner() {
     const statusEl = document.getElementById('qr-status');
     const readerEl = document.getElementById('qr-reader');
-    
+
     if (!readerEl) return;
-    
+
     // Verificar que la librería esté disponible
     if (typeof Html5Qrcode === 'undefined') {
       if (statusEl) {
@@ -479,22 +479,46 @@ class ModalManager {
       }
       return;
     }
-    
+
+    // Mostrar mensaje de espera de permiso
+    if (statusEl) {
+      statusEl.textContent = 'Esperando permiso para acceder a la cámara...';
+      statusEl.dataset.type = 'info';
+    }
+
+    // Probar acceso a la cámara antes de iniciar el escáner
+    try {
+      await navigator.mediaDevices.getUserMedia({ video: true });
+    } catch (err) {
+      if (statusEl) {
+        if (err && err.name === 'NotAllowedError') {
+          statusEl.textContent = 'Permiso denegado para usar la cámara. Usá el ingreso manual.';
+        } else if (err && err.name === 'NotFoundError') {
+          statusEl.textContent = 'No se encontró ninguna cámara en el dispositivo.';
+        } else {
+          statusEl.textContent = 'No se pudo acceder a la cámara. Usá el ingreso manual.';
+        }
+        statusEl.dataset.type = 'error';
+      }
+      return;
+    }
+
+    // Si se obtuvo permiso, iniciar el escáner
     try {
       if (statusEl) {
         statusEl.textContent = 'Iniciando cámara...';
         statusEl.dataset.type = 'info';
       }
-      
+
       this.qrScanner = new Html5Qrcode('qr-reader');
-      
+
       await this.qrScanner.start(
         { facingMode: 'environment' },
         { fps: 10, qrbox: { width: 250, height: 250 } },
         (decodedText) => this.handleQrResult(decodedText),
         () => {} // Ignorar errores de escaneo
       );
-      
+
       if (statusEl) {
         statusEl.textContent = 'Escaneando... Enfocá el código QR';
         statusEl.dataset.type = 'info';
@@ -536,11 +560,26 @@ class ModalManager {
       code = decodeURIComponent(match[1]);
     }
 
-    // Cerrar modal QR y navegar a búsqueda
+    // Detener el escáner si está activo
+    if (this.qrScanner) {
+      try {
+        if (this.qrScanner.isScanning) {
+          this.qrScanner.stop();
+        }
+        this.qrScanner.clear();
+      } catch (err) {
+        // Ignorar errores
+      }
+      this.qrScanner = null;
+    }
+
+    // Cerrar el modal QR
     this.close();
 
-    // Navegar al producto
-    window.location.hash = `#search?query=${encodeURIComponent(code)}`;
+    // Navegar a la búsqueda tras un pequeño delay para asegurar cierre visual
+    setTimeout(() => {
+      window.location.href = `/spa.php?view=search&code=${encodeURIComponent(code)}`;
+    }, 250);
   }
 
   // ============================================
