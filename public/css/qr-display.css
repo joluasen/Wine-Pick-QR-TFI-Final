@@ -173,7 +173,7 @@
   font-size: 0.85rem;
   font-weight: 600;
   color: #4A0E1A;
-  margin-bottom: 1.25rem;
+  margin-bottom: 0.75rem;
   display: block;
 }
 
@@ -181,9 +181,9 @@
 .two-columns-layout {
   display: grid !important;
   grid-template-columns: 1fr 1fr !important;
-  gap: 2.5rem !important;
+  gap: 1.5rem !important;
   align-items: start;
-  max-width: 600px;
+  max-width: 500px;
   margin: 0 auto;
 }
 
@@ -244,9 +244,8 @@
 .image-preview-thumb {
   width: 100%;
   height: 100%;
-  object-fit: contain;
+  object-fit: cover;
   border-radius: 4px;
-  max-height: 140px;
 }
 
 .image-placeholder {
@@ -263,20 +262,25 @@
   color: #999;
 }
 
+/* Canvas del QR - tamaño unificado */
 .qr-preview-box canvas {
-  max-width: 85%;
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
   height: auto;
   display: block;
-  margin-bottom: 0.5rem;
+  object-fit: contain;
 }
 
-/* Contenedor del canvas (lo que se limpia) */
+/* Contenedor del canvas */
 .qr-canvas-container {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   width: 100%;
+  height: 100%;
+  padding: 0.5rem;
 }
 
 .btn-overlay-qr {
@@ -348,9 +352,9 @@
 }
 
 /* Hint overlay (info que aparece con hover) */
+
 .overlay-hint {
   position: absolute;
-  bottom: 0.5rem;
   left: 0.5rem;
   background: rgba(0, 0, 0, 0.8);
   color: white;
@@ -361,10 +365,15 @@
   align-items: center;
   gap: 0.25rem;
   opacity: 0;
-  transform: translateY(5px);
   transition: all 0.2s ease;
   pointer-events: none;
   white-space: nowrap;
+}
+
+.overlay-hint.overlay-hint-image {
+  top: 0.5rem;
+  bottom: auto;
+  transform: none;
 }
 
 .overlay-hint i {
@@ -474,15 +483,35 @@
   color: #4A0E1A !important;
 }
 
-/* Responsive: Stack en mobile */
+/* Responsive: Dos columnas también en mobile (más compactas) */
 @media (max-width: 768px) {
   .two-columns-layout {
-    grid-template-columns: 1fr !important;
-    gap: 2rem !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 0.75rem !important;
+    max-width: 100% !important;
+  }
+
+  .product-image-column,
+  .product-qr-column {
+    gap: 0.25rem !important;
   }
 
   .product-image-column .image-preview-box,
   .product-qr-column .qr-preview-box {
-    min-height: 280px;
+    min-height: 130px;
+    max-height: 130px;
+    aspect-ratio: 1 !important;
+    padding: 0.5rem !important;
+  }
+
+  /* Reducir tamaño del canvas en móvil para que respire */
+  .qr-canvas-container {
+    padding: 0.25rem;
+  }
+  
+  .qr-preview-box canvas {
+    max-width: 90px !important;
+    max-height: 90px !important;
   }
 }
+

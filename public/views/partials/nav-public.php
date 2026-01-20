@@ -44,7 +44,7 @@
     <span>Buscar</span>
   </a>
 
-  <a href="#promos" class="sidebar-nav-item" data-link="#promos" title="Promociones" data-bs-toggle="tooltip" data-bs-placement="right">
+  <a href="#promotions" class="sidebar-nav-item" data-link="#promotions" title="Promociones" data-bs-toggle="tooltip" data-bs-placement="right">
     <i class="fas fa-tag"></i>
     <span>Promos</span>
   </a>

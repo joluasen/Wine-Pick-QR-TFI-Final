@@ -16,6 +16,33 @@ declare(strict_types=1);
 */
 class Product
 {
+    /**
+     * Obtener el producto con promoción vigente más consultada.
+     * Devuelve los datos del producto y la promoción vigente.
+     *
+     * @return array|null
+     */
+    public function getMostConsultedPromotionProduct(): ?array
+    {
+        $now = date('Y-m-d H:i:s');
+        $query = "
+            SELECT
+                p.*, pr.id as promo_id, pr.promotion_type, pr.parameter_value, pr.visible_text, pr.start_at, pr.end_at,
+                COUNT(ce.id) as consult_count
+            FROM products p
+            INNER JOIN promotions pr ON pr.product_id = p.id
+                AND pr.is_active = 1
+                AND pr.start_at <= ?
+                AND (pr.end_at IS NULL OR pr.end_at >= ?)
+            LEFT JOIN consult_events ce ON ce.product_id = p.id
+            WHERE p.is_active = 1
+            GROUP BY p.id, pr.id
+            ORDER BY consult_count DESC
+            LIMIT 1
+        ";
+        $row = $this->db->fetchOne($query, [$now, $now], 'ss');
+        return $row ?: null;
+    }
     private \Database $db;
 
     public function __construct(Database $database)
@@ -241,14 +268,23 @@ class Product
      * Listar productos con promociones vigentes activas.
      *
      * Devuelve filas con datos del producto y campos de promoción con prefijo `promo_`.
+     * Filtra únicamente por productos que tienen una promoción vigente y activa.
      * Se filtra por vigencia: start_at <= NOW() y (end_at IS NULL o end_at >= NOW()).
      *
-     * @param int $limit Máximo de resultados a devolver.
-     * @param int $offset Desplazamiento.
-     * @return array
+     * @param int $limit Máximo de resultados a devolver (default: 50, max: 100).
+     * @param int $offset Desplazamiento para paginación (default: 0).
+     * @return array ['products' => [...], 'total' => int]
      */
     public function getProductsWithActivePromotions(int $limit = 50, int $offset = 0): array
     {
+        // Validaciones básicas
+        if ($limit <= 0) $limit = 50;
+        if ($limit > 100) $limit = 100;
+        if ($offset < 0) $offset = 0;
+
+        $now = date('Y-m-d H:i:s');
+
+        // Consulta principal: obtener productos con promociones vigentes
         $query = "
             SELECT
                 p.id,
@@ -272,17 +308,36 @@ class Product
                 pr.visible_text AS promo_text,
                 pr.start_at AS promo_start,
                 pr.end_at AS promo_end
-            FROM promotions pr
-            INNER JOIN products p ON p.id = pr.product_id
+            FROM products p
+            INNER JOIN promotions pr ON p.id = pr.product_id
             WHERE p.is_active = 1
               AND pr.is_active = 1
-              AND pr.start_at <= NOW()
-              AND (pr.end_at IS NULL OR pr.end_at >= NOW())
-            ORDER BY pr.start_at DESC
+              AND pr.start_at <= ?
+              AND (pr.end_at IS NULL OR pr.end_at >= ?)
+            ORDER BY p.id ASC
             LIMIT ? OFFSET ?
         ";
 
-        return $this->db->fetchAll($query, [$limit, $offset], 'ii') ?: [];
+        $products = $this->db->fetchAll($query, [$now, $now, $limit, $offset], 'ssii') ?: [];
+
+        // Consulta para contar el total de productos con promociones vigentes
+        $countQuery = "
+            SELECT COUNT(DISTINCT p.id) as total
+            FROM products p
+            INNER JOIN promotions pr ON p.id = pr.product_id
+            WHERE p.is_active = 1
+              AND pr.is_active = 1
+              AND pr.start_at <= ?
+              AND (pr.end_at IS NULL OR pr.end_at >= ?)
+        ";
+
+        $countRow = $this->db->fetchOne($countQuery, [$now, $now], 'ss');
+        $total = $countRow ? (int)$countRow['total'] : 0;
+
+        return [
+            'products' => $products,
+            'total' => $total
+        ];
     }
 
     /**

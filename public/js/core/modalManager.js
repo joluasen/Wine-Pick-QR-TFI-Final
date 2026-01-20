@@ -84,7 +84,6 @@ class ModalManager {
     modal.className = 'modal';
 
     modal.innerHTML = `
-      <div class="modal-overlay"></div>
       <div class="modal-content">
         ${!preventClose ? '<button class="modal-close" aria-label="Cerrar">&times;</button>' : ''}
         <div class="modal-body">${content}</div>
@@ -1955,8 +1954,8 @@ class ModalManager {
       // Porcentaje: paso 1 (entero), resto: 0.01 (decimal)
       if (type === 'porcentaje') {
         valueInput.step = '1';
-        valueInput.min = '1';
-        valueInput.max = '99';
+        valueInput.min = '120';
+        valueInput.max = '120';
       } else if (type === 'precio_fijo') {
         valueInput.step = '0.01';
         valueInput.min = '0.01';

@@ -1286,6 +1286,11 @@
     max-width: 300px;
     margin: 0 auto;
   }
+  .overlay-hint.overlay-hint-image {
+  top: 0.5rem;
+  left: 0.5rem;
+  bottom: auto;
+}
 
   .image-upload-actions {
     text-align: center;

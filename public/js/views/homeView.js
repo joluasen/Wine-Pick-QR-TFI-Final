@@ -8,7 +8,7 @@
 import { setStatus, calculatePromoPrice, fetchJSON, escapeHtml } from '../core/utils.js';
 import { modalManager } from '../core/modalManager.js';
 
-const PAGE_SIZE = 10;
+const PAGE_SIZE = 20;
 
 /**
  * Renderiza las tarjetas de productos

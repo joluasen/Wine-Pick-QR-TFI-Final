@@ -17,6 +17,30 @@ declare(strict_types=1);
 
 class ProductController {
 
+    /**
+     * GET /api/public/promocion-mas-consultada
+     *
+     * Devuelve el producto con promoción vigente más consultada.
+     */
+    public function mostConsultedPromotionProduct(): void
+    {
+        $row = $this->productModel->getMostConsultedPromotionProduct();
+        if (!$row) {
+            ApiResponse::notFound('No se encontró ningún producto con promoción vigente.');
+        }
+        // Formatear respuesta similar a promociones
+        $promotion = [
+            'promotion_type' => $row['promotion_type'],
+            'parameter_value' => $row['parameter_value'],
+            'visible_text' => $row['visible_text'],
+            'start_at' => $row['start_at'],
+            'end_at' => $row['end_at'],
+            'consult_count' => (int) $row['consult_count'],
+        ];
+        $data = $this->formatProductResponse($row, $promotion);
+        ApiResponse::success($data, 200);
+    }
+
     private \Product $productModel;
     
     /**
@@ -36,7 +60,9 @@ class ProductController {
         if ($offset < 0) $offset = 0;
 
         // Obtener lista de productos con promos vigentes
-        $rows = $this->productModel->getProductsWithActivePromotions($limit, $offset);
+        $result = $this->productModel->getProductsWithActivePromotions($limit, $offset);
+        $rows = $result['products'] ?? [];
+        $total = $result['total'] ?? 0;
 
         // Transformar filas en respuesta con promoción embebida
         $data = array_map(function (array $row) {
@@ -59,6 +85,7 @@ class ProductController {
 
         ApiResponse::success([
             'count' => count($data),
+            'total' => $total,
             'products' => $data,
         ], 200);
     }
@@ -246,6 +273,27 @@ class ProductController {
         $basePrice = (float) ($data['base_price'] ?? 0);
         if ($basePrice <= 0) {
             ApiResponse::validationError('El "base_price" debe ser mayor a 0.', 'base_price');
+        }
+
+        // Validar image_url si está presente
+        if (isset($data['image_url']) && !empty($data['image_url'])) {
+            $imageUrl = $data['image_url'];
+            // Validar que sea una URL válida
+            if (!filter_var($imageUrl, FILTER_VALIDATE_URL)) {
+                ApiResponse::validationError(
+                    'La URL de la imagen no es válida.',
+                    'image_url',
+                    ['provided_url' => $imageUrl]
+                );
+            }
+            // Validar que comience con BASE_URL (asegurar que es del servidor)
+            if (strpos($imageUrl, BASE_URL) !== 0) {
+                ApiResponse::validationError(
+                    'La imagen debe estar alojada en el servidor.',
+                    'image_url',
+                    ['expected_base_url' => BASE_URL]
+                );
+            }
         }
 
         // Validar que public_code no esté duplicado
@@ -442,6 +490,27 @@ class ProductController {
             $basePrice = (float)$data['base_price'];
             if ($basePrice <= 0) {
                 ApiResponse::validationError('El "base_price" debe ser mayor a 0.', 'base_price');
+            }
+        }
+
+        // Validar image_url si está presente
+        if (isset($data['image_url']) && !empty($data['image_url'])) {
+            $imageUrl = $data['image_url'];
+            // Validar que sea una URL válida
+            if (!filter_var($imageUrl, FILTER_VALIDATE_URL)) {
+                ApiResponse::validationError(
+                    'La URL de la imagen no es válida.',
+                    'image_url',
+                    ['provided_url' => $imageUrl]
+                );
+            }
+            // Validar que comience con BASE_URL (asegurar que es del servidor)
+            if (strpos($imageUrl, BASE_URL) !== 0) {
+                ApiResponse::validationError(
+                    'La imagen debe estar alojada en el servidor.',
+                    'image_url',
+                    ['expected_base_url' => BASE_URL]
+                );
             }
         }
 

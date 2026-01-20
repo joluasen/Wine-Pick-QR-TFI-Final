@@ -46,6 +46,8 @@ class Router
      */
     private function registerRoutes(): void
     {
+        // GET /api/public/promocion-mas-consultada - Producto con promoción vigente más consultada
+        $this->get('/api/public/promocion-mas-consultada', 'ProductController@mostConsultedPromotionProduct');
         // GET /api/public/productos/{codigo}
         $this->get('/api/public/productos/{codigo}', 'ProductController@getByCode');
 
