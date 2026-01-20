@@ -1681,7 +1681,6 @@ class ModalManager {
         submitBtn.innerHTML = `<i class="fas fa-spinner fa-spin me-1"></i>${loadingText}`;
 
         try {
-          console.log('Payload promoción:', payload);
 
           const url = isEdit 
             ? `./api/admin/promociones/${promotion.id}` 
@@ -1696,7 +1695,6 @@ class ModalManager {
           });
 
           const data = await response.json();
-          console.log('Respuesta:', response.status, data);
 
           if (!response.ok) {
             // Extraer mensaje de error del backend (estructura: { ok, data, error: { code, message } })

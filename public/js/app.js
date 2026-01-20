@@ -17,14 +17,12 @@ import { modalManager } from './core/modalManager.js';
  */
 function registerServiceWorker() {
   if (!('serviceWorker' in navigator)) {
-    console.log('Service Worker no soportado');
     return;
   }
   
   window.addEventListener('load', async () => {
     try {
       const registration = await navigator.serviceWorker.register('./service-worker.js');
-      console.log('Service Worker registrado:', registration.scope);
     } catch (err) {
       console.error('Error registrando Service Worker:', err);
     }

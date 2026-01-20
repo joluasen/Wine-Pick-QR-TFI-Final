@@ -37,8 +37,6 @@ export async function editProductByCode(code) {
 
   // Abrir directamente el modal de edición
   modalManager.showEditProduct(product, (updatedProduct) => {
-    // Recargar la vista si es necesario
-    console.log('Producto actualizado:', updatedProduct);
   });
 }
 

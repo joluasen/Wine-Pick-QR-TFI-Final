@@ -64,7 +64,7 @@ function getViewFromHash() {
   
   // Si la ruta no existe y no es la de home, redirigir
   if (hash !== '#home' && hash !== '') {
-    console.warn(`Ruta no encontrada: ${hash}. Redirigiendo a #home`);
+
     window.location.hash = '#home';
   }
   
@@ -114,12 +114,12 @@ async function loadNavigation(viewName) {
           setupLogout(document.body, null);
           setupProfileModal();
         } catch (err) {
-          console.error('Error cargando módulos admin:', err);
+
         }
       }
     }
   } catch (err) {
-    console.error('Error cargando navegación:', err);
+
   }
 }
 
@@ -146,7 +146,7 @@ async function loadSearchHeader() {
       initUnifiedSearchBar();
     }
   } catch (err) {
-    console.error('Error cargando buscador:', err);
+
   }
 }
 
@@ -314,7 +314,7 @@ async function loadView(viewName) {
     window.scrollTo(0, 0);
     
   } catch (err) {
-    console.error('Error cargando vista:', err);
+
     root.innerHTML = `
       <div class="error-view text-center py-5">
         <i class="fas fa-exclamation-triangle fa-3x text-warning mb-3"></i>
@@ -358,7 +358,7 @@ async function initializeView(viewName, container) {
         await initFn(container);
       }
     } catch (err) {
-      console.error(`Error inicializando vista ${viewName}:`, err);
+
     }
   }
 }

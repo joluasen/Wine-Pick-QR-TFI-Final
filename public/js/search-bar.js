@@ -50,7 +50,6 @@ function initUnifiedSearchBar() {
     }
 
     async function fetchSuggestions(query) {
-      // console.log('[search-bar] fetchSuggestions called with:', query);
       if (!query || query.length < 2) {
         clearDropdown();
         return;
@@ -106,7 +105,6 @@ function initUnifiedSearchBar() {
 
     newInput.addEventListener('input', (e) => {
       const query = e.target.value.trim();
-      // console.log('[search-bar] input event, query:', query);
       clearTimeout(debounceTimeout);
       debounceTimeout = setTimeout(() => fetchSuggestions(query), 250);
     });
