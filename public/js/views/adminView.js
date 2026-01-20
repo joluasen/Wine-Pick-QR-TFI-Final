@@ -16,6 +16,10 @@ import { searchProductByCode } from '../admin/services/productService.js';
 
 // Componentes
 import { setupPromotionCreateForm } from '../admin/components/PromotionFormHandler.js';
+import { setupProfileModal as setupProfileModalComponent } from '../admin/components/profileModal.js';
+
+// Re-exportar para uso en router
+export { setupProfileModalComponent as setupProfileModal };
 
 /**
  * Muestra la ficha editable de un producto dado su código público
@@ -121,4 +125,5 @@ export async function initAdminView(container) {
   // Configurar formularios usando componentes
   setupPromotionCreateForm(container);
   setupLogout(container, statusEl);
+  setupProfileModalComponent();
 }

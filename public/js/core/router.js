@@ -108,10 +108,11 @@ async function loadNavigation(viewName) {
       // Configurar botones específicos de admin o login
       if (navFile === 'nav-admin.php') {
         try {
-          const { setupNewProductButtons, setupNewPromotionButtons, setupLogout } = await import('../views/adminView.js');
+          const { setupNewProductButtons, setupNewPromotionButtons, setupLogout, setupProfileModal } = await import('../views/adminView.js');
           setupNewProductButtons();
           setupNewPromotionButtons();
           setupLogout(document.body, null);
+          setupProfileModal();
         } catch (err) {
           console.error('Error cargando módulos admin:', err);
         }

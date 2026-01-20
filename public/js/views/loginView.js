@@ -5,6 +5,23 @@
 import { fetchJSON } from '../core/utils.js';
 import { showToast } from '../admin/components/Toast.js';
 
+// Toggle clase de error para imitar validación de modales de producto/promoción
+const toggleInvalid = (input, isInvalid) => {
+  if (!input) return;
+  input.classList.toggle('is-invalid', Boolean(isInvalid));
+};
+
+const attachLiveValidation = (inputs) => {
+  inputs.forEach((input) => {
+    if (!input) return;
+    input.addEventListener('input', () => {
+      if (input.classList.contains('is-invalid') && input.value.trim()) {
+        toggleInvalid(input, false);
+      }
+    });
+  });
+};
+
 /**
  * Maneja el proceso de login
  */
@@ -48,6 +65,8 @@ export function initLoginView(container) {
   const userInput = document.getElementById('login-username');
   const passInput = document.getElementById('login-password');
 
+  attachLiveValidation([userInput, passInput]);
+
   const modalEl = document.getElementById('login-modal-page');
   const closeBtn = document.getElementById('login-close-btn');
 
@@ -59,6 +78,17 @@ export function initLoginView(container) {
 
     const username = userInput?.value?.trim() || '';
     const password = passInput?.value || '';
+
+    const userEmpty = username === '';
+    const passEmpty = password === '';
+
+    toggleInvalid(userInput, userEmpty);
+    toggleInvalid(passInput, passEmpty);
+
+    if (userEmpty || passEmpty) {
+      showToast('Completa usuario y contraseña.', 'error');
+      return;
+    }
 
     await handleLogin(username, password);
   });
@@ -107,11 +137,24 @@ export function initLoginModal() {
   const userInput = document.getElementById('login-username-modal');
   const passInput = document.getElementById('login-password-modal');
 
+  attachLiveValidation([userInput, passInput]);
+
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
 
     const username = userInput?.value?.trim() || '';
     const password = passInput?.value || '';
+
+    const userEmpty = username === '';
+    const passEmpty = password === '';
+
+    toggleInvalid(userInput, userEmpty);
+    toggleInvalid(passInput, passEmpty);
+
+    if (userEmpty || passEmpty) {
+      showToast('Completa usuario y contraseña.', 'error');
+      return;
+    }
 
     const success = await handleLogin(username, password);
     

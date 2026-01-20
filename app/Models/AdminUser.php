@@ -59,5 +59,36 @@ class AdminUser
         }
         return null;
     }
+
+    /**
+     * Cambia la contraseña del admin
+     * @param int $userId
+     * @param string $currentPassword
+     * @param string $newPassword
+     * @return bool
+     */
+    public function changePassword(int $userId, string $currentPassword, string $newPassword): bool
+    {
+        $sql = "SELECT * FROM admin_users WHERE id = ? LIMIT 1";
+        $user = $this->db->fetchOne($sql, [$userId], 'i');
+        
+        if (!$user) {
+            return false;
+        }
+
+        // Verificar contraseña actual
+        if (!password_verify($currentPassword, $user['password_hash'])) {
+            return false;
+        }
+
+        // Hash de la nueva contraseña
+        $hashedPassword = password_hash($newPassword, PASSWORD_DEFAULT);
+        
+        // Actualizar en la base de datos
+        $updateSql = "UPDATE admin_users SET password_hash = ? WHERE id = ?";
+        $this->db->execute($updateSql, [$hashedPassword, $userId], 'si');
+        
+        return true;
+    }
 }
 ?>

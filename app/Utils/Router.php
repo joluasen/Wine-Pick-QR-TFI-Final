@@ -46,8 +46,6 @@ class Router
      */
     private function registerRoutes(): void
     {
-        // GET /api/public/promocion-mas-consultada - Producto con promoción vigente más consultada
-        $this->get('/api/public/promocion-mas-consultada', 'ProductController@mostConsultedPromotionProduct');
         // GET /api/public/productos/{codigo}
         $this->get('/api/public/productos/{codigo}', 'ProductController@getByCode');
 
@@ -64,6 +62,7 @@ class Router
         $this->post('/api/admin/login', 'AuthController@login');
         $this->post('/api/admin/logout', 'AuthController@logout');
         $this->get('/api/admin/me', 'AuthController@me');
+        $this->post('/api/admin/change-password', 'AuthController@changePassword');
 
         // POST /api/admin/productos (protegido)
         $this->post('/api/admin/productos', 'ProductController@create');
@@ -169,19 +168,6 @@ class Router
                 $params = $this->matchRoute($pattern, $uri, $method);
 
                 if ($params !== null) {
-                    // Enforce auth for admin endpoints except auth routes
-                    if (strpos($uri, '/api/admin/') === 0) {
-                        $whitelist = [
-                            '/api/admin/login',
-                            '/api/admin/logout',
-                            '/api/admin/me'
-                        ];
-                        if (!in_array($uri, $whitelist, true)) {
-                            // Validará o responderá 401
-                            Auth::assertAuthenticated();
-                        }
-                    }
-
                     $this->executeHandler($handler, $params);
                     return;
                 }

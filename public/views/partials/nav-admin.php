@@ -51,7 +51,7 @@ header('Content-Type: text/html; charset=utf-8');
       <span>Más</span>
     </a>
     <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="admin-dropdown-trigger">
-      <li><a class="dropdown-item" href="#">
+      <li><a class="dropdown-item" href="#" id="profile-btn-mobile">
         <i class="fas fa-user me-2"></i>Perfil
       </a></li>
       <li><hr class="dropdown-divider"></li>
@@ -99,7 +99,11 @@ header('Content-Type: text/html; charset=utf-8');
     </ul>
   </div>
   <div class="sidebar-divider"></div>
-  <a href="#" id="logout-btn-desktop" class="sidebar-nav-item mt-auto" title="Cerrar sesión" data-bs-toggle="tooltip" data-bs-placement="right" style="color: var(--sidebar-link-color, #7a003c);">
+  <a href="#" id="profile-btn-desktop" class="sidebar-nav-item" title="Perfil" data-bs-toggle="tooltip" data-bs-placement="right">
+    <i class="fas fa-user"></i>
+    <span>Perfil</span>
+  </a>
+  <a href="#" id="logout-btn-desktop" class="sidebar-nav-item" title="Cerrar sesión" data-bs-toggle="tooltip" data-bs-placement="right" style="color: var(--sidebar-link-color, #7a003c);">
     <i class="fas fa-sign-out-alt" style="color: var(--sidebar-link-icon, #7a003c);"></i>
     <span>Salir</span>
   </a>
