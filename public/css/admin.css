@@ -865,16 +865,27 @@
 }
 
 @media (max-width: 576px) {
+  .metrics-header {
+    gap: 0.75rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .metrics-title,
+  .admin-section-title {
+    font-size: 1.15rem;
+  }
+
   .metrics-kpis {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.75rem;
   }
 
   .kpi-card {
-    padding: 1rem;
+    padding: 0.9rem;
   }
 
   .kpi-value {
-    font-size: 1.5rem;
+    font-size: 1.4rem;
   }
 
   .section-header {
@@ -1826,11 +1837,13 @@
   .metrics-header {
     flex-direction: column;
     align-items: flex-start;
+    gap: 0.85rem;
+    margin-bottom: 1.35rem;
   }
 
   .metrics-title,
   .admin-section-title {
-    font-size: 1.25rem;
+    font-size: 1.2rem;
   }
 
   .metrics-period-selector {
