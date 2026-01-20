@@ -16,7 +16,11 @@ const attachLiveValidation = (inputs) => {
     if (!input) return;
     input.addEventListener('input', () => {
       if (input.classList.contains('is-invalid') && input.value.trim()) {
-        toggleInvalid(input, false);
+        input.classList.remove('is-invalid');
+      }
+      // Si el input queda vacío, volver a poner is-invalid
+      if (!input.value.trim()) {
+        input.classList.add('is-invalid');
       }
     });
   });
@@ -73,6 +77,22 @@ export function initLoginView(container) {
   // Desactivar scroll del body al abrir el modal
   document.body.style.overflow = 'hidden';
 
+  // OJO: Mostrar/Ocultar contraseña
+  const eyeBtn = document.querySelector('.btn-eye[data-eye="login-password"]');
+  if (eyeBtn && passInput) {
+    eyeBtn.addEventListener('click', () => {
+      if (passInput.type === 'password') {
+        passInput.type = 'text';
+        eyeBtn.querySelector('i').classList.remove('fa-eye');
+        eyeBtn.querySelector('i').classList.add('fa-eye-slash');
+      } else {
+        passInput.type = 'password';
+        eyeBtn.querySelector('i').classList.remove('fa-eye-slash');
+        eyeBtn.querySelector('i').classList.add('fa-eye');
+      }
+    });
+  }
+
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
 
@@ -82,15 +102,23 @@ export function initLoginView(container) {
     const userEmpty = username === '';
     const passEmpty = password === '';
 
-    toggleInvalid(userInput, userEmpty);
-    toggleInvalid(passInput, passEmpty);
+    // Siempre forzar is-invalid si está vacío
+    if (userEmpty) userInput.classList.add('is-invalid');
+    if (passEmpty) passInput.classList.add('is-invalid');
+    if (!userEmpty) userInput.classList.remove('is-invalid');
+    if (!passEmpty) passInput.classList.remove('is-invalid');
 
     if (userEmpty || passEmpty) {
       showToast('Completa usuario y contraseña.', 'error');
       return;
     }
 
-    await handleLogin(username, password);
+    const success = await handleLogin(username, password);
+    if (success) {
+      setTimeout(() => {
+        window.dispatchEvent(new Event('hashchange'));
+      }, 600);
+    }
   });
 
   // Cerrar modal navegando a home
@@ -104,14 +132,18 @@ export function initLoginView(container) {
   }
 
   // Cerrar al clickear overlay (fuera del contenido)
+  // BLOQUEADO: Solo se puede cerrar con la X
+  // if (modalEl) {
+  //   modalEl.addEventListener('click', (e) => {
+  //     if (e.target === modalEl) {
+  //       document.body.style.overflow = '';
+  //       closeModal();
+  //     }
+  //   });
+  //   // Asegurar que se muestre el modal (modals.css usa display:none por defecto)
+  //   modalEl.style.display = 'flex';
+  // }
   if (modalEl) {
-    modalEl.addEventListener('click', (e) => {
-      if (e.target === modalEl) {
-        document.body.style.overflow = '';
-        closeModal();
-      }
-    });
-    // Asegurar que se muestre el modal (modals.css usa display:none por defecto)
     modalEl.style.display = 'flex';
   }
 

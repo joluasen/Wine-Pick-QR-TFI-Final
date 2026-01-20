@@ -21,20 +21,26 @@
             id="login-username"
             placeholder="Ingresa tu usuario"
             autocomplete="username"
-            required
+          
           >
         </div>
 
         <div class="form-group">
           <label for="login-password" class="form-label">Contraseña</label>
-          <input
-            type="password"
-            class="form-control"
-            id="login-password"
-            placeholder="Ingresa tu contraseña"
-            autocomplete="current-password"
-            required
-          >
+          <div class="input-eye-wrapper" style="position:relative;display:flex;align-items:center;">
+            <input
+              type="password"
+              class="form-control"
+              id="login-password"
+              placeholder="Ingresa tu contraseña"
+              autocomplete="current-password"
+          
+              style="padding-right:2.5em;width:100%;box-sizing:border-box;"
+            >
+            <button type="button" class="btn-eye" tabindex="-1" aria-label="Mostrar/Ocultar" data-eye="login-password" style="position:absolute;right:0.5em;top:50%;transform:translateY(-50%);background:transparent;border:none;padding:0;margin:0;height:1.8em;width:2em;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:2;">
+              <i class="fas fa-eye" style="color:#888;font-size:1.1em;"></i>
+            </button>
+          </div>
         </div>
 
         <button type="submit" class="btn-modal btn-modal-primary login-btn">Ingresar</button>

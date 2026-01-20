@@ -1,4 +1,22 @@
 /**
+ * Valida en vivo los campos del modal de perfil (igual que login)
+ * Quita is-invalid al escribir si hay valor, la pone si queda vacío
+ */
+function attachLiveValidationProfile(inputs) {
+  inputs.forEach((input) => {
+    if (!input) return;
+    input.addEventListener('input', () => {
+      if (input.classList.contains('is-invalid') && input.value.trim()) {
+        input.classList.remove('is-invalid');
+      }
+      // Si el input queda vacío, volver a poner is-invalid
+      if (!input.value.trim()) {
+        input.classList.add('is-invalid');
+      }
+    });
+  });
+}
+/**
  * profileModal.js
  * Gestión del modal de perfil y cambio de contraseña del administrador
  */
@@ -43,7 +61,7 @@ function generateProfileModalHTML() {
           <div class="mb-3">
             <label for="currentPassword" class="form-label">Contraseña Actual <span class="text-danger">*</span></label>
             <div class="input-eye-wrapper" style="position:relative;display:flex;align-items:center;">
-              <input type="password" class="form-control" id="currentPassword" name="currentPassword" required autocomplete="off" style="padding-right:2.5em;width:100%;box-sizing:border-box;" value="">
+              <input type="password" class="form-control" id="currentPassword" name="currentPassword" autocomplete="off" style="padding-right:2.5em;width:100%;box-sizing:border-box;" value="">
               <button type="button" class="btn-eye" tabindex="-1" aria-label="Mostrar/Ocultar" data-eye="currentPassword" style="position:absolute;right:0.5em;top:50%;transform:translateY(-50%);background:transparent;border:none;padding:0;margin:0;height:1.8em;width:2em;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:2;">
                 <i class="fas fa-eye" style="color:#888;font-size:1.1em;"></i>
               </button>
@@ -53,7 +71,7 @@ function generateProfileModalHTML() {
           <div class="mb-3">
             <label for="newPassword" class="form-label">Nueva Contraseña <span class="text-danger">*</span></label>
             <div class="input-eye-wrapper" style="position:relative;display:flex;align-items:center;">
-              <input type="password" class="form-control" id="newPassword" name="newPassword" required autocomplete="off" style="padding-right:2.5em;width:100%;box-sizing:border-box;" value="">
+              <input type="password" class="form-control" id="newPassword" name="newPassword" autocomplete="off" style="padding-right:2.5em;width:100%;box-sizing:border-box;" value="">
               <button type="button" class="btn-eye" tabindex="-1" aria-label="Mostrar/Ocultar" data-eye="newPassword" style="position:absolute;right:0.5em;top:50%;transform:translateY(-50%);background:transparent;border:none;padding:0;margin:0;height:1.8em;width:2em;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:2;">
                 <i class="fas fa-eye" style="color:#888;font-size:1.1em;"></i>
               </button>
@@ -64,7 +82,7 @@ function generateProfileModalHTML() {
           <div class="mb-3">
             <label for="confirmPassword" class="form-label">Confirmar Nueva Contraseña <span class="text-danger">*</span></label>
             <div class="input-eye-wrapper" style="position:relative;display:flex;align-items:center;">
-              <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" required autocomplete="off" style="padding-right:2.5em;width:100%;box-sizing:border-box;" value="">
+              <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" autocomplete="off" style="padding-right:2.5em;width:100%;box-sizing:border-box;" value="">
               <button type="button" class="btn-eye" tabindex="-1" aria-label="Mostrar/Ocultar" data-eye="confirmPassword" style="position:absolute;right:0.5em;top:50%;transform:translateY(-50%);background:transparent;border:none;padding:0;margin:0;height:1.8em;width:2em;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:2;">
                 <i class="fas fa-eye" style="color:#888;font-size:1.1em;"></i>
               </button>
@@ -93,25 +111,42 @@ async function handleChangePassword(e) {
   const newPassword = form.newPassword.value;
   const confirmPassword = form.confirmPassword.value;
 
-  if (!currentPassword || !newPassword || !confirmPassword) {
-    showToast('Todos los campos son requeridos', 'error');
-    return;
-  }
+  // Validación visual
+  const currentInput = form.currentPassword;
+  const newInput = form.newPassword;
+  const confirmInput = form.confirmPassword;
+  let hasError = false;
+  if (!currentPassword) { currentInput.classList.add('is-invalid'); hasError = true; } else { currentInput.classList.remove('is-invalid'); }
+  if (!newPassword) { newInput.classList.add('is-invalid'); hasError = true; } else { newInput.classList.remove('is-invalid'); }
+  if (!confirmPassword) { confirmInput.classList.add('is-invalid'); hasError = true; } else { confirmInput.classList.remove('is-invalid'); }
 
+  if (hasError) return;
+
+  // Validar que las contraseñas coincidan
   if (newPassword !== confirmPassword) {
-    showToast('Las contraseñas nuevas no coinciden', 'error');
+    newInput.classList.add('is-invalid');
+    confirmInput.classList.add('is-invalid');
     return;
+  } else {
+    newInput.classList.remove('is-invalid');
+    confirmInput.classList.remove('is-invalid');
   }
 
+  // Validar que la nueva contraseña sea diferente a la actual
   if (currentPassword === newPassword) {
-    showToast('La nueva contraseña debe ser diferente a la actual', 'error');
+    newInput.classList.add('is-invalid');
     return;
+  } else {
+    newInput.classList.remove('is-invalid');
   }
 
+  // Validar seguridad de la nueva contraseña
   const validation = validatePassword(newPassword);
   if (!validation.valid) {
-    showToast(validation.message, 'error');
+    newInput.classList.add('is-invalid');
     return;
+  } else {
+    newInput.classList.remove('is-invalid');
   }
 
   const submitBtn = document.getElementById('submitChangePassword');
@@ -132,10 +167,10 @@ async function handleChangePassword(e) {
       })
     });
 
-    showToast('Contraseña actualizada correctamente', 'success');
+    // Éxito visual: limpiar y cerrar
+    form.reset();
     modalManager.close();
   } catch (error) {
-    showToast(error.message || 'Error al cambiar la contraseña', 'error');
     submitBtn.disabled = false;
     submitBtn.innerHTML = originalText;
   }
@@ -146,13 +181,17 @@ async function handleChangePassword(e) {
  */
 function showProfileModal() {
   const content = generateProfileModalHTML();
-  
   modalManager.open('profile-modal', content, {
     disableClickOutside: true,
     onOpen: () => {
       const form = document.getElementById('changePasswordForm');
       if (form) {
         form.addEventListener('submit', handleChangePassword);
+        attachLiveValidationProfile([
+          form.currentPassword,
+          form.newPassword,
+          form.confirmPassword
+        ]);
       }
       
       // Configurar botón de cancelar
@@ -163,7 +202,9 @@ function showProfileModal() {
 
       // Configurar botones de ojo para mostrar/ocultar contraseña
       document.querySelectorAll('.btn-eye').forEach(btn => {
-        btn.addEventListener('click', () => {
+        btn.addEventListener('click', (ev) => {
+          ev.preventDefault();
+          ev.stopPropagation();
           const inputId = btn.getAttribute('data-eye');
           const input = document.getElementById(inputId);
           if (input) {
