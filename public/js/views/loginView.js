@@ -43,9 +43,12 @@ async function handleLogin(username, password) {
 
     showToast('Login exitoso. Redirigiendo...', 'success');
 
-    // Redirigir al panel admin
+    // Redirigir al panel admin y forzar evento hashchange para SPA móvil
     setTimeout(() => {
-      window.location.hash = '#admin';
+      // Usar navigate del router para forzar inicialización aunque el hash no cambie
+      import('../core/router.js').then(({ navigate }) => {
+        navigate('#admin');
+      });
     }, 500);
 
     return true;

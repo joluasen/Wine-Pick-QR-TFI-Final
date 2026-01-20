@@ -7,12 +7,24 @@ import { getMetrics } from '../admin/services/metricService.js';
 import { showToast } from '../admin/components/Toast.js';
 
 export async function initAdminMetricsView(container) {
-  // Referencias del DOM
-  const loadingEl = document.getElementById('metrics-loading');
-  const contentEl = document.getElementById('metrics-content');
-  const errorEl = document.getElementById('metrics-error');
-  const periodButtons = document.querySelectorAll('.period-btn');
-  const retryBtn = document.getElementById('metrics-retry');
+  // Esperar a que el DOM esté listo (máx 1s)
+  let loadingEl, contentEl, errorEl, periodButtons, retryBtn;
+  let tries = 0;
+  while (tries < 20) { // 20 * 50ms = 1s máx
+    loadingEl = document.getElementById('metrics-loading');
+    contentEl = document.getElementById('metrics-content');
+    errorEl = document.getElementById('metrics-error');
+    periodButtons = document.querySelectorAll('.period-btn');
+    retryBtn = document.getElementById('metrics-retry');
+    if (loadingEl && contentEl && errorEl && periodButtons.length > 0) break;
+    await new Promise(res => setTimeout(res, 50));
+    tries++;
+  }
+  // Si no están, mostrar error básico
+  if (!loadingEl || !contentEl || !errorEl || periodButtons.length === 0) {
+    if (container) container.innerHTML = '<div class="text-danger">Error cargando métricas. Intenta recargar la página.</div>';
+    return;
+  }
 
   let currentPeriod = 30;
   let dailyChartInstance = null;
