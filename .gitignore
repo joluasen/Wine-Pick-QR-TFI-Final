@@ -1,16 +1,38 @@
-# Ignorar archivos de logs
-logs/debug.log
+# ============================================
+# Wine-Pick-QR - Git Ignore
+# ============================================
 
-# Ignorar archivos zip
+# Archivos de entorno (CRÍTICO - contienen credenciales)
+.env
+!.env.example
+!.env.production.template
+
+# Logs (pueden contener información sensible)
+logs/
+*.log
+
+# Archivos temporales
 *.zip
+*.tmp
+*.bak
+*.swp
 tmpclaude-*
 
-# Ignorar documentación de análisis temporal
-tareas_pendientes/
-uploads
+# Uploads de usuarios (no versionar)
+public/uploads/products/*
+!public/uploads/products/.gitkeep
 
-# Ignorar configuración de VS Code
+# Documentación de desarrollo interno
+docs/tareas_pendientes/
+
+# IDE y editores
 .vscode/
+.idea/
+*.sublime-*
 
-# Ignorar archivos de entorno
-.env
+# Sistema
+.DS_Store
+Thumbs.db
+
+# Reporte de seguridad (no subir a producción)
+SECURITY_AUDIT_REPORT.md

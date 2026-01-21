@@ -1,5 +1,35 @@
 RewriteEngine On
 
+# ============================================
+# PROTECCIÓN DE SEGURIDAD - Wine-Pick-QR
+# ============================================
+
+# Denegar acceso directo a carpetas sensibles
+# Esto bloquea el acceso a /app, /config, /logs, /docs, /database
+RewriteRule ^app(/.*)?$ - [F,L]
+RewriteRule ^config(/.*)?$ - [F,L]
+RewriteRule ^logs(/.*)?$ - [F,L]
+RewriteRule ^docs(/.*)?$ - [F,L]
+RewriteRule ^database(/.*)?$ - [F,L]
+
+# Denegar acceso a archivos ocultos y sensibles
+RewriteRule ^\. - [F,L]
+RewriteRule \.env$ - [F,L]
+RewriteRule \.git - [F,L]
+RewriteRule composer\.(json|lock)$ - [F,L]
+
+# Headers de seguridad adicionales (si mod_headers está disponible)
+<IfModule mod_headers.c>
+    Header set X-Content-Type-Options "nosniff"
+    Header set X-Frame-Options "SAMEORIGIN"
+    Header set X-XSS-Protection "1; mode=block"
+    Header set Referrer-Policy "strict-origin-when-cross-origin"
+</IfModule>
+
+# ============================================
+# ENRUTAMIENTO DE LA APLICACIÓN
+# ============================================
+
 # Si la URL es la raíz (http://localhost/proyectos/Wine-Pick-QR-TFI/)
 RewriteRule ^$ public/index.php [QSA,L]
 

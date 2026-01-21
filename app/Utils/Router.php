@@ -168,6 +168,11 @@ class Router
                 $params = $this->matchRoute($pattern, $uri, $method);
 
                 if ($params !== null) {
+                    // Verificar autenticación para rutas admin (excepto login/logout)
+                    if ($this->isProtectedAdminRoute($pattern)) {
+                        Auth::assertAuthenticated();
+                    }
+                    
                     $this->executeHandler($handler, $params);
                     return;
                 }
@@ -259,6 +264,28 @@ class Router
             // Si hay parámetros, pasarlos como argumentos
             $controller->$methodName(...array_values($params));
         }
+    }
+
+    /**
+     * Determina si una ruta requiere autenticación admin.
+     * 
+     * @param string $pattern Patrón de la ruta
+     * @return bool True si requiere autenticación
+     */
+    private function isProtectedAdminRoute(string $pattern): bool
+    {
+        // Rutas admin que NO requieren autenticación
+        $publicAdminRoutes = [
+            '/api/admin/login',
+            '/api/admin/logout',
+        ];
+
+        // Si es una ruta admin pero no está en la lista de públicas, requiere auth
+        if (strpos($pattern, '/api/admin/') === 0) {
+            return !in_array($pattern, $publicAdminRoutes, true);
+        }
+
+        return false;
     }
 }
 ?>

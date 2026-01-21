@@ -14,10 +14,14 @@ class UploadController
     // Configuración de archivos permitidos
     private const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/jpg'];
     private const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+    
+    // Resolución estándar para imágenes de productos (cuadradas)
+    private const TARGET_WIDTH = 400;
+    private const TARGET_HEIGHT = 400;
 
     /**
      * POST /api/admin/upload/product-image
-     * Sube una imagen de producto y retorna la URL pública
+     * Sube una imagen de producto, la redimensiona a 400x400 y retorna la URL pública
      */
     public function uploadProductImage(): void
     {
@@ -71,14 +75,15 @@ class UploadController
             }
         }
 
-        // Generar nombre único para el archivo
-        $extension = $this->getExtensionFromMime($mimeType);
-        $filename = $this->generateUniqueFilename($extension);
+        // Generar nombre único para el archivo (siempre guardamos como JPG para optimizar)
+        $filename = $this->generateUniqueFilename('jpg');
         $targetPath = self::PRODUCTS_DIR . '/' . $filename;
 
-        // Mover archivo
-        if (!move_uploaded_file($file['tmp_name'], $targetPath)) {
-            ApiResponse::serverError('Error al guardar la imagen.');
+        // Procesar y redimensionar la imagen
+        $processResult = $this->processAndResizeImage($file['tmp_name'], $mimeType, $targetPath);
+        
+        if (!$processResult['success']) {
+            ApiResponse::serverError($processResult['error']);
         }
 
         // Generar URL pública
@@ -87,24 +92,119 @@ class UploadController
         ApiResponse::success([
             'filename' => $filename,
             'url' => $publicUrl,
-            'size' => $file['size'],
-            'type' => $mimeType
+            'size' => filesize($targetPath),
+            'type' => 'image/jpeg',
+            'width' => self::TARGET_WIDTH,
+            'height' => self::TARGET_HEIGHT,
+            'original_width' => $processResult['original_width'],
+            'original_height' => $processResult['original_height']
         ], 201);
     }
 
     /**
-     * Obtiene la extensión de archivo desde el tipo MIME
+     * Procesa y redimensiona la imagen a las dimensiones estándar
+     * 
+     * @param string $sourcePath Ruta del archivo temporal
+     * @param string $mimeType Tipo MIME de la imagen
+     * @param string $targetPath Ruta destino
+     * @return array ['success' => bool, 'error' => string|null, 'original_width' => int, 'original_height' => int]
      */
-    private function getExtensionFromMime(string $mime): string
+    private function processAndResizeImage(string $sourcePath, string $mimeType, string $targetPath): array
     {
-        $map = [
-            'image/jpeg' => 'jpg',
-            'image/jpg' => 'jpg',
-            'image/png' => 'png',
-            'image/webp' => 'webp'
-        ];
+        // Verificar que GD está disponible
+        if (!extension_loaded('gd')) {
+            // Si no hay GD, guardar sin procesar
+            if (move_uploaded_file($sourcePath, $targetPath)) {
+                $size = getimagesize($targetPath);
+                return [
+                    'success' => true,
+                    'error' => null,
+                    'original_width' => $size[0] ?? 0,
+                    'original_height' => $size[1] ?? 0
+                ];
+            }
+            return ['success' => false, 'error' => 'Error al guardar la imagen.', 'original_width' => 0, 'original_height' => 0];
+        }
 
-        return $map[$mime] ?? 'jpg';
+        // Obtener dimensiones originales
+        $imageInfo = getimagesize($sourcePath);
+        if ($imageInfo === false) {
+            return ['success' => false, 'error' => 'No se pudo leer la imagen.', 'original_width' => 0, 'original_height' => 0];
+        }
+        
+        $originalWidth = $imageInfo[0];
+        $originalHeight = $imageInfo[1];
+
+        // Crear imagen desde el archivo original
+        switch ($mimeType) {
+            case 'image/jpeg':
+            case 'image/jpg':
+                $sourceImage = @imagecreatefromjpeg($sourcePath);
+                break;
+            case 'image/png':
+                $sourceImage = @imagecreatefrompng($sourcePath);
+                break;
+            case 'image/webp':
+                $sourceImage = @imagecreatefromwebp($sourcePath);
+                break;
+            default:
+                return ['success' => false, 'error' => 'Tipo de imagen no soportado.', 'original_width' => $originalWidth, 'original_height' => $originalHeight];
+        }
+
+        if ($sourceImage === false) {
+            return ['success' => false, 'error' => 'Error al procesar la imagen.', 'original_width' => $originalWidth, 'original_height' => $originalHeight];
+        }
+
+        // Crear imagen de destino con fondo blanco (para transparencias)
+        $targetImage = imagecreatetruecolor(self::TARGET_WIDTH, self::TARGET_HEIGHT);
+        $white = imagecolorallocate($targetImage, 255, 255, 255);
+        imagefill($targetImage, 0, 0, $white);
+
+        // Calcular dimensiones para mantener aspect ratio y centrar
+        $srcRatio = $originalWidth / $originalHeight;
+        $dstRatio = self::TARGET_WIDTH / self::TARGET_HEIGHT;
+
+        if ($srcRatio > $dstRatio) {
+            // Imagen más ancha - ajustar por ancho
+            $newWidth = self::TARGET_WIDTH;
+            $newHeight = (int) round(self::TARGET_WIDTH / $srcRatio);
+            $dstX = 0;
+            $dstY = (int) round((self::TARGET_HEIGHT - $newHeight) / 2);
+        } else {
+            // Imagen más alta - ajustar por alto
+            $newHeight = self::TARGET_HEIGHT;
+            $newWidth = (int) round(self::TARGET_HEIGHT * $srcRatio);
+            $dstX = (int) round((self::TARGET_WIDTH - $newWidth) / 2);
+            $dstY = 0;
+        }
+
+        // Redimensionar y copiar
+        imagecopyresampled(
+            $targetImage,
+            $sourceImage,
+            $dstX, $dstY,           // Destino X, Y
+            0, 0,                    // Origen X, Y
+            $newWidth, $newHeight,   // Nuevo tamaño
+            $originalWidth, $originalHeight // Tamaño original
+        );
+
+        // Guardar como JPEG con calidad 85 (buen balance calidad/tamaño)
+        $saved = imagejpeg($targetImage, $targetPath, 85);
+
+        // Liberar memoria
+        imagedestroy($sourceImage);
+        imagedestroy($targetImage);
+
+        if (!$saved) {
+            return ['success' => false, 'error' => 'Error al guardar la imagen procesada.', 'original_width' => $originalWidth, 'original_height' => $originalHeight];
+        }
+
+        return [
+            'success' => true,
+            'error' => null,
+            'original_width' => $originalWidth,
+            'original_height' => $originalHeight
+        ];
     }
 
     /**

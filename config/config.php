@@ -55,8 +55,23 @@ define('LOGS_PATH', BASE_PATH . '/logs');
 define('BASE_URL', $_ENV['BASE_URL'] ?? 'http://localhost/proyectos/Wine-Pick-QR-TFI');
 
 // Autenticación (JWT) - configurable vía .env
-define('JWT_SECRET', $_ENV['JWT_SECRET'] ?? 'change-this-in-.env');
+// CRÍTICO: En producción, JWT_SECRET DEBE estar configurado en .env
+$jwtSecret = $_ENV['JWT_SECRET'] ?? '';
+if (WPQ_ENV === 'prod' && (empty($jwtSecret) || $jwtSecret === 'change-this-in-.env')) {
+    // En producción, no permitir secrets inseguros
+    die('ERROR CRÍTICO: JWT_SECRET no está configurado en .env. La aplicación no puede iniciar en modo producción sin un secret seguro.');
+}
+define('JWT_SECRET', $jwtSecret ?: 'dev-only-secret-do-not-use-in-prod');
 define('AUTH_COOKIE_NAME', $_ENV['AUTH_COOKIE_NAME'] ?? 'wpq_auth');
+
+// Headers de seguridad HTTP (se aplican en producción)
+if (WPQ_ENV === 'prod' && php_sapi_name() !== 'cli') {
+    header('X-Content-Type-Options: nosniff');
+    header('X-Frame-Options: SAMEORIGIN');
+    header('X-XSS-Protection: 1; mode=block');
+    header('Referrer-Policy: strict-origin-when-cross-origin');
+    header('Permissions-Policy: geolocation=(), microphone=(), camera=()');
+}
 
 /**
  * Registra mensajes de depuración en el archivo de logs.

@@ -12,10 +12,23 @@ declare(strict_types=1);
  * - Para cualquier otra ruta, devolver la SPA `public/spa.php`.
  */
 
-ini_set('display_errors', '1');
-error_reporting(E_ALL);
-
+// Cargar configuración primero (incluye WPQ_ENV)
 require_once __DIR__ . '/../config/config.php';
+
+// Configurar manejo de errores según entorno
+if (WPQ_ENV === 'prod') {
+    // Producción: NO mostrar errores, solo loguearlos
+    ini_set('display_errors', '0');
+    ini_set('display_startup_errors', '0');
+    error_reporting(E_ALL);
+    ini_set('log_errors', '1');
+    ini_set('error_log', LOGS_PATH . '/php_errors.log');
+} else {
+    // Desarrollo: Mostrar todos los errores
+    ini_set('display_errors', '1');
+    ini_set('display_startup_errors', '1');
+    error_reporting(E_ALL);
+}
 
 $fullUri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) ?? '/';
 $projectPath = parse_url(BASE_URL, PHP_URL_PATH) ?: '/proyectos/Wine-Pick-QR-TFI';
