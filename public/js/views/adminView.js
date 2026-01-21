@@ -100,6 +100,11 @@ export function setupLogout(container, statusEl) {
       setStatus(statusEl || document.createElement('div'), 'Sesión cerrada', 'success');
       // Forzar salida a Home
       window.location.hash = '#home';
+        // Destruir instancia de gráfico si existe (prevención bug Chart.js)
+        if (window.dailyChartInstance && typeof window.dailyChartInstance.destroy === 'function') {
+          try { window.dailyChartInstance.destroy(); } catch (_) {}
+          window.dailyChartInstance = null;
+        }
       // Recargar navegación pública
       setTimeout(() => window.location.reload(), 200);
     } catch (err) {

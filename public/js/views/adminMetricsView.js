@@ -27,7 +27,8 @@ export async function initAdminMetricsView(container) {
   }
 
   let currentPeriod = 30;
-  let dailyChartInstance = null;
+  // Usar window para persistencia global y limpieza cross-view
+  window.dailyChartInstance = null;
 
   // Funciones de estado
   function showLoading() {
@@ -211,11 +212,20 @@ export async function initAdminMetricsView(container) {
     canvas.style.width = canvasWidth + 'px';
 
     const ctx = canvas.getContext('2d');
-    if (dailyChartInstance) {
-      try { dailyChartInstance.destroy(); } catch (_) {}
+    // Si existe instancia previa y su canvas no es el actual, destruirla
+    if (window.dailyChartInstance) {
+      const prevCanvas = window.dailyChartInstance.canvas;
+      if (!prevCanvas || prevCanvas !== canvas) {
+        try { window.dailyChartInstance.destroy(); } catch (_) {}
+        window.dailyChartInstance = null;
+      }
     }
-
-    dailyChartInstance = new Chart(ctx, {
+    // Si aún existe, destruir por seguridad
+    if (window.dailyChartInstance) {
+      try { window.dailyChartInstance.destroy(); } catch (_) {}
+      window.dailyChartInstance = null;
+    }
+    window.dailyChartInstance = new Chart(ctx, {
       type: 'line',
       data: {
         labels,

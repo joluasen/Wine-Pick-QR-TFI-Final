@@ -228,22 +228,37 @@ function showProfileModal() {
  * Inicializa el modal de perfil
  */
 export function setupProfileModal() {
-  const profileBtnMobile = document.getElementById('profile-btn-mobile');
-  const profileBtnDesktop = document.getElementById('profile-btn-desktop');
+  function bindProfileEvents() {
+    const profileBtnMobile = document.getElementById('profile-btn-mobile');
+    const profileBtnDesktop = document.getElementById('profile-btn-desktop');
 
-  if (profileBtnMobile) {
-    profileBtnMobile.addEventListener('click', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      showProfileModal();
-    });
+    if (profileBtnMobile && !profileBtnMobile._profileBound) {
+      profileBtnMobile.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        showProfileModal();
+      });
+      profileBtnMobile._profileBound = true;
+    }
+    if (profileBtnDesktop && !profileBtnDesktop._profileBound) {
+      profileBtnDesktop.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        showProfileModal();
+      });
+      profileBtnDesktop._profileBound = true;
+    }
   }
 
-  if (profileBtnDesktop) {
-    profileBtnDesktop.addEventListener('click', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      showProfileModal();
-    });
-  }
+  // Intentar bind inmediato
+  bindProfileEvents();
+
+  // Observer para reintentar si el nav se renderiza después
+  const observer = new MutationObserver(() => {
+    bindProfileEvents();
+  });
+  observer.observe(document.body, { childList: true, subtree: true });
+
+  // Opcional: desconectar observer tras éxito
+  setTimeout(() => observer.disconnect(), 5000);
 }

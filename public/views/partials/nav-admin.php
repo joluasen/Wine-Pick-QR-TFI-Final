@@ -51,7 +51,7 @@ header('Content-Type: text/html; charset=utf-8');
       <span>Más</span>
     </a>
     <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="admin-dropdown-trigger">
-      <li><a class="dropdown-item" href="#" id="profile-btn-mobile">
+      <li><a class="dropdown-item" id="profile-btn-mobile" style="cursor:pointer;">
         <i class="fas fa-user me-2"></i>Perfil
       </a></li>
       <li><hr class="dropdown-divider"></li>
