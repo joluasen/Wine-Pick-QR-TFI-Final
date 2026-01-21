@@ -516,6 +516,14 @@ class ProductController {
 
         // Intenta actualizar el producto
         try {
+            // Si se solicita eliminar la imagen anterior
+            if (isset($data['delete_old_image']) && $data['delete_old_image'] && isset($data['old_image_url'])) {
+                UploadController::deleteProductImage($data['old_image_url']);
+                // Remover estos campos del payload para no enviarlos al modelo
+                unset($data['delete_old_image']);
+                unset($data['old_image_url']);
+            }
+
             $adminId = (int)($_SERVER['WPQ_USER']['sub'] ?? 0);
             $this->productModel->update($productId, $data, $adminId);
 

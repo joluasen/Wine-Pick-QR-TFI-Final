@@ -4,11 +4,16 @@
  * Unifica el manejo de todos los modales de la aplicación
  */
 
-import { getBasePath, escapeHtml, calculatePromoPrice, formatDate } from './utils.js';
-import { showToast } from '../admin/components/Toast.js';
-import { showConfirmDialog } from '../admin/components/ConfirmDialog.js';
-import { deleteProduct } from '../admin/services/productService.js';
-import { deletePromotion } from '../admin/services/promotionService.js';
+import {
+  getBasePath,
+  escapeHtml,
+  calculatePromoPrice,
+  formatDate,
+} from "./utils.js";
+import { showToast } from "../admin/components/Toast.js";
+import { showConfirmDialog } from "../admin/components/ConfirmDialog.js";
+import { deleteProduct } from "../admin/services/productService.js";
+import { deletePromotion } from "../admin/services/promotionService.js";
 
 class ModalManager {
   constructor() {
@@ -16,7 +21,7 @@ class ModalManager {
     this.modalStack = [];
     this.cache = new Map(); // Cache de HTML de modales
     this.qrScanner = null;
-    
+
     // Bind de métodos
     this.handleKeydown = this.handleKeydown.bind(this);
     this.handleClickOutside = this.handleClickOutside.bind(this);
@@ -27,12 +32,12 @@ class ModalManager {
    */
   init() {
     // Escuchar tecla Escape
-    document.addEventListener('keydown', this.handleKeydown);
-    
+    document.addEventListener("keydown", this.handleKeydown);
+
     // Crear contenedor de modales si no existe
-    if (!document.getElementById('modal-container')) {
-      const container = document.createElement('div');
-      container.id = 'modal-container';
+    if (!document.getElementById("modal-container")) {
+      const container = document.createElement("div");
+      container.id = "modal-container";
       document.body.appendChild(container);
     }
   }
@@ -41,7 +46,7 @@ class ModalManager {
    * Maneja la tecla Escape para cerrar modales
    */
   handleKeydown(e) {
-    if (e.key === 'Escape' && this.activeModal) {
+    if (e.key === "Escape" && this.activeModal) {
       this.close();
     }
   }
@@ -50,7 +55,10 @@ class ModalManager {
    * Maneja clicks fuera del contenido del modal
    */
   handleClickOutside(e) {
-    if (e.target.classList.contains('modal') || e.target.classList.contains('modal-overlay')) {
+    if (
+      e.target.classList.contains("modal") ||
+      e.target.classList.contains("modal-overlay")
+    ) {
       this.close();
     }
   }
@@ -62,7 +70,12 @@ class ModalManager {
    * @param {Object} options - Opciones adicionales
    */
   open(id, content, options = {}) {
-    const { onClose, onOpen, preventClose = false, disableClickOutside = false } = options;
+    const {
+      onClose,
+      onOpen,
+      preventClose = false,
+      disableClickOutside = false,
+    } = options;
 
     // Si hay un modal activo, lo apilamos
     if (this.activeModal) {
@@ -73,36 +86,38 @@ class ModalManager {
     let modal = document.getElementById(id);
 
     if (!modal) {
-      modal = document.createElement('div');
+      modal = document.createElement("div");
       modal.id = id;
-      modal.setAttribute('role', 'dialog');
-      modal.setAttribute('aria-modal', 'true');
-      document.getElementById('modal-container').appendChild(modal);
+      modal.setAttribute("role", "dialog");
+      modal.setAttribute("aria-modal", "true");
+      document.getElementById("modal-container").appendChild(modal);
     }
 
     // Reset clases (limpia clases de tamaño anteriores)
-    modal.className = 'modal';
+    modal.className = "modal";
 
     modal.innerHTML = `
       <div class="modal-content">
-        ${!preventClose ? '<button class="modal-close" aria-label="Cerrar">&times;</button>' : ''}
+        ${!preventClose ? '<button class="modal-close" aria-label="Cerrar">&times;</button>' : ""}
         <div class="modal-body">${content}</div>
       </div>
     `;
 
     // Event listeners
     if (!preventClose) {
-      modal.querySelector('.modal-close')?.addEventListener('click', () => this.close());
+      modal
+        .querySelector(".modal-close")
+        ?.addEventListener("click", () => this.close());
 
       // Solo agregar click outside si no está deshabilitado
       if (!disableClickOutside) {
-        modal.addEventListener('click', this.handleClickOutside);
+        modal.addEventListener("click", this.handleClickOutside);
       }
     }
 
     // Mostrar modal
-    modal.style.display = 'flex';
-    document.body.style.overflow = 'hidden';
+    modal.style.display = "flex";
+    document.body.style.overflow = "hidden";
 
     // Guardar referencia
     this.activeModal = { id, modal, onClose, onOpen };
@@ -111,7 +126,9 @@ class ModalManager {
     if (onOpen) onOpen(modal);
 
     // Focus trap
-    const firstFocusable = modal.querySelector('button, input, select, textarea, [tabindex]:not([tabindex="-1"])');
+    const firstFocusable = modal.querySelector(
+      'button, input, select, textarea, [tabindex]:not([tabindex="-1"])',
+    );
     if (firstFocusable) firstFocusable.focus();
 
     return modal;
@@ -130,14 +147,14 @@ class ModalManager {
 
     // Si es un modal QR y estamos en una ruta de scan, volver a la vista anterior
     const currentHash = window.location.hash;
-    if (id === 'qr-scanner-modal' && currentHash === '#scan') {
-      window.location.hash = '#home';
-    } else if (id === 'admin-qr-modal' && currentHash === '#admin-scan') {
-      window.location.hash = '#admin-products';
+    if (id === "qr-scanner-modal" && currentHash === "#scan") {
+      window.location.hash = "#home";
+    } else if (id === "admin-qr-modal" && currentHash === "#admin-scan") {
+      window.location.hash = "#admin-products";
     }
 
     // Ocultar modal
-    modal.style.display = 'none';
+    modal.style.display = "none";
 
     // Callback de cierre
     if (onClose) onClose();
@@ -145,10 +162,10 @@ class ModalManager {
     // Restaurar modal anterior si existe
     if (this.modalStack.length > 0) {
       this.activeModal = this.modalStack.pop();
-      this.activeModal.modal.style.display = 'flex';
+      this.activeModal.modal.style.display = "flex";
     } else {
       this.activeModal = null;
-      document.body.style.overflow = '';
+      document.body.style.overflow = "";
     }
   }
 
@@ -157,13 +174,13 @@ class ModalManager {
    */
   closeAll() {
     this.stopQrScanner();
-    
+
     while (this.activeModal) {
       this.close();
     }
-    
+
     this.modalStack = [];
-    document.body.style.overflow = '';
+    document.body.style.overflow = "";
   }
 
   // ============================================
@@ -176,84 +193,99 @@ class ModalManager {
    */
   showProduct(product) {
     const content = this.renderProductCard(product);
-    this.open('product-modal', content, {
+    this.open("product-modal", content, {
       onOpen: (modalEl) => {
         if (!this._isAdminContext()) return;
-        const menuBtn = modalEl.querySelector('.btn-admin-actions');
-        const menu = modalEl.querySelector('.admin-actions-menu');
+        const menuBtn = modalEl.querySelector(".btn-admin-actions");
+        const menu = modalEl.querySelector(".admin-actions-menu");
         if (menuBtn && menu) {
-          menuBtn.addEventListener('click', () => {
-            const expanded = menuBtn.getAttribute('aria-expanded') === 'true';
-            menuBtn.setAttribute('aria-expanded', expanded ? 'false' : 'true');
-            menu.style.display = expanded ? 'none' : 'block';
+          menuBtn.addEventListener("click", () => {
+            const expanded = menuBtn.getAttribute("aria-expanded") === "true";
+            menuBtn.setAttribute("aria-expanded", expanded ? "false" : "true");
+            menu.style.display = expanded ? "none" : "block";
           });
           const editBtn = menu.querySelector('[data-action="edit-product"]');
-          const deleteBtn = menu.querySelector('[data-action="delete-product"]');
+          const deleteBtn = menu.querySelector(
+            '[data-action="delete-product"]',
+          );
           const editPromoBtn = menu.querySelector('[data-action="edit-promo"]');
-          const deletePromoBtn = menu.querySelector('[data-action="delete-promo"]');
+          const deletePromoBtn = menu.querySelector(
+            '[data-action="delete-promo"]',
+          );
 
-          editBtn?.addEventListener('click', () => {
+          editBtn?.addEventListener("click", () => {
             this.showEditProduct(product);
           });
-          deleteBtn?.addEventListener('click', async () => {
+          deleteBtn?.addEventListener("click", async () => {
             const confirmed = await showConfirmDialog({
-              title: 'Eliminar producto',
+              title: "Eliminar producto",
               message: `¿Eliminar "${product.name}"?`,
-              confirmText: 'Eliminar',
-              cancelText: 'Cancelar',
-              confirmClass: 'btn-danger'
+              confirmText: "Eliminar",
+              cancelText: "Cancelar",
+              confirmClass: "btn-danger",
             });
             if (!confirmed) return;
             try {
-              const loadingToast = showToast('Eliminando producto...', 'info', 0);
+              const loadingToast = showToast(
+                "Eliminando producto...",
+                "info",
+                0,
+              );
               await deleteProduct(product.id);
-              loadingToast.classList.remove('show');
+              loadingToast.classList.remove("show");
               setTimeout(() => loadingToast.remove(), 300);
-              showToast('Producto eliminado correctamente', 'success');
+              showToast("Producto eliminado correctamente", "success");
               this.close();
-              if (window.adminView && typeof window.adminView.loadProducts === 'function') {
+              if (
+                window.adminView &&
+                typeof window.adminView.loadProducts === "function"
+              ) {
                 window.adminView.loadProducts();
               }
             } catch (err) {
-              showToast(`Error al eliminar: ${err.message}`, 'error');
+              showToast(`Error al eliminar: ${err.message}`, "error");
             }
           });
-          editPromoBtn?.addEventListener('click', () => {
+          editPromoBtn?.addEventListener("click", () => {
             const promo = product.promotion;
             if (!promo || !promo.id) {
-              showToast('El producto no tiene promoción asociada', 'error');
+              showToast("El producto no tiene promoción asociada", "error");
               return;
             }
             this.showEditPromotion(promo, () => {
-              showToast('Promoción actualizada', 'success');
+              showToast("Promoción actualizada", "success");
             });
           });
-          deletePromoBtn?.addEventListener('click', async () => {
+          deletePromoBtn?.addEventListener("click", async () => {
             const promo = product.promotion;
             if (!promo || !promo.id) {
-              showToast('El producto no tiene promoción asociada', 'error');
+              showToast("El producto no tiene promoción asociada", "error");
               return;
             }
             const confirmed = await showConfirmDialog({
-              title: 'Eliminar promoción',
-              message: '¿Eliminar la promoción asociada?',
-              confirmText: 'Eliminar',
-              cancelText: 'Cancelar',
-              confirmClass: 'btn-danger'
+              title: "Eliminar promoción",
+              message: "¿Eliminar la promoción asociada?",
+              confirmText: "Eliminar",
+              cancelText: "Cancelar",
+              confirmClass: "btn-danger",
             });
             if (!confirmed) return;
             try {
-              const loadingToast = showToast('Eliminando promoción...', 'info', 0);
+              const loadingToast = showToast(
+                "Eliminando promoción...",
+                "info",
+                0,
+              );
               await deletePromotion(promo.id);
-              loadingToast.classList.remove('show');
+              loadingToast.classList.remove("show");
               setTimeout(() => loadingToast.remove(), 300);
-              showToast('Promoción eliminada', 'success');
+              showToast("Promoción eliminada", "success");
             } catch (err) {
-              showToast(`Error al eliminar: ${err.message}`, 'error');
+              showToast(`Error al eliminar: ${err.message}`, "error");
             }
           });
         }
-      }
+      },
     });
   }
 
@@ -273,44 +305,45 @@ class ModalManager {
   renderProductCard(product) {
     const priceData = calculatePromoPrice(product);
     const basePrice = parseFloat(product.base_price);
-    const imageUrl = product.image_url || '';
+    const imageUrl = product.image_url || "";
 
-    let badge = '';
-    let savingsText = '';
-    let originalPrice = '';
+    let badge = "";
+    let savingsText = "";
+    let originalPrice = "";
 
     if (priceData.hasPromo) {
       switch (priceData.type) {
-        case 'porcentaje':
+        case "porcentaje":
           badge = `<span class="discount-badge">${priceData.discount}% OFF</span>`;
           originalPrice = `<p class="price-original">$${basePrice.toFixed(2)}</p>`;
           savingsText = `<p class="price-savings">Ahorrás $${priceData.savings.toFixed(2)}</p>`;
           break;
-        case 'precio_fijo':
+        case "precio_fijo":
           badge = `<span class="discount-badge">OFERTA</span>`;
           originalPrice = `<p class="price-original">$${basePrice.toFixed(2)}</p>`;
           savingsText = `<p class="price-savings">Ahorrás $${priceData.savings.toFixed(2)}</p>`;
           break;
-        case '2x1':
+        case "2x1":
           badge = `<span class="discount-badge">2x1</span>`;
           savingsText = `<p class="price-savings">Precio efectivo: $${priceData.final.toFixed(2)} c/u</p>`;
           break;
-        case '3x2':
+        case "3x2":
           badge = `<span class="discount-badge">3x2</span>`;
           savingsText = `<p class="price-savings">Pagás solo 2 unidades</p>`;
           break;
-        case 'nxm':
+        case "nxm":
           badge = `<span class="discount-badge">COMBO</span>`;
-          savingsText = `<p class="price-savings">${escapeHtml(priceData.customText) || 'Consultá condiciones'}</p>`;
+          savingsText = `<p class="price-savings">${escapeHtml(priceData.customText) || "Consultá condiciones"}</p>`;
           break;
       }
     }
 
     const validUntil = product.promotion?.end_at
       ? `<p class="promo-validity">Válido hasta: ${formatDate(product.promotion.end_at)}</p>`
-      : '';
+      : "";
 
-    const adminMenu = this._isAdminContext() ? `
+    const adminMenu = this._isAdminContext()
+      ? `
       <div class="admin-actions-dropdown">
         <button type="button" class="btn-admin-actions" aria-haspopup="true" aria-expanded="false">
           Acciones <i class="fas fa-chevron-down"></i>
@@ -322,18 +355,20 @@ class ModalManager {
           <li><button type="button" data-action="delete-promo"><i class="fas fa-times-circle"></i> Eliminar promoción</button></li>
         </ul>
       </div>
-    ` : '';
+    `
+      : "";
 
     return `
       <div class="product-card-detail">
         <!-- SECCIÓN DE IMAGEN (MÓVIL Y DESKTOP) -->
         <div class="product-image-section">
           <div class="product-image-wrapper">
-            ${imageUrl 
-              ? `<img src="${escapeHtml(imageUrl)}" alt="${escapeHtml(product.name)}" class="product-image" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">`
-              : ''
+            ${
+              imageUrl
+                ? `<img src="${escapeHtml(imageUrl)}" alt="${escapeHtml(product.name)}" class="product-image" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">`
+                : ""
             }
-            <div class="product-image-placeholder" style="${imageUrl ? 'display: none;' : 'display: flex;'}">
+            <div class="product-image-placeholder" style="${imageUrl ? "display: none;" : "display: flex;"}">
               <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
                 <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
                 <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
@@ -349,20 +384,28 @@ class ModalManager {
             <dl class="specs-list">
               <div class="spec-item">
                 <dt>Bodega</dt>
-                <dd>${escapeHtml(product.winery_distillery) || '—'}</dd>
+                <dd>${escapeHtml(product.winery_distillery) || "—"}</dd>
               </div>
-              ${product.origin ? `
+              ${
+                product.origin
+                  ? `
                 <div class="spec-item">
                   <dt>Origen</dt>
                   <dd>${escapeHtml(product.origin)}</dd>
                 </div>
-              ` : ''}
-              ${product.vintage_year ? `
+              `
+                  : ""
+              }
+              ${
+                product.vintage_year
+                  ? `
                 <div class="spec-item">
                   <dt>Cosecha</dt>
                   <dd>${product.vintage_year}</dd>
                 </div>
-              ` : ''}
+              `
+                  : ""
+              }
             </dl>
           </div>
         </div>
@@ -370,13 +413,13 @@ class ModalManager {
         <!-- SECCIÓN DE INFORMACIÓN -->
         <div class="product-info-section">
           <!-- CATEGORÍA (MÓVIL Y DESKTOP) -->
-          <p class="product-category">${escapeHtml(product.drink_type) || ''}${product.varietal ? ' | ' + escapeHtml(product.varietal) : ''}</p>
+          <p class="product-category">${escapeHtml(product.drink_type) || ""}${product.varietal ? " | " + escapeHtml(product.varietal) : ""}</p>
 
           <!-- CÓDIGO DEL PRODUCTO (MÓVIL Y DESKTOP) -->
           <p class="product-code-label"><small>${escapeHtml(product.public_code)}</small></p>
 
           <!-- NOMBRE DEL PRODUCTO (MÓVIL Y DESKTOP) -->
-          <h1 class="product-title">${escapeHtml(product.name) || 'Producto'}</h1>
+          <h1 class="product-title">${escapeHtml(product.name) || "Producto"}</h1>
 
           <!-- PRECIO Y PROMOCIÓN (MÓVIL Y DESKTOP) -->
           <div class="product-price-section">
@@ -392,23 +435,34 @@ class ModalManager {
           </div>
 
           <!-- DESCRIPCIÓN (MÓVIL Y DESKTOP) -->
-          ${product.short_description ? `
+          ${
+            product.short_description
+              ? `
             <div class="product-description">
               <h2 class="description-title">Descripción</h2>
               <p>${escapeHtml(product.short_description)}</p>
             </div>
-          ` : ''}
+          `
+              : ""
+          }
 
           <!-- ACCIONES ADMIN (MÓVIL Y DESKTOP) -->
-          ${adminMenu ? `<div class="product-actions-section">${adminMenu}</div>` : ''}
+          ${adminMenu ? `<div class="product-actions-section">${adminMenu}</div>` : ""}
         </div>
       </div>
     `;
   }
 
   _isAdminContext() {
-    const h = window.location.hash.split('?')[0] || '';
-    return ['#admin', '#admin-products', '#admin-metrics', '#admin-promotions', '#admin-scan', '#admin-search'].includes(h);
+    const h = window.location.hash.split("?")[0] || "";
+    return [
+      "#admin",
+      "#admin-products",
+      "#admin-metrics",
+      "#admin-promotions",
+      "#admin-scan",
+      "#admin-search",
+    ].includes(h);
   }
 
   // ============================================
@@ -443,18 +497,18 @@ class ModalManager {
         </div>
       </div>
     `;
-    
-    const modal = this.open('qr-scanner-modal', content, {
+
+    const modal = this.open("qr-scanner-modal", content, {
       onOpen: () => this.initQrScanner(),
-      onClose: () => this.stopQrScanner()
+      onClose: () => this.stopQrScanner(),
     });
-    
+
     // Setup del formulario manual
-    const form = modal.querySelector('#qr-manual-form');
+    const form = modal.querySelector("#qr-manual-form");
     if (form) {
-      form.addEventListener('submit', (e) => {
+      form.addEventListener("submit", (e) => {
         e.preventDefault();
-        const code = form.querySelector('#qr-manual-input')?.value?.trim();
+        const code = form.querySelector("#qr-manual-input")?.value?.trim();
         if (code) {
           this.handleQrResult(code);
         }
@@ -466,24 +520,24 @@ class ModalManager {
    * Inicializa el escáner QR
    */
   async initQrScanner() {
-    const statusEl = document.getElementById('qr-status');
-    const readerEl = document.getElementById('qr-reader');
+    const statusEl = document.getElementById("qr-status");
+    const readerEl = document.getElementById("qr-reader");
 
     if (!readerEl) return;
 
     // Verificar que la librería esté disponible
-    if (typeof Html5Qrcode === 'undefined') {
+    if (typeof Html5Qrcode === "undefined") {
       if (statusEl) {
-        statusEl.textContent = 'Error: Librería de QR no disponible';
-        statusEl.dataset.type = 'error';
+        statusEl.textContent = "Error: Librería de QR no disponible";
+        statusEl.dataset.type = "error";
       }
       return;
     }
 
     // Mostrar mensaje de espera de permiso
     if (statusEl) {
-      statusEl.textContent = 'Esperando permiso para acceder a la cámara...';
-      statusEl.dataset.type = 'info';
+      statusEl.textContent = "Esperando permiso para acceder a la cámara...";
+      statusEl.dataset.type = "info";
     }
 
     // Probar acceso a la cámara antes de iniciar el escáner
@@ -491,14 +545,17 @@ class ModalManager {
       await navigator.mediaDevices.getUserMedia({ video: true });
     } catch (err) {
       if (statusEl) {
-        if (err && err.name === 'NotAllowedError') {
-          statusEl.textContent = 'Permiso denegado para usar la cámara. Usá el ingreso manual.';
-        } else if (err && err.name === 'NotFoundError') {
-          statusEl.textContent = 'No se encontró ninguna cámara en el dispositivo.';
+        if (err && err.name === "NotAllowedError") {
+          statusEl.textContent =
+            "Permiso denegado para usar la cámara. Usá el ingreso manual.";
+        } else if (err && err.name === "NotFoundError") {
+          statusEl.textContent =
+            "No se encontró ninguna cámara en el dispositivo.";
         } else {
-          statusEl.textContent = 'No se pudo acceder a la cámara. Usá el ingreso manual.';
+          statusEl.textContent =
+            "No se pudo acceder a la cámara. Usá el ingreso manual.";
         }
-        statusEl.dataset.type = 'error';
+        statusEl.dataset.type = "error";
       }
       return;
     }
@@ -506,28 +563,29 @@ class ModalManager {
     // Si se obtuvo permiso, iniciar el escáner
     try {
       if (statusEl) {
-        statusEl.textContent = 'Iniciando cámara...';
-        statusEl.dataset.type = 'info';
+        statusEl.textContent = "Iniciando cámara...";
+        statusEl.dataset.type = "info";
       }
 
-      this.qrScanner = new Html5Qrcode('qr-reader');
+      this.qrScanner = new Html5Qrcode("qr-reader");
 
       await this.qrScanner.start(
-        { facingMode: 'environment' },
+        { facingMode: "environment" },
         { fps: 10, qrbox: { width: 250, height: 250 } },
         (decodedText) => this.handleQrResult(decodedText),
-        () => {} // Ignorar errores de escaneo
+        () => {}, // Ignorar errores de escaneo
       );
 
       if (statusEl) {
-        statusEl.textContent = 'Escaneando... Enfocá el código QR';
-        statusEl.dataset.type = 'info';
+        statusEl.textContent = "Escaneando... Enfocá el código QR";
+        statusEl.dataset.type = "info";
       }
     } catch (err) {
-      console.error('Error iniciando QR scanner:', err);
+      console.error("Error iniciando QR scanner:", err);
       if (statusEl) {
-        statusEl.textContent = 'No se pudo acceder a la cámara. Usá el ingreso manual.';
-        statusEl.dataset.type = 'error';
+        statusEl.textContent =
+          "No se pudo acceder a la cámara. Usá el ingreso manual.";
+        statusEl.dataset.type = "error";
       }
     }
   }
@@ -543,7 +601,7 @@ class ModalManager {
         }
         this.qrScanner.clear();
       } catch (err) {
-        console.error('Error deteniendo QR scanner:', err);
+        console.error("Error deteniendo QR scanner:", err);
       }
       this.qrScanner = null;
     }
@@ -590,27 +648,31 @@ class ModalManager {
    * Genera la estructura HTML base para modales de producto (crear/editar)
    */
   _generateProductModalHTML(mode, product = null) {
-    const isEdit = mode === 'edit';
+    const isEdit = mode === "edit";
     const currentYear = new Date().getFullYear();
-    const imageUrl = isEdit && product?.image_url && product.image_url !== '0' ? product.image_url : '';
+    const imageUrl =
+      isEdit && product?.image_url && product.image_url !== "0"
+        ? product.image_url
+        : "";
 
     return `
       <div class="product-modal-wrapper">
         <h2 class="product-modal-title">
-          <i class="fas fa-${isEdit ? 'edit' : 'plus-circle'} me-2"></i>${isEdit ? 'Editar' : 'Nuevo'} Producto
+          <i class="fas fa-${isEdit ? "edit" : "plus-circle"} me-2"></i>${isEdit ? "Editar" : "Nuevo"} Producto
         </h2>
 
-        <form id="${isEdit ? 'admin-edit' : 'product-create'}-product-form" class="product-modal-form" novalidate>
-          <!-- Sección de imagen ${isEdit ? '+ QR' : ''} -->
-          <div class="form-image-section ${isEdit ? 'form-image-qr-section' : ''}">
+        <form id="${isEdit ? "admin-edit" : "product-create"}-product-form" class="product-modal-form" novalidate>
+          <!-- Sección de imagen ${isEdit ? "+ QR" : ""} -->
+          <div class="form-image-section ${isEdit ? "form-image-qr-section" : ""}">
             
-            <div class="image-qr-container ${isEdit ? 'two-columns-layout' : ''}">
+            <div class="image-qr-container ${isEdit ? "two-columns-layout" : ""}">
               <!-- Columna 1: Imagen del producto -->
               <div class="product-image-column">
-                <div class="image-preview-box" id="${isEdit ? 'edit' : 'create'}-image-display">
-                  ${imageUrl
-                    ? `<img src="${escapeHtml(imageUrl)}" alt="Producto" class="image-preview-thumb" id="current-product-image">`
-                    : `<div class="image-placeholder">
+                <div class="image-preview-box" id="${isEdit ? "edit" : "create"}-image-display">
+                  ${
+                    imageUrl
+                      ? `<img src="${escapeHtml(imageUrl)}" alt="Producto" class="image-preview-thumb" id="current-product-image">`
+                      : `<div class="image-placeholder">
                          <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
                            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
                            <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
@@ -621,13 +683,13 @@ class ModalManager {
                   }
                   <input
                     type="file"
-                    id="${isEdit ? 'edit' : 'create'}-product-image"
+                    id="${isEdit ? "edit" : "create"}-product-image"
                     accept="image/jpeg,image/png,image/webp"
                     class="d-none"
                   >
-                  <button type="button" class="btn-overlay btn-overlay-image" id="${isEdit ? 'edit' : 'create'}-select-image-btn" title="${imageUrl ? 'Cambiar imagen' : 'Seleccionar imagen'}">
-                    <i class="fas fa-${imageUrl ? 'sync-alt' : 'upload'}"></i>
-                    <span>${imageUrl ? 'Cambiar' : 'Agregar'}</span>
+                  <button type="button" class="btn-overlay btn-overlay-image" id="${isEdit ? "edit" : "create"}-select-image-btn" title="${imageUrl ? "Cambiar imagen" : "Seleccionar imagen"}">
+                    <i class="fas fa-${imageUrl ? "sync-alt" : "upload"}"></i>
+                    <span>${imageUrl ? "Cambiar" : "Agregar"}</span>
                   </button>
                   <span class="overlay-hint overlay-hint-image">
                     <i class="fas fa-info-circle"></i> JPG, PNG o WebP · Máx 5MB
@@ -635,7 +697,9 @@ class ModalManager {
                 </div>
               </div>
 
-              ${isEdit && product?.public_code ? `
+              ${
+                isEdit && product?.public_code
+                  ? `
               <!-- Columna 2: Código QR -->
               <div class="product-qr-column">
                 <div class="qr-preview-box">
@@ -653,22 +717,24 @@ class ModalManager {
                   </button>
                 </div>
               </div>
-              ` : ''}
+              `
+                  : ""
+              }
             </div>
           </div>
 
           ${this._generateProductFormFields(isEdit, product, currentYear)}
 
           <!-- Mensaje de estado -->
-          <div id="${isEdit ? 'edit' : 'create'}-form-status" class="alert d-none mb-3" role="alert"></div>
+          <div id="${isEdit ? "edit" : "create"}-form-status" class="alert d-none mb-3" role="alert"></div>
 
           <!-- Botones -->
           <div class="d-flex gap-2 justify-content-end mt-4 pt-3 border-top">
             <button type="button" class="btn-modal" data-dismiss-modal>
               <i class="fas fa-times me-1"></i>Cancelar
             </button>
-            <button type="submit" class="btn-modal btn-modal-primary" id="${isEdit ? 'save' : 'create'}-product-btn">
-              <i class="fas fa-${isEdit ? 'save' : 'plus'} me-1"></i>${isEdit ? 'Guardar cambios' : 'Crear producto'}
+            <button type="submit" class="btn-modal btn-modal-primary" id="${isEdit ? "save" : "create"}-product-btn">
+              <i class="fas fa-${isEdit ? "save" : "plus"} me-1"></i>${isEdit ? "Guardar cambios" : "Crear producto"}
             </button>
           </div>
         </form>
@@ -681,7 +747,7 @@ class ModalManager {
    */
   _generateProductFormFields(isEdit, product, currentYear) {
     const p = product || {};
-    const descriptionLength = (p.short_description || '').length;
+    const descriptionLength = (p.short_description || "").length;
 
     return `
       <!-- Identificación -->
@@ -689,32 +755,33 @@ class ModalManager {
         <h4 class="form-section-title">Identificación</h4>
         <div class="row g-3">
           <div class="col-md-6">
-            <label for="${isEdit ? 'edit' : 'create'}-public-code" class="form-label">
+            <label for="${isEdit ? "edit" : "create"}-public-code" class="form-label">
               Código público <span class="text-danger">*</span>
             </label>
             <input
               type="text"
               class="form-control"
-              id="${isEdit ? 'edit' : 'create'}-public-code"
+              id="${isEdit ? "edit" : "create"}-public-code"
               name="public_code"
-              value="${escapeHtml(p.public_code || '')}"
+              value="${escapeHtml(p.public_code || "")}"
               ${isEdit ? 'readonly title="El código no puede modificarse"' : 'required placeholder="Ej: MALBEC-2021-001"'}
             >
-            ${isEdit
-              ? '<small class="form-text text-muted">Este código es único e inmutable</small>'
-              : '<div class="invalid-feedback">Solo mayúsculas, números y guiones</div>'
+            ${
+              isEdit
+                ? '<small class="form-text text-muted">Este código es único e inmutable</small>'
+                : '<div class="invalid-feedback">Solo mayúsculas, números y guiones</div>'
             }
           </div>
           <div class="col-md-6">
-            <label for="${isEdit ? 'edit' : 'create'}-name" class="form-label">
+            <label for="${isEdit ? "edit" : "create"}-name" class="form-label">
               Nombre <span class="text-danger">*</span>
             </label>
             <input
               type="text"
               class="form-control"
-              id="${isEdit ? 'edit' : 'create'}-name"
+              id="${isEdit ? "edit" : "create"}-name"
               name="name"
-              value="${escapeHtml(p.name || '')}"
+              value="${escapeHtml(p.name || "")}"
               required
               minlength="3"
               maxlength="100"
@@ -730,15 +797,15 @@ class ModalManager {
         <h4 class="form-section-title">Información del Producto</h4>
         <div class="row g-3">
           <div class="col-md-6">
-            <label for="${isEdit ? 'edit' : 'create'}-winery" class="form-label">
+            <label for="${isEdit ? "edit" : "create"}-winery" class="form-label">
               Bodega/Destilería <span class="text-danger">*</span>
             </label>
             <input
               type="text"
               class="form-control"
-              id="${isEdit ? 'edit' : 'create'}-winery"
+              id="${isEdit ? "edit" : "create"}-winery"
               name="winery_distillery"
-              value="${escapeHtml(p.winery_distillery || '')}"
+              value="${escapeHtml(p.winery_distillery || "")}"
               required
               minlength="2"
               maxlength="100"
@@ -747,17 +814,17 @@ class ModalManager {
             <div class="invalid-feedback">Ingrese el nombre de la bodega o destilería</div>
           </div>
           <div class="col-md-6">
-            <label for="${isEdit ? 'edit' : 'create'}-drink-type" class="form-label">
+            <label for="${isEdit ? "edit" : "create"}-drink-type" class="form-label">
               Tipo de bebida <span class="text-danger">*</span>
             </label>
-            <select class="form-control" id="${isEdit ? 'edit' : 'create'}-drink-type" name="drink_type" required>
+            <select class="form-control" id="${isEdit ? "edit" : "create"}-drink-type" name="drink_type" required>
               <option value="">Seleccione un tipo</option>
-              <option value="vino" ${p.drink_type === 'vino' ? 'selected' : ''}>Vino</option>
-              <option value="espumante" ${p.drink_type === 'espumante' ? 'selected' : ''}>Espumante</option>
-              <option value="whisky" ${p.drink_type === 'whisky' ? 'selected' : ''}>Whisky</option>
-              <option value="gin" ${p.drink_type === 'gin' ? 'selected' : ''}>Gin</option>
-              <option value="cerveza" ${p.drink_type === 'cerveza' ? 'selected' : ''}>Cerveza</option>
-              <option value="licor" ${p.drink_type === 'licor' ? 'selected' : ''}>Licor</option>
+              <option value="vino" ${p.drink_type === "vino" ? "selected" : ""}>Vino</option>
+              <option value="espumante" ${p.drink_type === "espumante" ? "selected" : ""}>Espumante</option>
+              <option value="whisky" ${p.drink_type === "whisky" ? "selected" : ""}>Whisky</option>
+              <option value="gin" ${p.drink_type === "gin" ? "selected" : ""}>Gin</option>
+              <option value="cerveza" ${p.drink_type === "cerveza" ? "selected" : ""}>Cerveza</option>
+              <option value="licor" ${p.drink_type === "licor" ? "selected" : ""}>Licor</option>
             </select>
             <div class="invalid-feedback">Seleccione el tipo de bebida</div>
           </div>
@@ -765,25 +832,25 @@ class ModalManager {
 
         <div class="row g-3 mt-2">
           <div class="col-md-6">
-            <label for="${isEdit ? 'edit' : 'create'}-varietal" class="form-label">Varietal</label>
+            <label for="${isEdit ? "edit" : "create"}-varietal" class="form-label">Varietal</label>
             <input
               type="text"
               class="form-control"
-              id="${isEdit ? 'edit' : 'create'}-varietal"
+              id="${isEdit ? "edit" : "create"}-varietal"
               name="varietal"
-              value="${escapeHtml(p.varietal || '')}"
+              value="${escapeHtml(p.varietal || "")}"
               maxlength="50"
               placeholder="Ej: Malbec, Cabernet Sauvignon"
             >
           </div>
           <div class="col-md-6">
-            <label for="${isEdit ? 'edit' : 'create'}-origin" class="form-label">Origen</label>
+            <label for="${isEdit ? "edit" : "create"}-origin" class="form-label">Origen</label>
             <input
               type="text"
               class="form-control"
-              id="${isEdit ? 'edit' : 'create'}-origin"
+              id="${isEdit ? "edit" : "create"}-origin"
               name="origin"
-              value="${escapeHtml(p.origin || '')}"
+              value="${escapeHtml(p.origin || "")}"
               maxlength="100"
               placeholder="Ej: Mendoza, Argentina"
             >
@@ -796,13 +863,13 @@ class ModalManager {
         <h4 class="form-section-title">Precio</h4>
         <div class="row g-3">
           <div class="col-md-6">
-            <label for="${isEdit ? 'edit' : 'create'}-vintage" class="form-label">Año de cosecha</label>
+            <label for="${isEdit ? "edit" : "create"}-vintage" class="form-label">Año de cosecha</label>
             <input
               type="number"
               class="form-control"
-              id="${isEdit ? 'edit' : 'create'}-vintage"
+              id="${isEdit ? "edit" : "create"}-vintage"
               name="vintage_year"
-              value="${escapeHtml(p.vintage_year || '')}"
+              value="${escapeHtml(p.vintage_year || "")}"
               min="1900"
               max="${currentYear + 1}"
               placeholder="Ej: ${currentYear - 3}"
@@ -810,16 +877,16 @@ class ModalManager {
             <div class="invalid-feedback">Año inválido</div>
           </div>
           <div class="col-md-6">
-            <label for="${isEdit ? 'edit' : 'create'}-price" class="form-label">
+            <label for="${isEdit ? "edit" : "create"}-price" class="form-label">
               Precio base <span class="text-danger">*</span>
             </label>
             <input
               type="number"
               class="form-control"
-              id="${isEdit ? 'edit' : 'create'}-price"
+              id="${isEdit ? "edit" : "create"}-price"
               name="base_price"
               step="0.01"
-              value="${escapeHtml(p.base_price || '')}"
+              value="${escapeHtml(p.base_price || "")}"
               required
               min="0.01"
               max="999999.99"
@@ -835,15 +902,15 @@ class ModalManager {
         <h4 class="form-section-title">Descripción</h4>
         <div class="row g-3">
           <div class="col-12">
-            <label for="${isEdit ? 'edit' : 'create'}-description" class="form-label">Descripción corta</label>
+            <label for="${isEdit ? "edit" : "create"}-description" class="form-label">Descripción corta</label>
             <textarea
               class="form-control"
-              id="${isEdit ? 'edit' : 'create'}-description"
+              id="${isEdit ? "edit" : "create"}-description"
               name="short_description"
               rows="4"
               maxlength="200"
               placeholder="Breve descripción del producto (opcional)"
-            >${escapeHtml(p.short_description || '')}</textarea>
+            >${escapeHtml(p.short_description || "")}</textarea>
             <div class="d-flex justify-content-between align-items-center mt-1">
               <small class="form-text text-muted">Máximo 200 caracteres</small>
               <small class="form-text">
@@ -864,14 +931,14 @@ class ModalManager {
    * Muestra el modal de creación de producto
    */
   async showCreateProduct(onSuccess = null) {
-    const content = this._generateProductModalHTML('create');
+    const content = this._generateProductModalHTML("create");
 
-    this.open('create-product-modal', content, {
+    this.open("create-product-modal", content, {
       disableClickOutside: true,
       onOpen: (modalEl) => {
-        modalEl.classList.add('modal-xl');
-        this._setupProductFormLogic('create', null, modalEl, onSuccess);
-      }
+        modalEl.classList.add("modal-xl");
+        this._setupProductFormLogic("create", null, modalEl, onSuccess);
+      },
     });
   }
 
@@ -884,38 +951,39 @@ class ModalManager {
    */
   async showEditProduct(product, onSuccess = null) {
     if (!product || !product.id) {
-      console.error('Product data is required for edit modal');
+      console.error("Product data is required for edit modal");
       return;
     }
 
-    const content = this._generateProductModalHTML('edit', product);
+    const content = this._generateProductModalHTML("edit", product);
 
-    this.open('edit-product-modal', content, {
+    this.open("edit-product-modal", content, {
       disableClickOutside: true,
       onOpen: (modalEl) => {
-        modalEl.classList.add('modal-xl');
-        this._setupProductFormLogic('edit', product, modalEl, onSuccess);
-        
+        modalEl.classList.add("modal-xl");
+        this._setupProductFormLogic("edit", product, modalEl, onSuccess);
+
         // Generar QR si estamos en modo edición
         if (product?.public_code) {
           setTimeout(() => {
-            const qrContainer = modalEl.querySelector('#edit-qr-display');
+            const qrContainer = modalEl.querySelector("#edit-qr-display");
             if (qrContainer) {
               // Generar el QR
               this.generateQRCode(product.public_code, qrContainer);
-              
             }
-            
+
             // Setup botón descargar QR
-            const downloadQRBtn = modalEl.querySelector('#edit-download-qr-btn');
+            const downloadQRBtn = modalEl.querySelector(
+              "#edit-download-qr-btn",
+            );
             if (downloadQRBtn) {
-              downloadQRBtn.addEventListener('click', () => {
+              downloadQRBtn.addEventListener("click", () => {
                 this._downloadQRAsImage(product.public_code);
               });
             }
           }, 100);
         }
-      }
+      },
     });
   }
 
@@ -931,84 +999,90 @@ class ModalManager {
    * @param {Function|null} onSuccess - Callback de éxito
    */
   _setupProductFormLogic(mode, product, modal, onSuccess) {
-    const isEdit = mode === 'edit';
-    const prefix = isEdit ? 'edit' : 'create';
+    const isEdit = mode === "edit";
+    const prefix = isEdit ? "edit" : "create";
 
     // Seleccionar elementos del DOM
-    const form = modal.querySelector(`#${isEdit ? 'admin-edit' : 'product-create'}-product-form`);
+    const form = modal.querySelector(
+      `#${isEdit ? "admin-edit" : "product-create"}-product-form`,
+    );
     const imageInput = modal.querySelector(`#${prefix}-product-image`);
     const imageDisplay = modal.querySelector(`#${prefix}-image-display`);
     const selectImageBtn = modal.querySelector(`#${prefix}-select-image-btn`);
-    const submitBtn = modal.querySelector(`#${isEdit ? 'save' : 'create'}-product-btn`);
+    const submitBtn = modal.querySelector(
+      `#${isEdit ? "save" : "create"}-product-btn`,
+    );
     const statusEl = modal.querySelector(`#${prefix}-form-status`);
     const descriptionTextarea = modal.querySelector(`#${prefix}-description`);
-    const charCount = modal.querySelector('#char-count');
+    const charCount = modal.querySelector("#char-count");
     const publicCodeInput = modal.querySelector(`#${prefix}-public-code`);
     const vintageInput = modal.querySelector(`#${prefix}-vintage`);
 
     // Botones de cancelar
-    const closeBtn = modal.querySelector('[data-close-modal]');
-    const dismissBtn = modal.querySelector('[data-dismiss-modal]');
+    const closeBtn = modal.querySelector("[data-close-modal]");
+    const dismissBtn = modal.querySelector("[data-dismiss-modal]");
 
-    let uploadedImageUrl = isEdit && product?.image_url ? product.image_url : null;
+    let uploadedImageUrl =
+      isEdit && product?.image_url ? product.image_url : null;
     let hasChangedImage = false;
+    let selectedImageFile = null; // Guardamos el archivo seleccionado
 
     // Contador de caracteres de descripción
     if (descriptionTextarea && charCount) {
-      descriptionTextarea.addEventListener('input', () => {
+      descriptionTextarea.addEventListener("input", () => {
         charCount.textContent = descriptionTextarea.value.length;
       });
     }
 
     // Forzar mayúsculas en el código público (solo creación)
     if (!isEdit && publicCodeInput) {
-      publicCodeInput.addEventListener('input', () => {
-        const val = publicCodeInput.value || '';
+      publicCodeInput.addEventListener("input", () => {
+        const val = publicCodeInput.value || "";
         publicCodeInput.value = val.toUpperCase();
       });
     }
 
     // Seleccionar imagen
     if (selectImageBtn && imageInput) {
-      selectImageBtn.addEventListener('click', () => imageInput.click());
+      selectImageBtn.addEventListener("click", () => imageInput.click());
 
-      imageInput.addEventListener('change', async (e) => {
+      imageInput.addEventListener("change", async (e) => {
         const file = e.target.files[0];
         if (!file) return;
 
         // Validar tipo
-        if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
-          showToast('Solo se permiten imágenes JPG, PNG o WebP', 'error');
+        if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
+          showToast("Solo se permiten imágenes JPG, PNG o WebP", "error");
           return;
         }
 
         // Validar tamaño (5MB)
         if (file.size > 5 * 1024 * 1024) {
-          showToast('La imagen no debe superar 5MB', 'error');
+          showToast("La imagen no debe superar 5MB", "error");
           return;
         }
+        //Guardar el archivo seleccionado para subirlo al servidor después
+        selectedImageFile = file;
+        hasChangedImage = true;
 
         // Preview de la imagen en memoria (sin subir aún)
         const reader = new FileReader();
         reader.onload = (e) => {
           // Guardar referencias al botón e hint antes de limpiar
-          const buttonRef = imageDisplay.querySelector('.btn-overlay');
-          const hintRef = imageDisplay.querySelector('.overlay-hint');
-          
+          const buttonRef = imageDisplay.querySelector(".btn-overlay");
+          const hintRef = imageDisplay.querySelector(".overlay-hint");
+
           // Limpiar y crear imagen
-          imageDisplay.innerHTML = '';
-          const img = document.createElement('img');
+          imageDisplay.innerHTML = "";
+          const img = document.createElement("img");
           img.src = e.target.result; // Data URL en memoria
-          img.alt = 'Preview';
-          img.className = 'image-preview-thumb';
+          img.alt = "Preview";
+          img.className = "image-preview-thumb";
           imageDisplay.appendChild(img);
-          
+
           // Re-agregar botón e hint
           if (buttonRef) imageDisplay.appendChild(buttonRef);
           if (hintRef) imageDisplay.appendChild(hintRef);
-          
-          // Guardar el archivo en memoria para subir después
-          imageInput.tempFile = file;
           imageInput.tempDataUrl = e.target.result;
         };
         reader.readAsDataURL(file);
@@ -1017,15 +1091,15 @@ class ModalManager {
 
     // Botones de cancelar
     if (closeBtn) {
-      closeBtn.addEventListener('click', () => this.close());
+      closeBtn.addEventListener("click", () => this.close());
     }
     if (dismissBtn) {
-      dismissBtn.addEventListener('click', () => this.close());
+      dismissBtn.addEventListener("click", () => this.close());
     }
 
     // Enviar formulario
     if (form) {
-      form.addEventListener('submit', async (e) => {
+      form.addEventListener("submit", async (e) => {
         e.preventDefault();
 
         // Validación específica: Año de cosecha dentro de rango
@@ -1034,17 +1108,18 @@ class ModalManager {
           const maxYear = new Date().getFullYear();
           if (isNaN(year) || year < 1900 || year > maxYear) {
             const msg = `Año de cosecha inválido. Debe estar entre 1900 y ${maxYear}.`;
-            showToast(msg, 'error');
-            vintageInput.classList.add('is-invalid');
-            const feedback = vintageInput.parentElement.querySelector('.invalid-feedback');
+            showToast(msg, "error");
+            vintageInput.classList.add("is-invalid");
+            const feedback =
+              vintageInput.parentElement.querySelector(".invalid-feedback");
             if (feedback) {
               feedback.textContent = msg;
-              feedback.style.display = 'block';
+              feedback.style.display = "block";
             }
-            vintageInput.addEventListener('input', function clearInvalid() {
-              vintageInput.classList.remove('is-invalid');
-              if (feedback) feedback.style.display = '';
-              vintageInput.removeEventListener('input', clearInvalid);
+            vintageInput.addEventListener("input", function clearInvalid() {
+              vintageInput.classList.remove("is-invalid");
+              if (feedback) feedback.style.display = "";
+              vintageInput.removeEventListener("input", clearInvalid);
             });
             vintageInput.focus();
             return;
@@ -1054,24 +1129,75 @@ class ModalManager {
         // Validación HTML5
         if (!form.checkValidity()) {
           e.stopPropagation();
-          form.classList.add('was-validated');
-          showToast('Por favor, complete todos los campos requeridos', 'error');
+          form.classList.add("was-validated");
+          showToast("Por favor, complete todos los campos requeridos", "error");
           return;
         }
 
         // Validación personalizada del código público (solo creación)
         if (!isEdit && publicCodeInput) {
-          const code = (publicCodeInput.value || '').trim();
+          const code = (publicCodeInput.value || "").trim();
           if (!code || !/^[A-Z0-9-]+$/.test(code)) {
-            showToast('Código público inválido: use mayúsculas, números y guiones', 'error');
+            showToast(
+              "Código público inválido: use mayúsculas, números y guiones",
+              "error",
+            );
             publicCodeInput.focus();
             return;
           }
         }
 
+        // Si hay una imagen seleccionada, subirla primero al servidor
+        if (hasChangedImage && selectedImageFile) {
+          submitBtn.disabled = true;
+          submitBtn.innerHTML =
+            '<i class="fas fa-spinner fa-spin me-1"></i>Subiendo imagen...';
+
+          try {
+            const imageFormData = new FormData();
+            imageFormData.append("image", selectedImageFile);
+
+            const uploadResponse = await fetch(
+              "./api/admin/upload/product-image",
+              {
+                method: "POST",
+                headers: {
+                  Authorization: `Bearer ${localStorage.getItem("auth_token")}`,
+                },
+                body: imageFormData,
+              },
+            );
+
+            if (!uploadResponse.ok) {
+              const errorData = await uploadResponse.json();
+              throw new Error(errorData.message || "Error al subir la imagen");
+            }
+
+            const uploadResult = await uploadResponse.json();
+
+            if (uploadResult.ok && uploadResult.data?.url) {
+              uploadedImageUrl = uploadResult.data.url;
+            } else {
+              throw new Error("No se recibió la URL de la imagen");
+            }
+          } catch (error) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = `<i class="fas fa-${isEdit ? "save" : "plus"} me-1"></i>${isEdit ? "Guardar cambios" : "Crear producto"}`;
+            showToast(error.message || "Error al subir la imagen", "error");
+            return;
+          }
+        }
+
         // Si es edición y cambió la imagen, preguntar qué hacer con la anterior
-        if (isEdit && hasChangedImage && product?.image_url && product.image_url !== '0') {
-          const shouldDelete = await this._showImageActionDialog(product.image_url);
+        if (
+          isEdit &&
+          hasChangedImage &&
+          product?.image_url &&
+          product.image_url !== "0"
+        ) {
+          const shouldDelete = await this._showImageActionDialog(
+            product.image_url,
+          );
 
           // Preparar datos
           const formData = new FormData(form);
@@ -1089,7 +1215,14 @@ class ModalManager {
           }
 
           // Enviar actualización
-          await this._submitProductForm(isEdit, product?.id, payload, submitBtn, statusEl, onSuccess);
+          await this._submitProductForm(
+            isEdit,
+            product?.id,
+            payload,
+            submitBtn,
+            statusEl,
+            onSuccess,
+          );
         } else {
           // Preparar datos normales
           const formData = new FormData(form);
@@ -1101,7 +1234,14 @@ class ModalManager {
           }
 
           // Enviar
-          await this._submitProductForm(isEdit, product?.id, payload, submitBtn, statusEl, onSuccess);
+          await this._submitProductForm(
+            isEdit,
+            product?.id,
+            payload,
+            submitBtn,
+            statusEl,
+            onSuccess,
+          );
         }
       });
     }
@@ -1110,11 +1250,22 @@ class ModalManager {
   /**
    * Envía el formulario de producto al servidor
    */
-  async _submitProductForm(isEdit, productId, payload, submitBtn, statusEl, onSuccess) {
-    const endpoint = isEdit ? `./api/admin/productos/${productId}` : './api/admin/productos';
-    const method = isEdit ? 'PUT' : 'POST';
-    const actionText = isEdit ? 'Guardando' : 'Creando';
-    const successText = isEdit ? 'Producto actualizado con éxito' : 'Producto creado con éxito';
+  async _submitProductForm(
+    isEdit,
+    productId,
+    payload,
+    submitBtn,
+    statusEl,
+    onSuccess,
+  ) {
+    const endpoint = isEdit
+      ? `./api/admin/productos/${productId}`
+      : "./api/admin/productos";
+    const method = isEdit ? "PUT" : "POST";
+    const actionText = isEdit ? "Guardando" : "Creando";
+    const successText = isEdit
+      ? "Producto actualizado con éxito"
+      : "Producto creado con éxito";
 
     // Si es edición, agregar el ID al payload
     if (isEdit) {
@@ -1130,21 +1281,23 @@ class ModalManager {
 
     try {
       // Si hay una imagen en memoria sin subir, subirla primero
-      const imageInput = document.querySelector(`#${isEdit ? 'edit' : 'create'}-product-image`);
+      const imageInput = document.querySelector(
+        `#${isEdit ? "edit" : "create"}-product-image`,
+      );
       if (imageInput && imageInput.tempFile) {
         try {
           const formData = new FormData();
-          formData.append('image', imageInput.tempFile);
+          formData.append("image", imageInput.tempFile);
 
-          const response = await fetch('./api/admin/upload/product-image', {
-            method: 'POST',
-            body: formData
+          const response = await fetch("./api/admin/upload/product-image", {
+            method: "POST",
+            body: formData,
           });
 
           const data = await response.json();
 
           if (!response.ok) {
-            throw new Error(data.message || 'Error al subir la imagen');
+            throw new Error(data.message || "Error al subir la imagen");
           }
 
           // Actualizar payload con URL de imagen del servidor
@@ -1153,9 +1306,9 @@ class ModalManager {
           imageInput.tempFile = null;
           imageInput.tempDataUrl = null;
         } catch (error) {
-          showToast(`Error al subir imagen: ${error.message}`, 'error');
+          showToast(`Error al subir imagen: ${error.message}`, "error");
           submitBtn.disabled = false;
-          submitBtn.innerHTML = `<i class="fas fa-${isEdit ? 'save' : 'plus'} me-1"></i>${isEdit ? 'Guardar cambios' : 'Crear producto'}`;
+          submitBtn.innerHTML = `<i class="fas fa-${isEdit ? "save" : "plus"} me-1"></i>${isEdit ? "Guardar cambios" : "Crear producto"}`;
           return;
         }
       }
@@ -1163,20 +1316,23 @@ class ModalManager {
       const response = await fetch(endpoint, {
         method,
         headers: {
-          'Content-Type': 'application/json'
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
       });
 
       const data = await response.json();
 
       if (!response.ok) {
         // Extraer mensaje de error del backend
-        const errorMessage = data.error?.message || data.message || `Error al ${isEdit ? 'actualizar' : 'crear'} el producto`;
+        const errorMessage =
+          data.error?.message ||
+          data.message ||
+          `Error al ${isEdit ? "actualizar" : "crear"} el producto`;
         throw new Error(errorMessage);
       }
 
-      showToast(successText, 'success');
+      showToast(successText, "success");
 
       // Mostrar QR modal solo al CREAR producto nuevo (no en edición)
       const productData = data.data;
@@ -1189,7 +1345,7 @@ class ModalManager {
           this.showProductQRModal({
             id: productData.id,
             name: productData.name,
-            public_code: productData.public_code
+            public_code: productData.public_code,
           });
         }, 300);
       } else {
@@ -1198,16 +1354,18 @@ class ModalManager {
           this.close();
           if (onSuccess) onSuccess(data.data);
           // Recargar tabla de productos
-          if (window.adminView && typeof window.adminView.loadProducts === 'function') {
+          if (
+            window.adminView &&
+            typeof window.adminView.loadProducts === "function"
+          ) {
             window.adminView.loadProducts();
           }
         }, 800);
       }
-
     } catch (error) {
-      showToast(error.message, 'error');
+      showToast(error.message, "error");
       submitBtn.disabled = false;
-      submitBtn.innerHTML = `<i class="fas fa-${isEdit ? 'save' : 'plus'} me-1"></i>${isEdit ? 'Guardar cambios' : 'Crear producto'}`;
+      submitBtn.innerHTML = `<i class="fas fa-${isEdit ? "save" : "plus"} me-1"></i>${isEdit ? "Guardar cambios" : "Crear producto"}`;
     }
   }
 
@@ -1240,20 +1398,24 @@ class ModalManager {
         </div>
       `;
 
-      const dialogModal = this.open('image-action-dialog-modal', dialogContent, {
-        disableClickOutside: true,
-        preventClose: true
-      });
+      const dialogModal = this.open(
+        "image-action-dialog-modal",
+        dialogContent,
+        {
+          disableClickOutside: true,
+          preventClose: true,
+        },
+      );
 
-      const keepBtn = dialogModal.querySelector('#keep-old-image');
-      const deleteBtn = dialogModal.querySelector('#delete-old-image');
+      const keepBtn = dialogModal.querySelector("#keep-old-image");
+      const deleteBtn = dialogModal.querySelector("#delete-old-image");
 
-      keepBtn?.addEventListener('click', () => {
+      keepBtn?.addEventListener("click", () => {
         this.close();
         resolve(false);
       });
 
-      deleteBtn?.addEventListener('click', () => {
+      deleteBtn?.addEventListener("click", () => {
         this.close();
         resolve(true);
       });
@@ -1267,21 +1429,21 @@ class ModalManager {
     if (!statusEl) return;
 
     statusEl.textContent = message;
-    statusEl.className = 'alert mb-3';
+    statusEl.className = "alert mb-3";
 
-    switch(type) {
-      case 'success':
-        statusEl.classList.add('alert-success');
+    switch (type) {
+      case "success":
+        statusEl.classList.add("alert-success");
         break;
-      case 'error':
-        statusEl.classList.add('alert-danger');
+      case "error":
+        statusEl.classList.add("alert-danger");
         break;
-      case 'info':
-        statusEl.classList.add('alert-info');
+      case "info":
+        statusEl.classList.add("alert-info");
         break;
     }
 
-    statusEl.classList.remove('d-none');
+    statusEl.classList.remove("d-none");
   }
 
   /**
@@ -1289,8 +1451,8 @@ class ModalManager {
    */
   hideFormStatus(statusEl) {
     if (!statusEl) return;
-    statusEl.classList.add('d-none');
-    statusEl.textContent = '';
+    statusEl.classList.add("d-none");
+    statusEl.textContent = "";
   }
 
   // ============================================
@@ -1302,14 +1464,14 @@ class ModalManager {
    * @param {Object|null} promotion - Datos de promoción para edición (null = crear nueva)
    */
   _generatePromotionModalHTML(promotion = null) {
-    const today = new Date().toISOString().split('T')[0];
+    const today = new Date().toISOString().split("T")[0];
     const isEdit = promotion !== null;
-    const productLabel = isEdit ? 'Producto' : 'Buscar producto';
-    const productSearchClass = isEdit ? 'd-none' : '';
-    const selectedBadgeClass = isEdit ? '' : 'd-none';
-    const title = isEdit ? 'Editar Promoción' : 'Nueva Promoción';
-    const btnText = isEdit ? 'Guardar cambios' : 'Crear promoción';
-    const btnIcon = isEdit ? 'fa-save' : 'fa-plus';
+    const productLabel = isEdit ? "Producto" : "Buscar producto";
+    const productSearchClass = isEdit ? "d-none" : "";
+    const selectedBadgeClass = isEdit ? "" : "d-none";
+    const title = isEdit ? "Editar Promoción" : "Nueva Promoción";
+    const btnText = isEdit ? "Guardar cambios" : "Crear promoción";
+    const btnIcon = isEdit ? "fa-save" : "fa-plus";
 
     return `
       <div class="promotion-modal-wrapper">
@@ -1323,7 +1485,7 @@ class ModalManager {
             <div class="row g-3">
               <div class="col-12">
                 <label for="promo-product-search" class="form-label">
-                  ${productLabel}${isEdit ? '' : ' <span class="text-danger">*</span>'}
+                  ${productLabel}${isEdit ? "" : ' <span class="text-danger">*</span>'}
                 </label>
                 <div class="product-search-container ${productSearchClass}">
                   <input
@@ -1493,12 +1655,12 @@ class ModalManager {
   async showCreatePromotion(onSuccess = null) {
     const content = this._generatePromotionModalHTML();
 
-    this.open('create-promotion-modal', content, {
+    this.open("create-promotion-modal", content, {
       disableClickOutside: true,
       onOpen: (modalEl) => {
-        modalEl.classList.add('modal-xl');
+        modalEl.classList.add("modal-xl");
         this._setupPromotionFormLogic(modalEl, onSuccess);
-      }
+      },
     });
   }
 
@@ -1510,12 +1672,12 @@ class ModalManager {
   async showEditPromotion(promotion, onSuccess = null) {
     const content = this._generatePromotionModalHTML(promotion);
 
-    this.open('edit-promotion-modal', content, {
+    this.open("edit-promotion-modal", content, {
       disableClickOutside: true,
       onOpen: (modalEl) => {
-        modalEl.classList.add('modal-xl');
+        modalEl.classList.add("modal-xl");
         this._setupPromotionFormLogic(modalEl, onSuccess, promotion);
-      }
+      },
     });
   }
 
@@ -1526,25 +1688,25 @@ class ModalManager {
    * @param {Object|null} promotion - Datos de promoción para edición
    */
   async _setupPromotionFormLogic(modal, onSuccess, promotion = null) {
-    const form = modal.querySelector('#promotion-create-form');
-    const productSearchInput = modal.querySelector('#promo-product-search');
-    const productIdInput = modal.querySelector('#promo-product-id');
-    const productResults = modal.querySelector('#promo-product-results');
-    const selectedProductBadge = modal.querySelector('#promo-selected-product');
-    const typeSelect = modal.querySelector('#promo-type');
-    const valueInput = modal.querySelector('#promo-value');
-    const valueContainer = modal.querySelector('#promo-value-container');
-    const valueLabel = modal.querySelector('#promo-value-label');
-    const valueHint = modal.querySelector('#promo-value-hint');
-    const nxmNContainer = modal.querySelector('#promo-nxm-n-container');
-    const nxmMContainer = modal.querySelector('#promo-nxm-m-container');
-    const nxmNInput = modal.querySelector('#promo-nxm-n');
-    const nxmMInput = modal.querySelector('#promo-nxm-m');
-    const textInput = modal.querySelector('#promo-text');
-    const startInput = modal.querySelector('#promo-start');
-    const endInput = modal.querySelector('#promo-end');
-    const submitBtn = modal.querySelector('#create-promo-btn');
-    const dismissBtn = modal.querySelector('[data-dismiss-modal]');
+    const form = modal.querySelector("#promotion-create-form");
+    const productSearchInput = modal.querySelector("#promo-product-search");
+    const productIdInput = modal.querySelector("#promo-product-id");
+    const productResults = modal.querySelector("#promo-product-results");
+    const selectedProductBadge = modal.querySelector("#promo-selected-product");
+    const typeSelect = modal.querySelector("#promo-type");
+    const valueInput = modal.querySelector("#promo-value");
+    const valueContainer = modal.querySelector("#promo-value-container");
+    const valueLabel = modal.querySelector("#promo-value-label");
+    const valueHint = modal.querySelector("#promo-value-hint");
+    const nxmNContainer = modal.querySelector("#promo-nxm-n-container");
+    const nxmMContainer = modal.querySelector("#promo-nxm-m-container");
+    const nxmNInput = modal.querySelector("#promo-nxm-n");
+    const nxmMInput = modal.querySelector("#promo-nxm-m");
+    const textInput = modal.querySelector("#promo-text");
+    const startInput = modal.querySelector("#promo-start");
+    const endInput = modal.querySelector("#promo-end");
+    const submitBtn = modal.querySelector("#create-promo-btn");
+    const dismissBtn = modal.querySelector("[data-dismiss-modal]");
 
     const isEdit = promotion !== null;
 
@@ -1552,7 +1714,8 @@ class ModalManager {
     const suggestInitialText = () => {
       const type = typeSelect.value;
       const current = textInput.value.trim();
-      const isAuto = current === '' ||
+      const isAuto =
+        current === "" ||
         current.match(/^\d+% OFF$/) ||
         current.match(/^Precio especial \$[\d.,]+$/) ||
         current.match(/^[23]x[12] - Llevá \d+ y pagá solo \d+$/) ||
@@ -1560,15 +1723,15 @@ class ModalManager {
 
       if (!isAuto) return;
 
-      if (type === 'porcentaje' && valueInput.value) {
+      if (type === "porcentaje" && valueInput.value) {
         textInput.value = `${valueInput.value}% OFF`;
-      } else if (type === 'precio_fijo' && valueInput.value) {
-        textInput.value = `Precio especial $${parseFloat(valueInput.value).toLocaleString('es-AR')}`;
-      } else if (type === '2x1') {
-        textInput.value = '2x1 - Llevá 2 y pagá solo 1';
-      } else if (type === '3x2') {
-        textInput.value = '3x2 - Llevá 3 y pagá solo 2';
-      } else if (type === 'nxm' && nxmNInput.value && nxmMInput.value) {
+      } else if (type === "precio_fijo" && valueInput.value) {
+        textInput.value = `Precio especial $${parseFloat(valueInput.value).toLocaleString("es-AR")}`;
+      } else if (type === "2x1") {
+        textInput.value = "2x1 - Llevá 2 y pagá solo 1";
+      } else if (type === "3x2") {
+        textInput.value = "3x2 - Llevá 3 y pagá solo 2";
+      } else if (type === "nxm" && nxmNInput.value && nxmMInput.value) {
         const n = nxmNInput.value;
         const m = nxmMInput.value;
         textInput.value = `${n}x${m} - Llevá ${n} y pagá solo ${m}`;
@@ -1586,27 +1749,30 @@ class ModalManager {
       nxmMContainer,
       nxmNInput,
       nxmMInput,
-      textInput
+      textInput,
     );
 
     // Si es edición, pre-llenar campos
     if (isEdit) {
-      const productName = promotion.product_name || `Producto #${promotion.product_id}`;
-      const productPrice = promotion.product_price !== undefined && promotion.product_price !== null
-        ? `$${parseFloat(promotion.product_price).toFixed(2)}`
-        : '';
+      const productName =
+        promotion.product_name || `Producto #${promotion.product_id}`;
+      const productPrice =
+        promotion.product_price !== undefined &&
+        promotion.product_price !== null
+          ? `$${parseFloat(promotion.product_price).toFixed(2)}`
+          : "";
 
       productIdInput.value = promotion.product_id;
       typeSelect.value = promotion.promotion_type;
       valueInput.value = promotion.parameter_value;
       textInput.value = promotion.visible_text;
-      
+
       // Formatear fechas (quitar hora si existe)
       if (promotion.start_at) {
-        startInput.value = promotion.start_at.split(' ')[0];
+        startInput.value = promotion.start_at.split(" ")[0];
       }
       if (promotion.end_at) {
-        endInput.value = promotion.end_at.split(' ')[0];
+        endInput.value = promotion.end_at.split(" ")[0];
       }
 
       // Deshabilitar búsqueda de producto (no se puede cambiar en edición) y mostrar info
@@ -1614,36 +1780,45 @@ class ModalManager {
         productSearchInput.disabled = true;
         productSearchInput.value = productName;
       }
-      selectedProductBadge.classList.remove('d-none');
-      selectedProductBadge.querySelector('.product-name').textContent = productName;
-      selectedProductBadge.querySelector('.product-price').textContent = productPrice;
-      const removeBtn = selectedProductBadge.querySelector('.btn-remove-product');
-      if (removeBtn) removeBtn.style.display = 'none';
-      
+      selectedProductBadge.classList.remove("d-none");
+      selectedProductBadge.querySelector(".product-name").textContent =
+        productName;
+      selectedProductBadge.querySelector(".product-price").textContent =
+        productPrice;
+      const removeBtn = selectedProductBadge.querySelector(
+        ".btn-remove-product",
+      );
+      if (removeBtn) removeBtn.style.display = "none";
+
       // Trigger change para actualizar labels según tipo (con manejadores ya configurados)
-      typeSelect.dispatchEvent(new Event('change'));
+      typeSelect.dispatchEvent(new Event("change"));
       suggestInitialText();
     } else {
       // Configurar buscador de productos solo para creación
-      this._setupProductSearch(productSearchInput, productIdInput, productResults, selectedProductBadge);
+      this._setupProductSearch(
+        productSearchInput,
+        productIdInput,
+        productResults,
+        selectedProductBadge,
+      );
       // Sugerir texto inicial para creación
-      typeSelect.dispatchEvent(new Event('change'));
+      typeSelect.dispatchEvent(new Event("change"));
       suggestInitialText();
     }
 
     // Botón cancelar
     if (dismissBtn) {
-      dismissBtn.addEventListener('click', () => this.close());
+      dismissBtn.addEventListener("click", () => this.close());
     }
 
     // Enviar formulario
     if (form) {
-      form.addEventListener('submit', async (e) => {
+      form.addEventListener("submit", async (e) => {
         e.preventDefault();
 
         // Validar que se haya seleccionado un producto
         if (!productIdInput.value) {
-          showToast('Debe seleccionar un producto', 'error');
+          showToast("Debe seleccionar un producto", "error");
           productSearchInput.focus();
           return;
         }
@@ -1651,73 +1826,84 @@ class ModalManager {
         // Validación HTML5 personalizada para fechas
         let hasError = false;
         if (!startInput.value) {
-          startInput.classList.add('is-invalid');
-          let feedback = startInput.parentElement.querySelector('.invalid-feedback');
-          if (feedback) feedback.style.display = 'block';
+          startInput.classList.add("is-invalid");
+          let feedback =
+            startInput.parentElement.querySelector(".invalid-feedback");
+          if (feedback) feedback.style.display = "block";
           hasError = true;
         }
-        if (!endInput.value && endInput.hasAttribute('required')) {
-          endInput.classList.add('is-invalid');
-          let feedback = endInput.parentElement.querySelector('.invalid-feedback');
-          if (feedback) feedback.style.display = 'block';
+        if (!endInput.value && endInput.hasAttribute("required")) {
+          endInput.classList.add("is-invalid");
+          let feedback =
+            endInput.parentElement.querySelector(".invalid-feedback");
+          if (feedback) feedback.style.display = "block";
           hasError = true;
         }
         if (!form.checkValidity() || hasError) {
           e.stopPropagation();
-          form.classList.add('was-validated');
-          showToast('Por favor, complete todos los campos requeridos', 'error');
+          form.classList.add("was-validated");
+          showToast("Por favor, complete todos los campos requeridos", "error");
           return;
         }
 
         // Validar fecha fin > fecha inicio
         if (endInput.value && endInput.value < startInput.value) {
-          showToast('La fecha de fin debe ser posterior a la de inicio', 'error');
-          endInput.classList.add('is-invalid');
+          showToast(
+            "La fecha de fin debe ser posterior a la de inicio",
+            "error",
+          );
+          endInput.classList.add("is-invalid");
           endInput.focus();
-          let feedback = endInput.parentElement.querySelector('.invalid-feedback');
+          let feedback =
+            endInput.parentElement.querySelector(".invalid-feedback");
           if (feedback) {
-            feedback.textContent = 'La fecha de fin debe ser posterior a la de inicio';
-            feedback.style.display = 'block';
+            feedback.textContent =
+              "La fecha de fin debe ser posterior a la de inicio";
+            feedback.style.display = "block";
           }
-          endInput.addEventListener('input', function clearInvalid() {
-            endInput.classList.remove('is-invalid');
-            if (feedback) feedback.style.display = '';
-            endInput.removeEventListener('input', clearInvalid);
+          endInput.addEventListener("input", function clearInvalid() {
+            endInput.classList.remove("is-invalid");
+            if (feedback) feedback.style.display = "";
+            endInput.removeEventListener("input", clearInvalid);
           });
           return;
         }
         // Remover error visual al corregir fechas
-        startInput.addEventListener('input', function clearInvalid() {
-          startInput.classList.remove('is-invalid');
-          let feedback = startInput.parentElement.querySelector('.invalid-feedback');
-          if (feedback) feedback.style.display = '';
-          startInput.removeEventListener('input', clearInvalid);
+        startInput.addEventListener("input", function clearInvalid() {
+          startInput.classList.remove("is-invalid");
+          let feedback =
+            startInput.parentElement.querySelector(".invalid-feedback");
+          if (feedback) feedback.style.display = "";
+          startInput.removeEventListener("input", clearInvalid);
         });
 
         // Validar campos NxM si el tipo es nxm
         const promoType = typeSelect.value;
-        if (promoType === 'nxm') {
+        if (promoType === "nxm") {
           const nVal = parseInt(nxmNInput.value);
           const mVal = parseInt(nxmMInput.value);
           if (!nVal || nVal < 2) {
-            showToast('El valor N (llevás) debe ser al menos 2', 'error');
+            showToast("El valor N (llevás) debe ser al menos 2", "error");
             nxmNInput.focus();
             return;
           }
           if (!mVal || mVal < 1) {
-            showToast('El valor M (pagás) debe ser al menos 1', 'error');
+            showToast("El valor M (pagás) debe ser al menos 1", "error");
             nxmMInput.focus();
             return;
           }
           if (mVal >= nVal) {
-            showToast('El valor M (pagás) debe ser menor que N (llevás)', 'error');
+            showToast(
+              "El valor M (pagás) debe ser menor que N (llevás)",
+              "error",
+            );
             nxmMInput.focus();
             return;
           }
         }
 
         // Validar porcentaje (debe ser entero entre 1 y 99)
-        if (promoType === 'porcentaje') {
+        if (promoType === "porcentaje") {
           /**
            * Validación profesional para promociones de tipo porcentaje:
            * - Solo se aceptan valores enteros (sin decimales)
@@ -1726,14 +1912,17 @@ class ModalManager {
            */
           const percentValue = valueInput.value.trim();
           const intValue = parseInt(percentValue, 10);
-          
+
           if (
             isNaN(intValue) ||
             !/^\d+$/.test(percentValue) || // Solo dígitos, sin decimales
             intValue < 1 ||
             intValue > 99
           ) {
-            showToast('El porcentaje debe ser un número entero entre 1 y 99', 'error');
+            showToast(
+              "El porcentaje debe ser un número entero entre 1 y 99",
+              "error",
+            );
             valueInput.focus();
             return;
           }
@@ -1742,9 +1931,9 @@ class ModalManager {
         // Preparar payload
         // Para nxm: parameter_value = M (cantidad que paga), y guardamos N en visible_text o usamos formato especial
         let parameterValue;
-        if (promoType === 'nxm') {
+        if (promoType === "nxm") {
           parameterValue = parseInt(nxmMInput.value);
-        } else if (promoType === 'porcentaje') {
+        } else if (promoType === "porcentaje") {
           // Asegurar que es entero
           parameterValue = Math.floor(parseFloat(valueInput.value));
         } else {
@@ -1757,56 +1946,59 @@ class ModalManager {
           parameter_value: parameterValue,
           visible_text: textInput.value.trim(),
           start_at: startInput.value ? `${startInput.value} 00:00:00` : null,
-          end_at: endInput.value ? `${endInput.value} 23:59:59` : null
+          end_at: endInput.value ? `${endInput.value} 23:59:59` : null,
         };
 
         // Para nxm, agregar el valor N como campo adicional
-        if (promoType === 'nxm') {
+        if (promoType === "nxm") {
           payload.nxm_n = parseInt(nxmNInput.value);
         }
 
         // Enviar
         submitBtn.disabled = true;
-        const loadingText = isEdit ? 'Guardando...' : 'Creando...';
-        const iconClass = isEdit ? 'fa-save' : 'fa-plus';
+        const loadingText = isEdit ? "Guardando..." : "Creando...";
+        const iconClass = isEdit ? "fa-save" : "fa-plus";
         submitBtn.innerHTML = `<i class="fas fa-spinner fa-spin me-1"></i>${loadingText}`;
 
         try {
-
-          const url = isEdit 
-            ? `./api/admin/promociones/${promotion.id}` 
-            : './api/admin/promociones';
-          const method = isEdit ? 'PUT' : 'POST';
+          const url = isEdit
+            ? `./api/admin/promociones/${promotion.id}`
+            : "./api/admin/promociones";
+          const method = isEdit ? "PUT" : "POST";
 
           const response = await fetch(url, {
             method: method,
-            headers: { 'Content-Type': 'application/json' },
-            credentials: 'same-origin',
-            body: JSON.stringify(payload)
+            headers: { "Content-Type": "application/json" },
+            credentials: "same-origin",
+            body: JSON.stringify(payload),
           });
 
           const data = await response.json();
 
           if (!response.ok) {
             // Extraer mensaje de error del backend (estructura: { ok, data, error: { code, message } })
-            const errorMessage = data.error?.message || data.message || `Error al ${isEdit ? 'actualizar' : 'crear'} la promoción`;
+            const errorMessage =
+              data.error?.message ||
+              data.message ||
+              `Error al ${isEdit ? "actualizar" : "crear"} la promoción`;
             throw new Error(errorMessage);
           }
 
-          const successMsg = isEdit ? 'Promoción actualizada con éxito' : 'Promoción creada con éxito';
-          showToast(successMsg, 'success');
+          const successMsg = isEdit
+            ? "Promoción actualizada con éxito"
+            : "Promoción creada con éxito";
+          showToast(successMsg, "success");
 
           // Cerrar y callback
           setTimeout(() => {
             this.close();
             if (onSuccess) onSuccess(data.data);
           }, 800);
-
         } catch (error) {
-          showToast(error.message, 'error');
+          showToast(error.message, "error");
           submitBtn.disabled = false;
-          const btnText = isEdit ? 'Guardar cambios' : 'Crear promoción';
-          const btnIcon = isEdit ? 'fa-save' : 'fa-plus';
+          const btnText = isEdit ? "Guardar cambios" : "Crear promoción";
+          const btnIcon = isEdit ? "fa-save" : "fa-plus";
           submitBtn.innerHTML = `<i class="fas ${btnIcon} me-1"></i>${btnText}`;
         }
       });
@@ -1816,102 +2008,120 @@ class ModalManager {
   /**
    * Configura el buscador de productos con autocompletado
    */
-  _setupProductSearch(searchInput, hiddenInput, resultsContainer, selectedBadge) {
+  _setupProductSearch(
+    searchInput,
+    hiddenInput,
+    resultsContainer,
+    selectedBadge,
+  ) {
     if (!searchInput || !hiddenInput || !resultsContainer) return;
 
     let debounceTimer = null;
     let selectedProduct = null;
 
     // Buscar productos mientras escribe
-    searchInput.addEventListener('input', () => {
+    searchInput.addEventListener("input", () => {
       const query = searchInput.value.trim();
 
       clearTimeout(debounceTimer);
 
       if (query.length < 2) {
-        resultsContainer.innerHTML = '';
-        resultsContainer.classList.remove('show');
+        resultsContainer.innerHTML = "";
+        resultsContainer.classList.remove("show");
         return;
       }
 
       debounceTimer = setTimeout(async () => {
         try {
           const params = new URLSearchParams({ search: query, limit: 10 });
-          const response = await fetch(`./api/public/productos?${params.toString()}`);
+          const response = await fetch(
+            `./api/public/productos?${params.toString()}`,
+          );
           const data = await response.json();
           const products = data?.data?.products || [];
 
           if (products.length === 0) {
-            resultsContainer.innerHTML = '<div class="search-no-results">No se encontraron productos</div>';
+            resultsContainer.innerHTML =
+              '<div class="search-no-results">No se encontraron productos</div>';
           } else {
-            resultsContainer.innerHTML = products.map(p => `
+            resultsContainer.innerHTML = products
+              .map(
+                (p) => `
               <div class="search-result-item" data-id="${p.id}" data-name="${escapeHtml(p.name)}" data-price="${p.base_price}">
                 <span class="result-name">${escapeHtml(p.name)}</span>
                 <span class="result-price">$${parseFloat(p.base_price).toFixed(2)}</span>
               </div>
-            `).join('');
+            `,
+              )
+              .join("");
           }
-          resultsContainer.classList.add('show');
+          resultsContainer.classList.add("show");
         } catch (err) {
-          console.error('Error buscando productos:', err);
-          resultsContainer.innerHTML = '<div class="search-no-results">Error al buscar</div>';
-          resultsContainer.classList.add('show');
+          console.error("Error buscando productos:", err);
+          resultsContainer.innerHTML =
+            '<div class="search-no-results">Error al buscar</div>';
+          resultsContainer.classList.add("show");
         }
       }, 300);
     });
 
     // Seleccionar producto del resultado
-    resultsContainer.addEventListener('click', (e) => {
-      const item = e.target.closest('.search-result-item');
+    resultsContainer.addEventListener("click", (e) => {
+      const item = e.target.closest(".search-result-item");
       if (!item) return;
 
       selectedProduct = {
         id: item.dataset.id,
         name: item.dataset.name,
-        price: item.dataset.price
+        price: item.dataset.price,
       };
 
       // Actualizar campos
       hiddenInput.value = selectedProduct.id;
-      searchInput.value = '';
-      searchInput.classList.add('d-none');
-      resultsContainer.innerHTML = '';
-      resultsContainer.classList.remove('show');
+      searchInput.value = "";
+      searchInput.classList.add("d-none");
+      resultsContainer.innerHTML = "";
+      resultsContainer.classList.remove("show");
 
       // Mostrar badge del producto seleccionado
       if (selectedBadge) {
-        selectedBadge.querySelector('.product-name').textContent = selectedProduct.name;
-        selectedBadge.querySelector('.product-price').textContent = `$${parseFloat(selectedProduct.price).toFixed(2)}`;
-        selectedBadge.classList.remove('d-none');
+        selectedBadge.querySelector(".product-name").textContent =
+          selectedProduct.name;
+        selectedBadge.querySelector(".product-price").textContent =
+          `$${parseFloat(selectedProduct.price).toFixed(2)}`;
+        selectedBadge.classList.remove("d-none");
       }
     });
 
     // Quitar producto seleccionado
     if (selectedBadge) {
-      const removeBtn = selectedBadge.querySelector('.btn-remove-product');
+      const removeBtn = selectedBadge.querySelector(".btn-remove-product");
       if (removeBtn) {
-        removeBtn.addEventListener('click', () => {
+        removeBtn.addEventListener("click", () => {
           selectedProduct = null;
-          hiddenInput.value = '';
-          searchInput.classList.remove('d-none');
-          searchInput.value = '';
+          hiddenInput.value = "";
+          searchInput.classList.remove("d-none");
+          searchInput.value = "";
           searchInput.focus();
-          selectedBadge.classList.add('d-none');
+          selectedBadge.classList.add("d-none");
         });
       }
     }
 
     // Cerrar resultados al hacer clic fuera
-    document.addEventListener('click', (e) => {
-      if (!searchInput.contains(e.target) && !resultsContainer.contains(e.target)) {
-        resultsContainer.classList.remove('show');
+    document.addEventListener("click", (e) => {
+      if (
+        !searchInput.contains(e.target) &&
+        !resultsContainer.contains(e.target)
+      ) {
+        resultsContainer.classList.remove("show");
       }
     });
 
     // Cerrar resultados con Escape
-    searchInput.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') {
-        resultsContainer.classList.remove('show');
+    searchInput.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") {
+        resultsContainer.classList.remove("show");
       }
     });
   }
@@ -1919,7 +2129,18 @@ class ModalManager {
   /**
    * Configura los labels dinámicos según el tipo de promoción
    */
-  _setupPromotionTypeLabels(typeSelect, valueInput, valueContainer, valueLabel, valueHint, nxmNContainer, nxmMContainer, nxmNInput, nxmMInput, textInput) {
+  _setupPromotionTypeLabels(
+    typeSelect,
+    valueInput,
+    valueContainer,
+    valueLabel,
+    valueHint,
+    nxmNContainer,
+    nxmMContainer,
+    nxmNInput,
+    nxmMInput,
+    textInput,
+  ) {
     if (!typeSelect || !valueInput || !valueLabel) return;
 
     // El texto siempre es editable por el usuario
@@ -1932,7 +2153,8 @@ class ModalManager {
 
       // Solo sugerir si el campo está vacío o tiene un texto auto-generado previo
       const currentText = textInput.value.trim();
-      const isAutoGenerated = currentText === '' ||
+      const isAutoGenerated =
+        currentText === "" ||
         currentText.match(/^\d+% OFF$/) ||
         currentText.match(/^Precio especial \$[\d.,]+$/) ||
         currentText.match(/^[23]x[12] - Llevá \d+ y pagá solo \d+$/) ||
@@ -1940,14 +2162,14 @@ class ModalManager {
 
       if (!isAutoGenerated) return; // No sobrescribir texto personalizado
 
-      if (type === 'porcentaje' && value) {
+      if (type === "porcentaje" && value) {
         textInput.value = `${value}% OFF`;
-      } else if (type === 'precio_fijo' && value) {
-        textInput.value = `Precio especial $${parseFloat(value).toLocaleString('es-AR')}`;
-      } else if (type === '2x1') {
-        textInput.value = '2x1 - Llevá 2 y pagá solo 1';
-      } else if (type === '3x2') {
-        textInput.value = '3x2 - Llevá 3 y pagá solo 2';
+      } else if (type === "precio_fijo" && value) {
+        textInput.value = `Precio especial $${parseFloat(value).toLocaleString("es-AR")}`;
+      } else if (type === "2x1") {
+        textInput.value = "2x1 - Llevá 2 y pagá solo 1";
+      } else if (type === "3x2") {
+        textInput.value = "3x2 - Llevá 3 y pagá solo 2";
       }
     };
 
@@ -1958,7 +2180,8 @@ class ModalManager {
 
       // Solo sugerir si está vacío o tiene formato auto-generado
       const currentText = textInput.value.trim();
-      const isAutoGenerated = currentText === '' ||
+      const isAutoGenerated =
+        currentText === "" ||
         currentText.match(/^\d+x\d+ - Llevá \d+ y pagá solo \d+$/);
 
       if (!isAutoGenerated) return;
@@ -1972,98 +2195,98 @@ class ModalManager {
       const type = typeSelect.value;
 
       const labels = {
-        'porcentaje': 'Porcentaje de descuento',
-        'precio_fijo': 'Precio promocional (ARS)',
-        '2x1': 'Valor',
-        '3x2': 'Valor',
-        'nxm': 'Cantidad a pagar (M)'
+        porcentaje: "Porcentaje de descuento",
+        precio_fijo: "Precio promocional (ARS)",
+        "2x1": "Valor",
+        "3x2": "Valor",
+        nxm: "Cantidad a pagar (M)",
       };
 
       const hints = {
-        'porcentaje': 'Ej: 15 para 15% de descuento',
-        'precio_fijo': 'Ej: 2999.99 precio final',
-        '2x1': '',
-        '3x2': '',
-        'nxm': ''
+        porcentaje: "Ej: 15 para 15% de descuento",
+        precio_fijo: "Ej: 2999.99 precio final",
+        "2x1": "",
+        "3x2": "",
+        nxm: "",
       };
 
       const placeholders = {
-        'porcentaje': 'Ej: 15',
-        'precio_fijo': 'Ej: 2999.99',
-        '2x1': '1',
-        '3x2': '2',
-        'nxm': ''
+        porcentaje: "Ej: 15",
+        precio_fijo: "Ej: 2999.99",
+        "2x1": "1",
+        "3x2": "2",
+        nxm: "",
       };
 
       // Mostrar/ocultar campos según tipo
-      if (type === 'nxm') {
+      if (type === "nxm") {
         // Ocultar campo valor estándar y desactivar validación
-        valueContainer.classList.add('d-none');
-        valueInput.removeAttribute('required');
-        valueInput.value = ''; // Limpiar valor para evitar conflictos
+        valueContainer.classList.add("d-none");
+        valueInput.removeAttribute("required");
+        valueInput.value = ""; // Limpiar valor para evitar conflictos
         valueInput.disabled = false;
         // Mostrar campos N y M
-        nxmNContainer.classList.remove('d-none');
-        nxmMContainer.classList.remove('d-none');
-        nxmNInput.setAttribute('required', 'required');
-        nxmMInput.setAttribute('required', 'required');
+        nxmNContainer.classList.remove("d-none");
+        nxmMContainer.classList.remove("d-none");
+        nxmNInput.setAttribute("required", "required");
+        nxmMInput.setAttribute("required", "required");
         // Limpiar texto para nueva sugerencia
-        textInput.value = '';
-      } else if (type === '2x1' || type === '3x2') {
+        textInput.value = "";
+      } else if (type === "2x1" || type === "3x2") {
         // Mostrar campo valor pero bloquearlo (no editable)
-        valueContainer.classList.remove('d-none');
-        valueInput.removeAttribute('required');
+        valueContainer.classList.remove("d-none");
+        valueInput.removeAttribute("required");
         valueInput.disabled = true;
         // Ocultar campos N y M y limpiar valores
-        nxmNContainer.classList.add('d-none');
-        nxmMContainer.classList.add('d-none');
-        nxmNInput.removeAttribute('required');
-        nxmMInput.removeAttribute('required');
-        nxmNInput.value = ''; // Limpiar para evitar validación incorrecta
-        nxmMInput.value = ''; // Limpiar para evitar validación incorrecta
+        nxmNContainer.classList.add("d-none");
+        nxmMContainer.classList.add("d-none");
+        nxmNInput.removeAttribute("required");
+        nxmMInput.removeAttribute("required");
+        nxmNInput.value = ""; // Limpiar para evitar validación incorrecta
+        nxmMInput.value = ""; // Limpiar para evitar validación incorrecta
         // Setear valor interno y sugerir texto
-        valueInput.value = type === '2x1' ? '1' : '2';
+        valueInput.value = type === "2x1" ? "1" : "2";
         suggestVisibleText();
       } else {
         // porcentaje o precio_fijo
-        valueContainer.classList.remove('d-none');
-        valueInput.setAttribute('required', 'required');
+        valueContainer.classList.remove("d-none");
+        valueInput.setAttribute("required", "required");
         valueInput.disabled = false;
         // Ocultar campos N y M y limpiar valores
-        nxmNContainer.classList.add('d-none');
-        nxmMContainer.classList.add('d-none');
-        nxmNInput.removeAttribute('required');
-        nxmMInput.removeAttribute('required');
-        nxmNInput.value = ''; // Limpiar para evitar validación incorrecta
-        nxmMInput.value = ''; // Limpiar para evitar validación incorrecta
+        nxmNContainer.classList.add("d-none");
+        nxmMContainer.classList.add("d-none");
+        nxmNInput.removeAttribute("required");
+        nxmMInput.removeAttribute("required");
+        nxmNInput.value = ""; // Limpiar para evitar validación incorrecta
+        nxmMInput.value = ""; // Limpiar para evitar validación incorrecta
         // Limpiar texto para nueva sugerencia
-        textInput.value = '';
+        textInput.value = "";
         // Sugerir texto si el valor ya existe
         suggestVisibleText();
       }
 
-      valueLabel.innerHTML = `${labels[type] || 'Valor'} <span class="text-danger">*</span>`;
-      valueInput.placeholder = placeholders[type] || '';
-      valueHint.textContent = hints[type] || '';
+      valueLabel.innerHTML = `${labels[type] || "Valor"} <span class="text-danger">*</span>`;
+      valueInput.placeholder = placeholders[type] || "";
+      valueHint.textContent = hints[type] || "";
       // Porcentaje: paso 1 (entero) entre 1 y 99, resto: 0.01 (decimal)
-      if (type === 'porcentaje') {
-        valueInput.step = '1';
-        valueInput.min = '1';
-        valueInput.max = '99';
-      } else if (type === 'precio_fijo') {
-        valueInput.step = '0.01';
-        valueInput.min = '0.01';
-        valueInput.removeAttribute('max');
+      if (type === "porcentaje") {
+        valueInput.step = "1";
+        valueInput.min = "1";
+        valueInput.max = "99";
+      } else if (type === "precio_fijo") {
+        valueInput.step = "0.01";
+        valueInput.min = "0.01";
+        valueInput.removeAttribute("max");
       } else {
-        valueInput.step = '1';
-        valueInput.min = '0';
-        valueInput.removeAttribute('max');
+        valueInput.step = "1";
+        valueInput.min = "0";
+        valueInput.removeAttribute("max");
       }
     };
 
     // Limpiar decimales si es porcentaje
     const cleanPercentageValue = () => {
-      if (typeSelect.value === 'porcentaje' && valueInput.value) {
+      if (typeSelect.value === "porcentaje" && valueInput.value) {
         const intValue = Math.floor(parseFloat(valueInput.value));
         if (intValue >= 1 && intValue <= 99) {
           valueInput.value = intValue;
@@ -2072,11 +2295,11 @@ class ModalManager {
     };
 
     // Eventos
-    typeSelect.addEventListener('change', updateLabels);
-    valueInput.addEventListener('change', cleanPercentageValue);
-    valueInput.addEventListener('input', suggestVisibleText);
-    nxmNInput.addEventListener('input', suggestNxmText);
-    nxmMInput.addEventListener('input', suggestNxmText);
+    typeSelect.addEventListener("change", updateLabels);
+    valueInput.addEventListener("change", cleanPercentageValue);
+    valueInput.addEventListener("input", suggestVisibleText);
+    nxmNInput.addEventListener("input", suggestNxmText);
+    nxmMInput.addEventListener("input", suggestNxmText);
   }
 
   /**
@@ -2086,11 +2309,12 @@ class ModalManager {
    */
   generateQRCode(publicCode, container) {
     // Verificar que QRCode esté disponible
-    if (typeof window.QRCode === 'undefined') {
-      console.warn('QRCode library not loaded yet, trying to load from CDN');
+    if (typeof window.QRCode === "undefined") {
+      console.warn("QRCode library not loaded yet, trying to load from CDN");
       // Intentar cargar dinámicamente
-      const script = document.createElement('script');
-      script.src = 'https://cdn.jsdelivr.net/npm/qrcode@latest/build/qrcode.min.js';
+      const script = document.createElement("script");
+      script.src =
+        "https://cdn.jsdelivr.net/npm/qrcode@latest/build/qrcode.min.js";
       script.onload = () => {
         this.generateQRCode(publicCode, container);
       };
@@ -2099,49 +2323,55 @@ class ModalManager {
     }
 
     if (!publicCode) {
-      console.error('Invalid publicCode');
+      console.error("Invalid publicCode");
       return null;
     }
 
     // Obtener referencia al contenedor
     let targetContainer = container;
-    if (typeof container === 'string') {
+    if (typeof container === "string") {
       targetContainer = document.getElementById(container);
     }
 
     if (!targetContainer) {
-      console.error('Container not found');
+      console.error("Container not found");
       return null;
     }
 
     // Limpiar contenedor
-    targetContainer.innerHTML = '';
+    targetContainer.innerHTML = "";
 
     // Crear canvas para el QR
-    const canvas = document.createElement('canvas');
-    
+    const canvas = document.createElement("canvas");
+
     try {
-      window.QRCode.toCanvas(canvas, publicCode, {
-        width: 140,
-        margin: 1,
-        color: {
-          dark: '#4A0E1A',    // Wine color
-          light: '#FFFFFF'
+      window.QRCode.toCanvas(
+        canvas,
+        publicCode,
+        {
+          width: 140,
+          margin: 1,
+          color: {
+            dark: "#4A0E1A", // Wine color
+            light: "#FFFFFF",
+          },
+          errorCorrectionLevel: "H",
         },
-        errorCorrectionLevel: 'H'
-      }, (error) => {
-        if (error) {
-          console.error('Error generating QR:', error);
-          targetContainer.innerHTML = '<p class="text-danger">Error al generar QR</p>';
-        }
-      });
+        (error) => {
+          if (error) {
+            console.error("Error generating QR:", error);
+            targetContainer.innerHTML =
+              '<p class="text-danger">Error al generar QR</p>';
+          }
+        },
+      );
 
       targetContainer.appendChild(canvas);
       return canvas;
-
     } catch (error) {
-      console.error('Exception generating QR:', error);
-      targetContainer.innerHTML = '<p class="text-danger">Error al generar QR</p>';
+      console.error("Exception generating QR:", error);
+      targetContainer.innerHTML =
+        '<p class="text-danger">Error al generar QR</p>';
       return null;
     }
   }
@@ -2152,7 +2382,7 @@ class ModalManager {
    */
   async showProductQRModal(product) {
     if (!product || !product.public_code) {
-      alert('Código de producto no disponible');
+      alert("Código de producto no disponible");
       return;
     }
 
@@ -2180,26 +2410,29 @@ class ModalManager {
       </div>
     `;
 
-    const modal = this.open('qr-display-modal', qrModalContent, {
+    const modal = this.open("qr-display-modal", qrModalContent, {
       disableClickOutside: false,
       onOpen: (modalElement) => {
         // Generar QR cuando se abre el modal
-        this.generateQRCode(publicCode, 'qr-code-canvas');
+        this.generateQRCode(publicCode, "qr-code-canvas");
 
         // Setup botón descargar
-        const downloadBtn = modalElement.querySelector('#qr-download-png');
+        const downloadBtn = modalElement.querySelector("#qr-download-png");
         if (downloadBtn) {
-          downloadBtn.addEventListener('click', () => {
+          downloadBtn.addEventListener("click", () => {
             this._downloadQRAsImage(publicCode);
           });
         }
       },
       onClose: () => {
         // Recargar tabla de productos cuando se cierre el modal de QR
-        if (window.adminView && typeof window.adminView.loadProducts === 'function') {
+        if (
+          window.adminView &&
+          typeof window.adminView.loadProducts === "function"
+        ) {
           window.adminView.loadProducts();
         }
-      }
+      },
     });
   }
 
@@ -2208,126 +2441,148 @@ class ModalManager {
    * @param {string} publicCode - Código público del producto
    */
   _downloadQRAsImage(publicCode) {
-    if (typeof window.QRCode === 'undefined') {
-      alert('Librería QR no disponible');
+    if (typeof window.QRCode === "undefined") {
+      alert("Librería QR no disponible");
       return;
     }
 
     try {
       // Canvas base del QR
-      const qrCanvas = document.createElement('canvas');
+      const qrCanvas = document.createElement("canvas");
       const qrSize = 384; // +50% sobre 256
       const padding = 36; // +50% sobre 24
-      const textColor = '#4A0E1A';
-      const helperColor = '#333333';
-      const bgColor = '#FFFFFF';
+      const textColor = "#4A0E1A";
+      const helperColor = "#333333";
+      const bgColor = "#FFFFFF";
 
       // Generar el QR base
-      window.QRCode.toCanvas(qrCanvas, publicCode, {
-        width: qrSize,
-        margin: 2,
-        color: {
-          dark: textColor,
-          light: bgColor
+      window.QRCode.toCanvas(
+        qrCanvas,
+        publicCode,
+        {
+          width: qrSize,
+          margin: 2,
+          color: {
+            dark: textColor,
+            light: bgColor,
+          },
+          errorCorrectionLevel: "H",
         },
-        errorCorrectionLevel: 'H'
-      }, (error) => {
-        if (error) {
-          console.error('Error generating QR for download:', error);
-          alert('Error al generar QR para descarga');
-          return;
-        }
+        (error) => {
+          if (error) {
+            console.error("Error generating QR for download:", error);
+            alert("Error al generar QR para descarga");
+            return;
+          }
 
-        // Canvas final con texto
-        const finalCanvas = document.createElement('canvas');
-        const ctx = finalCanvas.getContext('2d');
+          // Canvas final con texto
+          const finalCanvas = document.createElement("canvas");
+          const ctx = finalCanvas.getContext("2d");
 
-        const finalWidth = qrSize + padding * 2; // 256 + 48 = 304
-        const qrTop = padding; // 36
-        const codeText = `${publicCode}`;
-        const helperText1 = '¿Problemas con el QR?';
-        const helperText2 = 'Visite www.winepickqr.com y realice la busqueda del producto manualmente.';
+          const finalWidth = qrSize + padding * 2; // 256 + 48 = 304
+          const qrTop = padding; // 36
+          const codeText = `${publicCode}`;
+          const helperText1 = "¿Problemas con el QR?";
+          const helperText2 =
+            "Visite www.winepickqr.com y realice la busqueda del producto manualmente.";
 
-        // Calcular alto necesario con wrap
-        const lineHeight = 24;
-        const maxTextWidth = finalWidth - padding * 2;
+          // Calcular alto necesario con wrap
+          const lineHeight = 24;
+          const maxTextWidth = finalWidth - padding * 2;
 
-        const wrapText = (text, maxWidth, font) => {
-          ctx.font = font;
-          const words = text.split(' ');
-          const lines = [];
-          let line = '';
-          words.forEach((word) => {
-            const testLine = line ? `${line} ${word}` : word;
-            const metrics = ctx.measureText(testLine);
-            if (metrics.width > maxWidth && line) {
-              lines.push(line);
-              line = word;
-            } else {
-              line = testLine;
-            }
+          const wrapText = (text, maxWidth, font) => {
+            ctx.font = font;
+            const words = text.split(" ");
+            const lines = [];
+            let line = "";
+            words.forEach((word) => {
+              const testLine = line ? `${line} ${word}` : word;
+              const metrics = ctx.measureText(testLine);
+              if (metrics.width > maxWidth && line) {
+                lines.push(line);
+                line = word;
+              } else {
+                line = testLine;
+              }
+            });
+            if (line) lines.push(line);
+            return lines;
+          };
+
+          const codeLines = wrapText(
+            codeText,
+            maxTextWidth,
+            'bold 35px "Segoe UI", Arial, sans-serif',
+          );
+          const helperLines1 = wrapText(
+            helperText1,
+            maxTextWidth,
+            '17px "Segoe UI", Arial, sans-serif',
+          );
+          const helperLines2 = wrapText(
+            helperText2,
+            maxTextWidth,
+            '17px "Segoe UI", Arial, sans-serif',
+          );
+
+          const textBlockHeight =
+            codeLines.length * lineHeight +
+            helperLines1.length * lineHeight +
+            helperLines2.length * lineHeight +
+            padding; // extra padding bajo el QR
+          const finalHeight = qrTop + qrSize + padding + textBlockHeight;
+
+          finalCanvas.width = finalWidth;
+          finalCanvas.height = finalHeight;
+
+          // Fondo
+          ctx.fillStyle = bgColor;
+          ctx.fillRect(0, 0, finalWidth, finalHeight);
+
+          // QR centrado
+          const qrX = (finalWidth - qrSize) / 2;
+          ctx.drawImage(qrCanvas, qrX, qrTop, qrSize, qrSize);
+
+          // Código público
+          let currentY = qrTop + qrSize + padding;
+          ctx.textAlign = "center";
+          ctx.fillStyle = textColor;
+          ctx.font = 'bold 35px "Segoe UI", Arial, sans-serif';
+          codeLines.forEach((line) => {
+            ctx.fillText(line, finalWidth / 2, currentY);
+            currentY += lineHeight;
           });
-          if (line) lines.push(line);
-          return lines;
-        };
 
-        const codeLines = wrapText(codeText, maxTextWidth, 'bold 35px "Segoe UI", Arial, sans-serif');
-        const helperLines1 = wrapText(helperText1, maxTextWidth, '17px "Segoe UI", Arial, sans-serif');
-        const helperLines2 = wrapText(helperText2, maxTextWidth, '17px "Segoe UI", Arial, sans-serif');
+          // Texto de ayuda - Parágrafo 1
+          ctx.fillStyle = helperColor;
+          ctx.font = '17px "Segoe UI", Arial, sans-serif';
+          helperLines1.forEach((line) => {
+            ctx.fillText(line, finalWidth / 2, currentY);
+            currentY += lineHeight;
+          });
 
-        const textBlockHeight = (codeLines.length * lineHeight) + (helperLines1.length * lineHeight) + (helperLines2.length * lineHeight) + padding; // extra padding bajo el QR
-        const finalHeight = qrTop + qrSize + padding + textBlockHeight;
+          // Texto de ayuda - Parágrafo 2
+          helperLines2.forEach((line) => {
+            ctx.fillText(line, finalWidth / 2, currentY);
+            currentY += lineHeight;
+          });
 
-        finalCanvas.width = finalWidth;
-        finalCanvas.height = finalHeight;
-
-        // Fondo
-        ctx.fillStyle = bgColor;
-        ctx.fillRect(0, 0, finalWidth, finalHeight);
-
-        // QR centrado
-        const qrX = (finalWidth - qrSize) / 2;
-        ctx.drawImage(qrCanvas, qrX, qrTop, qrSize, qrSize);
-
-        // Código público
-        let currentY = qrTop + qrSize + padding;
-        ctx.textAlign = 'center';
-        ctx.fillStyle = textColor;
-        ctx.font = 'bold 35px "Segoe UI", Arial, sans-serif';
-        codeLines.forEach((line) => {
-          ctx.fillText(line, finalWidth / 2, currentY);
-          currentY += lineHeight;
-        });
-
-        // Texto de ayuda - Parágrafo 1
-        ctx.fillStyle = helperColor;
-        ctx.font = '17px "Segoe UI", Arial, sans-serif';
-        helperLines1.forEach((line) => {
-          ctx.fillText(line, finalWidth / 2, currentY);
-          currentY += lineHeight;
-        });
-
-        // Texto de ayuda - Parágrafo 2
-        helperLines2.forEach((line) => {
-          ctx.fillText(line, finalWidth / 2, currentY);
-          currentY += lineHeight;
-        });
-
-        // Descargar PNG
-        finalCanvas.toBlob((blob) => {
-          const url = URL.createObjectURL(blob);
-          const link = document.createElement('a');
-          link.href = url;
-          link.download = `QR-${publicCode}-${new Date().toISOString().split('T')[0]}.png`;
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
-          URL.revokeObjectURL(url);
-        }, 'image/png');
-      });
+          // Descargar PNG
+          finalCanvas.toBlob((blob) => {
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.href = url;
+            link.download = `QR-${publicCode}-${new Date().toISOString().split("T")[0]}.png`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+          }, "image/png");
+        },
+      );
     } catch (error) {
-      console.error('Exception downloading QR:', error);
-      alert('Error al descargar QR');
+      console.error("Exception downloading QR:", error);
+      alert("Error al descargar QR");
     }
   }
 }
