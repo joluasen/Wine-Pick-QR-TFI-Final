@@ -1,24 +1,28 @@
+
+# Habilita el motor de reescritura de URLs de Apache.
 RewriteEngine On
 
-# ============================================
-# PROTECCIÓN DE SEGURIDAD - Wine-Pick-QR
-# ============================================
+# ===============================
+# Seguridad: Bloqueo de accesos
+# ===============================
 
-# Denegar acceso directo a carpetas sensibles
-# Esto bloquea el acceso a /app, /config, /logs, /docs, /database
+# Bloquea el acceso directo a carpetas internas del sistema.
+# Protege carpetas que contienen código, configuraciones o datos sensibles.
 RewriteRule ^app(/.*)?$ - [F,L]
 RewriteRule ^config(/.*)?$ - [F,L]
 RewriteRule ^logs(/.*)?$ - [F,L]
 RewriteRule ^docs(/.*)?$ - [F,L]
 RewriteRule ^database(/.*)?$ - [F,L]
 
-# Denegar acceso a archivos ocultos y sensibles
+# Bloquea el acceso a archivos ocultos y archivos de configuración sensibles.
+# Incluye archivos que comienzan con punto y archivos de Composer.
 RewriteRule ^\. - [F,L]
 RewriteRule \.env$ - [F,L]
 RewriteRule \.git - [F,L]
 RewriteRule composer\.(json|lock)$ - [F,L]
 
-# Headers de seguridad adicionales (si mod_headers está disponible)
+# Agrega cabeceras HTTP de seguridad si el módulo mod_headers está disponible.
+# Estas cabeceras ayudan a mitigar ataques comunes en navegadores.
 <IfModule mod_headers.c>
     Header set X-Content-Type-Options "nosniff"
     Header set X-Frame-Options "SAMEORIGIN"
@@ -26,14 +30,15 @@ RewriteRule composer\.(json|lock)$ - [F,L]
     Header set Referrer-Policy "strict-origin-when-cross-origin"
 </IfModule>
 
-# ============================================
-# ENRUTAMIENTO DE LA APLICACIÓN
-# ============================================
+# ===============================
+# Enrutamiento de la aplicación
+# ===============================
 
-# Si la URL es la raíz (http://localhost/proyectos/Wine-Pick-QR-TFI/)
+# Redirige la raíz del proyecto al archivo principal de la aplicación.
 RewriteRule ^$ public/index.php [QSA,L]
 
-# Si no es archivo ni carpeta física, también mandamos a public/index.php
+# Si la URL no corresponde a un archivo o carpeta física,
+# redirige todas las peticiones a public/index.php para manejo por el router PHP.
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule ^(.*)$ public/index.php [QSA,L]
