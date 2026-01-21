@@ -791,11 +791,11 @@ class ModalManager {
         </div>
       </div>
 
-      <!-- Precio y stock -->
+      <!-- Precio -->
       <div class="form-section mb-4">
-        <h4 class="form-section-title">Precio y Stock</h4>
+        <h4 class="form-section-title">Precio</h4>
         <div class="row g-3">
-          <div class="col-md-4">
+          <div class="col-md-6">
             <label for="${isEdit ? 'edit' : 'create'}-vintage" class="form-label">Año de cosecha</label>
             <input
               type="number"
@@ -807,8 +807,9 @@ class ModalManager {
               max="${currentYear + 1}"
               placeholder="Ej: ${currentYear - 3}"
             >
+            <div class="invalid-feedback">Año inválido</div>
           </div>
-          <div class="col-md-4">
+          <div class="col-md-6">
             <label for="${isEdit ? 'edit' : 'create'}-price" class="form-label">
               Precio base <span class="text-danger">*</span>
             </label>
@@ -825,19 +826,6 @@ class ModalManager {
               placeholder="0.00"
             >
             <div class="invalid-feedback">Ingrese un precio válido mayor a 0</div>
-          </div>
-          <div class="col-md-4">
-            <label for="${isEdit ? 'edit' : 'create'}-stock" class="form-label">Stock visible</label>
-            <input
-              type="number"
-              class="form-control"
-              id="${isEdit ? 'edit' : 'create'}-stock"
-              name="visible_stock"
-              value="${escapeHtml(p.visible_stock || '')}"
-              min="0"
-              max="99999"
-              placeholder="0"
-            >
           </div>
         </div>
       </div>
@@ -956,6 +944,7 @@ class ModalManager {
     const descriptionTextarea = modal.querySelector(`#${prefix}-description`);
     const charCount = modal.querySelector('#char-count');
     const publicCodeInput = modal.querySelector(`#${prefix}-public-code`);
+    const vintageInput = modal.querySelector(`#${prefix}-vintage`);
 
     // Botones de cancelar
     const closeBtn = modal.querySelector('[data-close-modal]');
@@ -1038,6 +1027,29 @@ class ModalManager {
     if (form) {
       form.addEventListener('submit', async (e) => {
         e.preventDefault();
+
+        // Validación específica: Año de cosecha dentro de rango
+        if (vintageInput && vintageInput.value) {
+          const year = parseInt(vintageInput.value, 10);
+          const maxYear = new Date().getFullYear();
+          if (isNaN(year) || year < 1900 || year > maxYear) {
+            const msg = `Año de cosecha inválido. Debe estar entre 1900 y ${maxYear}.`;
+            showToast(msg, 'error');
+            vintageInput.classList.add('is-invalid');
+            const feedback = vintageInput.parentElement.querySelector('.invalid-feedback');
+            if (feedback) {
+              feedback.textContent = msg;
+              feedback.style.display = 'block';
+            }
+            vintageInput.addEventListener('input', function clearInvalid() {
+              vintageInput.classList.remove('is-invalid');
+              if (feedback) feedback.style.display = '';
+              vintageInput.removeEventListener('input', clearInvalid);
+            });
+            vintageInput.focus();
+            return;
+          }
+        }
 
         // Validación HTML5
         if (!form.checkValidity()) {
@@ -1636,8 +1648,21 @@ class ModalManager {
           return;
         }
 
-        // Validación HTML5
-        if (!form.checkValidity()) {
+        // Validación HTML5 personalizada para fechas
+        let hasError = false;
+        if (!startInput.value) {
+          startInput.classList.add('is-invalid');
+          let feedback = startInput.parentElement.querySelector('.invalid-feedback');
+          if (feedback) feedback.style.display = 'block';
+          hasError = true;
+        }
+        if (!endInput.value && endInput.hasAttribute('required')) {
+          endInput.classList.add('is-invalid');
+          let feedback = endInput.parentElement.querySelector('.invalid-feedback');
+          if (feedback) feedback.style.display = 'block';
+          hasError = true;
+        }
+        if (!form.checkValidity() || hasError) {
           e.stopPropagation();
           form.classList.add('was-validated');
           showToast('Por favor, complete todos los campos requeridos', 'error');
@@ -1647,8 +1672,27 @@ class ModalManager {
         // Validar fecha fin > fecha inicio
         if (endInput.value && endInput.value < startInput.value) {
           showToast('La fecha de fin debe ser posterior a la de inicio', 'error');
+          endInput.classList.add('is-invalid');
+          endInput.focus();
+          let feedback = endInput.parentElement.querySelector('.invalid-feedback');
+          if (feedback) {
+            feedback.textContent = 'La fecha de fin debe ser posterior a la de inicio';
+            feedback.style.display = 'block';
+          }
+          endInput.addEventListener('input', function clearInvalid() {
+            endInput.classList.remove('is-invalid');
+            if (feedback) feedback.style.display = '';
+            endInput.removeEventListener('input', clearInvalid);
+          });
           return;
         }
+        // Remover error visual al corregir fechas
+        startInput.addEventListener('input', function clearInvalid() {
+          startInput.classList.remove('is-invalid');
+          let feedback = startInput.parentElement.querySelector('.invalid-feedback');
+          if (feedback) feedback.style.display = '';
+          startInput.removeEventListener('input', clearInvalid);
+        });
 
         // Validar campos NxM si el tipo es nxm
         const promoType = typeSelect.value;
@@ -1674,14 +1718,22 @@ class ModalManager {
 
         // Validar porcentaje (debe ser entero entre 1 y 99)
         if (promoType === 'porcentaje') {
-          const percentValue = parseFloat(valueInput.value);
-          if (percentValue !== Math.floor(percentValue)) {
-            showToast('El porcentaje debe ser un número entero sin decimales', 'error');
-            valueInput.focus();
-            return;
-          }
-          if (percentValue < 1 || percentValue >= 100) {
-            showToast('El porcentaje debe estar entre 1 y 99', 'error');
+          /**
+           * Validación profesional para promociones de tipo porcentaje:
+           * - Solo se aceptan valores enteros (sin decimales)
+           * - El rango permitido es de 1 a 99 inclusive
+           * - Se verifica que el input contenga solo dígitos
+           */
+          const percentValue = valueInput.value.trim();
+          const intValue = parseInt(percentValue, 10);
+          
+          if (
+            isNaN(intValue) ||
+            !/^\d+$/.test(percentValue) || // Solo dígitos, sin decimales
+            intValue < 1 ||
+            intValue > 99
+          ) {
+            showToast('El porcentaje debe ser un número entero entre 1 y 99', 'error');
             valueInput.focus();
             return;
           }
@@ -1945,9 +1997,10 @@ class ModalManager {
 
       // Mostrar/ocultar campos según tipo
       if (type === 'nxm') {
-        // Ocultar campo valor estándar
+        // Ocultar campo valor estándar y desactivar validación
         valueContainer.classList.add('d-none');
         valueInput.removeAttribute('required');
+        valueInput.value = ''; // Limpiar valor para evitar conflictos
         valueInput.disabled = false;
         // Mostrar campos N y M
         nxmNContainer.classList.remove('d-none');
@@ -1961,11 +2014,13 @@ class ModalManager {
         valueContainer.classList.remove('d-none');
         valueInput.removeAttribute('required');
         valueInput.disabled = true;
-        // Ocultar campos N y M
+        // Ocultar campos N y M y limpiar valores
         nxmNContainer.classList.add('d-none');
         nxmMContainer.classList.add('d-none');
         nxmNInput.removeAttribute('required');
         nxmMInput.removeAttribute('required');
+        nxmNInput.value = ''; // Limpiar para evitar validación incorrecta
+        nxmMInput.value = ''; // Limpiar para evitar validación incorrecta
         // Setear valor interno y sugerir texto
         valueInput.value = type === '2x1' ? '1' : '2';
         suggestVisibleText();
@@ -1974,11 +2029,13 @@ class ModalManager {
         valueContainer.classList.remove('d-none');
         valueInput.setAttribute('required', 'required');
         valueInput.disabled = false;
-        // Ocultar campos N y M
+        // Ocultar campos N y M y limpiar valores
         nxmNContainer.classList.add('d-none');
         nxmMContainer.classList.add('d-none');
         nxmNInput.removeAttribute('required');
         nxmMInput.removeAttribute('required');
+        nxmNInput.value = ''; // Limpiar para evitar validación incorrecta
+        nxmMInput.value = ''; // Limpiar para evitar validación incorrecta
         // Limpiar texto para nueva sugerencia
         textInput.value = '';
         // Sugerir texto si el valor ya existe
@@ -1988,11 +2045,11 @@ class ModalManager {
       valueLabel.innerHTML = `${labels[type] || 'Valor'} <span class="text-danger">*</span>`;
       valueInput.placeholder = placeholders[type] || '';
       valueHint.textContent = hints[type] || '';
-      // Porcentaje: paso 1 (entero), resto: 0.01 (decimal)
+      // Porcentaje: paso 1 (entero) entre 1 y 99, resto: 0.01 (decimal)
       if (type === 'porcentaje') {
         valueInput.step = '1';
-        valueInput.min = '120';
-        valueInput.max = '120';
+        valueInput.min = '1';
+        valueInput.max = '99';
       } else if (type === 'precio_fijo') {
         valueInput.step = '0.01';
         valueInput.min = '0.01';

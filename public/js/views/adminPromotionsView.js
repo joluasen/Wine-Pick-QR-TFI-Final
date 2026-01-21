@@ -68,7 +68,6 @@ export async function initAdminPromotionsView(container) {
         <td>${p.visible_text}</td>
         <td>${p.start_at ? p.start_at.split(" ")[0] : ""}</td>
         <td>${p.end_at ? p.end_at.split(" ")[0] : ""}</td>
-        <td>${p.is_active ? "Activa" : "Inactiva"}</td>
         <td>
           <button class="btn-table" data-edit-promo="${p.id}">Editar</button>
           <button class="btn-table ms-1" data-delete-promo="${p.id}">Borrar</button>
@@ -79,7 +78,7 @@ export async function initAdminPromotionsView(container) {
 
     // Rellenar con filas vacías
     for (let i = promos.length; i < PAGE_SIZE; i++) {
-      rows.push("<tr>" + "<td>&nbsp;</td>".repeat(9) + "</tr>");
+      rows.push("<tr>" + "<td>&nbsp;</td>".repeat(8) + "</tr>");
     }
 
     return rows.join("");

@@ -33,7 +33,6 @@ header('Content-Type: text/html; charset=utf-8');
               <th>Texto</th>
               <th>Inicio</th>
               <th>Fin</th>
-              <th>Estado</th>
               <th>Acciones</th>
             </tr>
           </thead>

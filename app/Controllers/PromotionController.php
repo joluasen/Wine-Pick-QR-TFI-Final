@@ -1,12 +1,17 @@
 <?php
-// app/Controllers/PromotionController.php
+// Controlador para la gestión de promociones de productos.
+// Implementa la lógica de negocio y validaciones para los endpoints de promociones.
+
 declare(strict_types=1);
 
 class PromotionController
 {
+    // Modelo de promociones para operaciones de base de datos.
     private \Promotion $promotionModel;
+    // Modelo de productos para validaciones y operaciones relacionadas.
     private \Product $productModel;
 
+    // Inicializa el controlador con los modelos necesarios.
     public function __construct(Promotion $promotionModel, Product $productModel)
     {
         $this->promotionModel = $promotionModel;
@@ -14,25 +19,14 @@ class PromotionController
     }
 
     /**
-     * POST /api/admin/promociones
-     * 
-     * Crear una nueva promoción para un producto.
-     * 
-     * Requiere:
-     * - product_id: ID del producto
-     * - promotion_type: tipo de promo (porcentaje, precio_fijo, etc)
-     * - parameter_value: valor (precio o porcentaje)
-     * - visible_text: texto breve visible
-     * - start_at: fecha inicio (Y-m-d H:i:s)
-     * - end_at: fecha fin (Y-m-d H:i:s, opcional)
-     * 
-     * @return void JSON con promoción creada o error.
+     * Crea una nueva promoción para un producto.
+     * Endpoint: POST /api/admin/promociones
      */
     public function create(): void
     {
         $body = json_decode(file_get_contents('php://input'), true);
 
-        // Validar campos requeridos
+        // Validación de campos requeridos
         if (empty($body['product_id']) || empty($body['promotion_type']) || empty($body['parameter_value']) || empty($body['visible_text']) || empty($body['start_at'])) {
             ApiResponse::validationError('Campos requeridos: product_id, promotion_type, parameter_value, visible_text, start_at.', 'body');
         }
@@ -45,7 +39,7 @@ class PromotionController
         $endAt = !empty($body['end_at']) ? trim($body['end_at']) : null;
         $adminId = (int)($_SERVER['WPQ_USER']['sub'] ?? 0);
 
-        // Validar tipo de promoción (valores permitidos)
+        // Validación de tipo de promoción
         $validTypes = ['porcentaje', 'precio_fijo', '2x1', '3x2', 'nxm'];
         if (!in_array($type, $validTypes, true)) {
             ApiResponse::validationError(
@@ -54,18 +48,18 @@ class PromotionController
             );
         }
 
-        // Validar que el producto existe
+        // Validación de existencia de producto
         $product = $this->productModel->findById($productId);
         if (!$product) {
             ApiResponse::notFound('Producto no encontrado.');
         }
 
-        // Validar parámetro según el tipo de promoción
+        // Validación de valor de promoción
         if ($value <= 0) {
             ApiResponse::validationError('El valor de la promoción debe ser mayor a 0.', 'parameter_value');
         }
 
-        // Validaciones específicas por tipo
+        // Validaciones específicas por tipo de promoción
         if ($type === 'porcentaje') {
             if ($value >= 100) {
                 ApiResponse::validationError('El porcentaje debe ser menor a 100% para que el precio final sea mayor a 0.', 'parameter_value');
@@ -75,31 +69,28 @@ class PromotionController
                 ApiResponse::validationError('El precio promocional debe ser menor al precio base (' . $product['base_price'] . ' ARS).', 'parameter_value');
             }
         } elseif ($type === '2x1' || $type === '3x2' || $type === 'nxm') {
-            // Para combos, el valor debe ser entero
             if ($value != floor($value)) {
                 ApiResponse::validationError('El valor para combos debe ser un número entero.', 'parameter_value');
             }
         }
 
-        // Validar fechas
+        // Validación de fechas
         if (!$this->isValidDate($startAt)) {
             ApiResponse::validationError('Fecha de inicio inválida (formato: Y-m-d H:i:s).', 'start_at');
         }
-
         if ($endAt && !$this->isValidDate($endAt)) {
             ApiResponse::validationError('Fecha de fin inválida (formato: Y-m-d H:i:s).', 'end_at');
         }
-
         if ($endAt && strtotime($startAt) > strtotime($endAt)) {
             ApiResponse::validationError('La fecha de inicio debe ser menor o igual a la fecha de fin.', 'start_at');
         }
 
-        // Validar texto visible
+        // Validación de texto visible
         if (strlen($text) < 3 || strlen($text) > 255) {
             ApiResponse::validationError('El texto de promoción debe tener entre 3 y 255 caracteres.', 'visible_text');
         }
 
-        // RF12: Validar que no exista otra promoción activa para el mismo producto en el mismo período
+        // Validación de solapamiento de promociones activas
         $overlapping = $this->promotionModel->findOverlappingPromotion($productId, $startAt, $endAt);
         if ($overlapping) {
             $conflictInfo = sprintf(
@@ -114,7 +105,7 @@ class PromotionController
             );
         }
 
-        // Crear promoción
+        // Creación de la promoción
         try {
             $promoId = $this->promotionModel->create(
                 $productId,
@@ -145,18 +136,8 @@ class PromotionController
     }
 
     /**
-     * GET /api/admin/promociones?product_id=... o GET /api/admin/promociones?limit=...&offset=...
-     *
-     * Listar promociones con dos modos:
-     * 1. Si se proporciona product_id: Listar todas las promociones de ese producto
-     * 2. Si NO se proporciona product_id: Listar todas las promociones (paginado)
-     *
-     * Query params:
-     * - product_id: ID del producto (opcional, para filtrar por producto)
-     * - limit: Límite de resultados (default: 10, max: 100, solo si NO hay product_id)
-     * - offset: Offset para paginación (default: 0, solo si NO hay product_id)
-     *
-     * @return void JSON con lista de promociones.
+     * Lista promociones, por producto o paginadas.
+     * Endpoint: GET /api/admin/promociones?product_id=... o GET /api/admin/promociones?limit=...&offset=...
      */
     public function listPromotions(): void
     {
@@ -185,7 +166,7 @@ class PromotionController
             ], 200);
         }
 
-        // Modo 2: Listar todas las promociones (paginado, con datos de producto)
+        // Modo 2: Listar todas las promociones (paginado)
         $limit = isset($_GET['limit']) ? (int)$_GET['limit'] : 10;
         $offset = isset($_GET['offset']) ? (int)$_GET['offset'] : 0;
 
@@ -204,28 +185,16 @@ class PromotionController
     }
 
     /**
-     * PUT /api/admin/promociones/{id}
-     *
-     * Actualizar una promoción existente.
-     *
-     * Requiere en body JSON:
-     * - promotion_type: tipo de promo (porcentaje, precio_fijo, etc)
-     * - parameter_value: valor (precio o porcentaje)
-     * - visible_text: texto breve visible
-     * - start_at: fecha inicio (Y-m-d H:i:s)
-     * - end_at: fecha fin (Y-m-d H:i:s, opcional)
-     *
-     * @return void JSON con promoción actualizada o error.
+     * Actualiza una promoción existente.
+     * Endpoint: PUT /api/admin/promociones/{id}
      */
     public function update(string $id): void
     {
-        // Validar ID
         $promotionId = (int)$id;
         if ($promotionId <= 0) {
             ApiResponse::validationError('ID de promoción inválido.', 'id');
         }
 
-        // Obtener JSON del body
         $body = file_get_contents('php://input');
         $data = json_decode($body, true);
 
@@ -233,13 +202,12 @@ class PromotionController
             ApiResponse::validationError('El cuerpo de la solicitud no es un JSON válido.');
         }
 
-        // Verificar que la promoción existe
         $promotion = $this->promotionModel->findById($promotionId);
         if (!$promotion) {
             ApiResponse::notFound('Promoción no encontrada.');
         }
 
-        // Validar campos requeridos
+        // Validación de campos requeridos
         if (empty($data['promotion_type']) || empty($data['parameter_value']) || empty($data['visible_text']) || empty($data['start_at'])) {
             ApiResponse::validationError('Campos requeridos: promotion_type, parameter_value, visible_text, start_at.', 'body');
         }
@@ -250,7 +218,7 @@ class PromotionController
         $startAt = trim($data['start_at']);
         $endAt = !empty($data['end_at']) ? trim($data['end_at']) : null;
 
-        // Validar tipo de promoción
+        // Validación de tipo de promoción
         $validTypes = ['porcentaje', 'precio_fijo', '2x1', '3x2', 'nxm'];
         if (!in_array($type, $validTypes, true)) {
             ApiResponse::validationError(
@@ -259,14 +227,13 @@ class PromotionController
             );
         }
 
-        // Validar parámetro según el tipo de promoción
+        // Validación de valor de promoción
         if ($value <= 0) {
             ApiResponse::validationError('El valor de la promoción debe ser mayor a 0.', 'parameter_value');
         }
 
         // Validaciones específicas por tipo
         if ($type === 'porcentaje') {
-            // Porcentaje debe ser entero sin decimales
             if ($value != floor($value)) {
                 ApiResponse::validationError('El porcentaje debe ser un número entero (sin decimales).', 'parameter_value');
             }
@@ -274,7 +241,6 @@ class PromotionController
                 ApiResponse::validationError('El porcentaje debe ser menor a 100%.', 'parameter_value');
             }
         } elseif ($type === 'precio_fijo') {
-            // Obtener producto para validar precio
             $product = $this->productModel->findById((int)$promotion['product_id']);
             if ($product && $value >= (float)$product['base_price']) {
                 ApiResponse::validationError('El precio promocional debe ser menor al precio base (' . $product['base_price'] . ' ARS).', 'parameter_value');
@@ -285,26 +251,23 @@ class PromotionController
             }
         }
 
-        // Validar fechas
+        // Validación de fechas
         if (!$this->isValidDate($startAt)) {
             ApiResponse::validationError('Fecha de inicio inválida (formato: Y-m-d H:i:s).', 'start_at');
         }
-
         if ($endAt && !$this->isValidDate($endAt)) {
             ApiResponse::validationError('Fecha de fin inválida (formato: Y-m-d H:i:s).', 'end_at');
         }
-
         if ($endAt && strtotime($startAt) > strtotime($endAt)) {
             ApiResponse::validationError('La fecha de inicio debe ser menor o igual a la fecha de fin.', 'start_at');
         }
 
-        // Validar texto visible
+        // Validación de texto visible
         if (strlen($text) < 3 || strlen($text) > 255) {
             ApiResponse::validationError('El texto de promoción debe tener entre 3 y 255 caracteres.', 'visible_text');
         }
 
-        // RF12: Validar que no exista otra promoción activa para el mismo producto en el mismo período
-        // Excluir la promoción actual de la verificación
+        // Validación de solapamiento de promociones activas (excluyendo la actual)
         $overlapping = $this->promotionModel->findOverlappingPromotion(
             (int)$promotion['product_id'],
             $startAt,
@@ -324,7 +287,7 @@ class PromotionController
             );
         }
 
-        // Actualizar promoción
+        // Actualización de la promoción
         try {
             $success = $this->promotionModel->update(
                 $promotionId,
@@ -358,27 +321,22 @@ class PromotionController
     }
 
     /**
-     * DELETE /api/admin/promociones/{id}
-     * 
-     * Eliminar una promoción existente.
-     * 
-     * @return void JSON con confirmación o error.
+     * Elimina una promoción existente.
+     * Endpoint: DELETE /api/admin/promociones/{id}
      */
     public function delete(string $id): void
     {
-        // Validar ID
         $promotionId = (int)$id;
         if ($promotionId <= 0) {
             ApiResponse::validationError('ID de promoción inválido.', 'id');
         }
 
-        // Verificar que la promoción existe
         $promotion = $this->promotionModel->findById($promotionId);
         if (!$promotion) {
             ApiResponse::notFound('Promoción no encontrada.');
         }
 
-        // Eliminar promoción
+        // Eliminación de la promoción
         try {
             $success = $this->promotionModel->delete($promotionId);
 
@@ -396,17 +354,16 @@ class PromotionController
     }
 
     /**
-     * Validar formato de fecha Y-m-d H:i:s
+     * Valida el formato de fecha Y-m-d H:i:s.
+     * @param string $date Fecha a validar.
+     * @return bool True si el formato es válido.
      */
     private function isValidDate(string $date): bool
     {
-        // Permitir formato Y-m-d H:i:s (con segundos opcionales)
-        $pattern = '/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/';
+        $pattern = '/^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}$/';
         if (!preg_match($pattern, $date)) {
             return false;
         }
-        
-        // Verificar que sea una fecha válida
         $d = \DateTime::createFromFormat('Y-m-d H:i:s', $date);
         return $d && $d->format('Y-m-d H:i:s') === $date;
     }

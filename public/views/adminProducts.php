@@ -26,7 +26,6 @@
               <th>Tipo</th>
               <th>Bodega</th>
               <th>Precio</th>
-              <th>Activo</th>
               <th>Acciones</th>
             </tr>
           </thead>

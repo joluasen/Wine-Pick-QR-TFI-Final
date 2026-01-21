@@ -55,7 +55,6 @@ export async function initAdminProductsView(_container) {
         <td>${p.drink_type}</td>
         <td>${p.winery_distillery}</td>
         <td>$${p.base_price.toFixed(2)}</td>
-        <td>${p.is_active ? "Sí" : "No"}</td>
         <td>
           <button class="btn-table" data-edit-product="${p.id}">Editar</button>
           <button class="btn-table ms-1" data-view-product="${p.id}">Ver</button>
@@ -67,7 +66,7 @@ export async function initAdminProductsView(_container) {
 
     // Rellenar con filas vacías
     for (let i = products.length; i < PAGE_SIZE; i++) {
-      rows.push("<tr>" + "<td>&nbsp;</td>".repeat(8) + "</tr>");
+      rows.push("<tr>" + "<td>&nbsp;</td>".repeat(7) + "</tr>");
     }
 
     return rows.join("");

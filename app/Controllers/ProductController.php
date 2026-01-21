@@ -1,26 +1,42 @@
 <?php
 declare(strict_types=1);
-// app/Controllers/ProductController.php
+// Controlador para la gestión de productos.
+// Implementa la lógica de negocio y validaciones para los endpoints de productos.
 
 /**
  * Controlador de Productos
- * 
+ *
  * Gestiona la lógica de negocio para los endpoints de productos.
  * Valida solicitudes, invoca el modelo para obtener/persistir datos,
  * y construye respuestas HTTP apropiadas.
- * 
+ *
  * Endpoints implementados:
  * - GET /api/public/productos/{codigo}  - Obtener por código QR
  * - GET /api/public/productos?search=.. - Buscar productos
  * - POST /api/admin/productos           - Crear producto
  */
-
 class ProductController {
 
+    // Modelo de productos para operaciones de base de datos.
+    private \Product $productModel;
+
+    // Inicializa el controlador y el modelo de productos.
+    public function __construct()
+    {
+        try {
+            $db = Database::getInstance();
+            $this->productModel = new Product($db);
+        } catch (\Exception $e) {
+            ApiResponse::serverError(
+                'Error al conectar con la base de datos.',
+                ['details' => $e->getMessage()]
+            );
+        }
+    }
+
     /**
-     * GET /api/public/promocion-mas-consultada
-     *
      * Devuelve el producto con promoción vigente más consultada.
+     * Endpoint: GET /api/public/promocion-mas-consultada
      */
     public function mostConsultedPromotionProduct(): void
     {
@@ -28,7 +44,7 @@ class ProductController {
         if (!$row) {
             ApiResponse::notFound('No se encontró ningún producto con promoción vigente.');
         }
-        // Formatear respuesta similar a promociones
+        // Formatea la respuesta para incluir datos de promoción.
         $promotion = [
             'promotion_type' => $row['promotion_type'],
             'parameter_value' => $row['parameter_value'],
@@ -41,30 +57,26 @@ class ProductController {
         ApiResponse::success($data, 200);
     }
 
-    private \Product $productModel;
-    
     /**
-     * GET /api/public/promociones
-     * 
-     * Listar productos con promociones vigentes y activas.
-     * Devuelve datos del producto + promoción formateados.
+     * Lista productos con promociones vigentes y activas.
+     * Endpoint: GET /api/public/promociones
      */
     public function listActivePromotions(): void
     {
         $limit = isset($_GET['limit']) ? (int)$_GET['limit'] : 100;
         $offset = isset($_GET['offset']) ? (int)$_GET['offset'] : 0;
 
-        // Validaciones básicas
+        // Validaciones de paginación
         if ($limit <= 0) $limit = 10;
         if ($limit > 100) $limit = 100;
         if ($offset < 0) $offset = 0;
 
-        // Obtener lista de productos con promos vigentes
+        // Obtiene productos con promociones activas
         $result = $this->productModel->getProductsWithActivePromotions($limit, $offset);
         $rows = $result['products'] ?? [];
         $total = $result['total'] ?? 0;
 
-        // Transformar filas en respuesta con promoción embebida
+        // Formatea cada producto con su promoción
         $data = array_map(function (array $row) {
             $promotion = [
                 'promotion_type' => $row['promo_type'] ?? null,
@@ -73,7 +85,6 @@ class ProductController {
                 'start_at' => $row['promo_start'] ?? null,
                 'end_at' => $row['promo_end'] ?? null,
             ];
-
             return $this->formatProductResponse($row, [
                 'promotion_type' => $promotion['promotion_type'],
                 'parameter_value' => $promotion['parameter_value'],
@@ -91,26 +102,24 @@ class ProductController {
     }
 
     /**
-     * GET /api/public/mas-buscados
-     * 
-     * Listar los productos más buscados/consultados.
-     * Se cuenta por eventos de consulta (QR y BÚSQUEDA).
+     * Lista los productos más buscados/consultados.
+     * Endpoint: GET /api/public/mas-buscados
      */
     public function listMostSearched(): void
     {
         $limit = isset($_GET['limit']) ? (int)$_GET['limit'] : 10;
         $offset = isset($_GET['offset']) ? (int)$_GET['offset'] : 0;
 
-        // Validaciones básicas
+        // Validaciones de paginación
         if ($limit <= 0) $limit = 10;
         if ($limit > 100) $limit = 100;
         if ($offset < 0) $offset = 0;
 
-        // Obtener lista de productos más buscados
+        // Obtiene productos más buscados
         $rows = $this->productModel->getMostSearchedProducts($limit, $offset);
         $total = $this->productModel->getMostSearchedProductsTotal();
 
-        // Transformar cada resultado agregando promoción vigente (si existe)
+        // Formatea cada producto con su promoción activa
         $data = array_map(function ($product) {
             $promotion = $this->productModel->getActivePromotion((int)$product['id']);
             return $this->formatProductResponse($product, $promotion);
@@ -123,27 +132,10 @@ class ProductController {
         ], 200);
     }
 
-    public function __construct()
-    {
-        try {
-            $db = Database::getInstance();
-            $this->productModel = new Product($db);
-        } catch (\Exception $e) {
-            ApiResponse::serverError(
-                'Error al conectar con la base de datos.',
-                ['details' => $e->getMessage()]
-            );
-        }
-    }
-
     /**
-     * GET /api/public/productos/{codigo}
-     * 
-     * Obtener un producto por su código público (QR).
-     * 
-     * @param string $code El código del producto.
-     * 
-     * @return void Devuelve JSON con el producto o error 404.
+     * Obtiene un producto por su código público (QR).
+     * Endpoint: GET /api/public/productos/{codigo}
+     * @param string $code Código del producto.
      */
     public function getByCode(string $code): void
     {
@@ -157,30 +149,18 @@ class ProductController {
             ApiResponse::notFound('Producto no encontrado.');
         }
 
-        // Obtener promoción activa si existe
+        // Obtiene promoción activa si existe
         $promotion = $this->productModel->getActivePromotion((int)$product['id']);
 
-        // Transformar datos para la respuesta
+        // Formatea datos para la respuesta
         $data = $this->formatProductResponse($product, $promotion);
 
         ApiResponse::success($data, 200);
     }
 
     /**
-     * GET /api/public/productos?search=texto&field=...&min_price=...&max_price=...&vintage_year=...&limit=...&offset=...
-     *
-     * Buscar productos por texto libre con filtros opcionales.
-     *
-     * Query params:
-     * - search: Texto a buscar (requerido)
-     * - field: Campo específico (name, drink_type, varietal, origin, public_code) (opcional)
-     * - min_price: Precio mínimo (opcional)
-     * - max_price: Precio máximo (opcional)
-     * - vintage_year: Año de cosecha (opcional)
-     * - limit: Límite de resultados (default: 20, max: 100)
-     * - offset: Offset para paginación (default: 0)
-     *
-     * @return void Devuelve JSON con lista de productos, total y count.
+     * Busca productos por texto libre con filtros opcionales.
+     * Endpoint: GET /api/public/productos?search=texto&...
      */
     public function search(): void
     {
@@ -190,7 +170,7 @@ class ProductController {
             ApiResponse::validationError('El parámetro "search" es requerido y no puede estar vacío.', 'search');
         }
 
-        // Limitar longitud de búsqueda
+        // Limita longitud de búsqueda
         $searchText = mb_substr($searchText, 0, 100);
 
         // Parámetros de filtrado
@@ -207,10 +187,10 @@ class ProductController {
         if ($limit > 100) $limit = 100;
         if ($offset < 0) $offset = 0;
 
-        // Ejecutar búsqueda con filtros
+        // Ejecuta búsqueda con filtros
         $results = $this->productModel->search($searchText, $limit, $offset, $field, $minPrice, $maxPrice, $vintageYear);
 
-        // Transformar cada resultado agregando promoción vigente (si existe)
+        // Formatea cada producto con su promoción activa
         $data = array_map(function ($product) {
             $promotion = $this->productModel->getActivePromotion((int)$product['id']);
             return $this->formatProductResponse($product, $promotion);
@@ -224,15 +204,12 @@ class ProductController {
     }
 
     /**
-     * POST /api/admin/productos
-     * 
-     * Crear un nuevo producto.
-     * 
-     * @return void Devuelve JSON con el producto creado (201) o error.
+     * Crea un nuevo producto.
+     * Endpoint: POST /api/admin/productos
      */
     public function create(): void
     {
-        // Obtener JSON del body
+        // Obtiene JSON del body
         $body = file_get_contents('php://input');
         $data = json_decode($body, true);
 
@@ -240,47 +217,42 @@ class ProductController {
             ApiResponse::validationError('El cuerpo de la solicitud no es un JSON válido.');
         }
 
-        // Validación básica de campos requeridos
+        // Validaciones de campos requeridos
         if (!isset($data['public_code'])) {
-            ApiResponse::validationError('El campo "public_code" es requerido.', 'public_code');
+            ApiResponse::validationError('El campo \"public_code\" es requerido.', 'public_code');
         }
-
         if (!isset($data['name'])) {
-            ApiResponse::validationError('El campo "name" es requerido.', 'name');
+            ApiResponse::validationError('El campo \"name\" es requerido.', 'name');
         }
-
         if (!isset($data['drink_type'])) {
-            ApiResponse::validationError('El campo "drink_type" es requerido.', 'drink_type');
+            ApiResponse::validationError('El campo \"drink_type\" es requerido.', 'drink_type');
         }
-
         if (!isset($data['winery_distillery'])) {
-            ApiResponse::validationError('El campo "winery_distillery" es requerido.', 'winery_distillery');
+            ApiResponse::validationError('El campo \"winery_distillery\" es requerido.', 'winery_distillery');
         }
-
         if (!isset($data['base_price'])) {
-            ApiResponse::validationError('El campo "base_price" es requerido.', 'base_price');
+            ApiResponse::validationError('El campo \"base_price\" es requerido.', 'base_price');
         }
 
-        // Validar drink_type
+        // Validación de tipo de bebida
         if (!Product::isValidDrinkType($data['drink_type'])) {
             $validTypes = ['vino', 'espumante', 'whisky', 'gin', 'licor', 'cerveza', 'otro'];
             ApiResponse::validationError(
-                'El "drink_type" no es válido. Valores aceptados: ' . implode(', ', $validTypes),
+                'El \"drink_type\" no es válido. Valores aceptados: ' . implode(', ', $validTypes),
                 'drink_type',
                 ['valid_values' => $validTypes]
             );
         }
 
-        // Validar base_price
+        // Validación de precio base
         $basePrice = (float) ($data['base_price'] ?? 0);
         if ($basePrice <= 0) {
-            ApiResponse::validationError('El "base_price" debe ser mayor a 0.', 'base_price');
+            ApiResponse::validationError('El \"base_price\" debe ser mayor a 0.', 'base_price');
         }
 
-        // Validar image_url si está presente
+        // Validación de imagen si está presente
         if (isset($data['image_url']) && !empty($data['image_url'])) {
             $imageUrl = $data['image_url'];
-            // Validar que sea una URL válida
             if (!filter_var($imageUrl, FILTER_VALIDATE_URL)) {
                 ApiResponse::validationError(
                     'La URL de la imagen no es válida.',
@@ -288,7 +260,6 @@ class ProductController {
                     ['provided_url' => $imageUrl]
                 );
             }
-            // Validar que comience con BASE_URL (asegurar que es del servidor)
             if (strpos($imageUrl, BASE_URL) !== 0) {
                 ApiResponse::validationError(
                     'La imagen debe estar alojada en el servidor.',
@@ -298,16 +269,16 @@ class ProductController {
             }
         }
 
-        // Validar que public_code no esté duplicado
+        // Validación de código público duplicado
         $existingByCode = $this->productModel->findByPublicCode($data['public_code']);
         if ($existingByCode) {
             ApiResponse::conflict(
-                'Ya existe un producto con el código "' . $data['public_code'] . '".',
+                'Ya existe un producto con el código \"' . $data['public_code'] . '\".',
                 'public_code'
             );
         }
 
-        // Validar que no exista un producto idéntico (mismo nombre, bodega, tipo y año)
+        // Validación de producto duplicado (nombre, bodega, tipo y año)
         $vintageYear = isset($data['vintage_year']) && $data['vintage_year'] !== ''
             ? (int)$data['vintage_year']
             : null;
@@ -333,12 +304,12 @@ class ProductController {
             );
         }
 
-        // Intentar crear el producto
+        // Intenta crear el producto
         try {
             $adminId = (int)($_SERVER['WPQ_USER']['sub'] ?? 0);
             $productId = $this->productModel->create($data, $adminId);
 
-            // Recuperar el producto recién creado
+            // Recupera el producto recién creado
             $product = $this->productModel->findById($productId);
 
             if (!$product) {
@@ -349,7 +320,6 @@ class ProductController {
 
             ApiResponse::success($responseData, 201);
         } catch (\Exception $e) {
-            // Detectar si es un error de clave duplicada
             $errorMsg = $e->getMessage();
             if (strpos($errorMsg, 'Duplicate entry') !== false) {
                 ApiResponse::conflict(
@@ -358,8 +328,6 @@ class ProductController {
                     ['error' => $errorMsg]
                 );
             }
-
-            // Error genérico
             ApiResponse::serverError(
                 'Error al crear el producto.',
                 ['error' => $errorMsg]
@@ -368,10 +336,9 @@ class ProductController {
     }
 
     /**
-     * Formatear un registro de producto para la respuesta JSON.
-     * 
+     * Formatea un registro de producto para la respuesta JSON.
      * @param array $product
-     * 
+     * @param array|null $promotion
      * @return array
      */
     private function formatProductResponse(array $product, ?array $promotion = null): array
@@ -395,7 +362,7 @@ class ProductController {
             'qr_link' => BASE_URL . '/#qr?code=' . rawurlencode($product['public_code']),
         ];
 
-        // Agregar promoción si existe
+        // Agrega promoción si existe
         if ($promotion) {
             $data['promotion'] = [
                 'type' => $promotion['promotion_type'],
@@ -405,7 +372,7 @@ class ProductController {
                 'end_at' => $promotion['end_at'] ?? null,
             ];
 
-            // Calcular precio final según tipo de promoción
+            // Calcula precio final según tipo de promoción
             $base = (float) $product['base_price'];
             $final = $base;
             $type = $data['promotion']['type'];
@@ -420,11 +387,9 @@ class ProductController {
             } elseif ($type === '3x2') {
                 $final = ($base * 2.0) / 3.0;
             } elseif ($type === 'nxm') {
-                // Para combos NXM, mantener precio unitario; condiciones en texto
                 $final = $base;
             }
 
-            // Asegurar no negativo/0
             if ($final <= 0) {
                 $final = $base;
             }
@@ -441,18 +406,12 @@ class ProductController {
     }
 
     /**
-     * POST /api/admin/productos/actualizar
-     * Actualizar un producto existente.
-     *
-     * Body JSON:
-     * - id: ID del producto (requerido)
-     * - name, drink_type, winery_distillery, base_price, etc. (campos a actualizar)
-     *
-     * @return void Devuelve JSON con el producto actualizado (200) o error.
+     * Actualiza un producto existente.
+     * Endpoint: POST /api/admin/productos/actualizar
      */
     public function update(): void
     {
-        // Obtener JSON del body
+        // Obtiene JSON del body
         $body = file_get_contents('php://input');
         $data = json_decode($body, true);
 
@@ -462,43 +421,42 @@ class ProductController {
 
         // Validación del ID
         if (!isset($data['id'])) {
-            ApiResponse::validationError('El campo "id" es requerido.', 'id');
+            ApiResponse::validationError('El campo \"id\" es requerido.', 'id');
         }
 
         $productId = (int)$data['id'];
 
         if ($productId <= 0) {
-            ApiResponse::validationError('El "id" debe ser un número positivo.', 'id');
+            ApiResponse::validationError('El \"id\" debe ser un número positivo.', 'id');
         }
 
-        // Verificar que el producto existe
+        // Verifica que el producto existe
         $existingProduct = $this->productModel->findById($productId);
         if (!$existingProduct) {
             ApiResponse::notFound('Producto no encontrado.');
         }
 
-        // Validar drink_type si está presente
+        // Validación de tipo de bebida si está presente
         if (isset($data['drink_type']) && !Product::isValidDrinkType($data['drink_type'])) {
             $validTypes = ['vino', 'espumante', 'whisky', 'gin', 'licor', 'cerveza', 'otro'];
             ApiResponse::validationError(
-                'El "drink_type" no es válido. Valores aceptados: ' . implode(', ', $validTypes),
+                'El \"drink_type\" no es válido. Valores aceptados: ' . implode(', ', $validTypes),
                 'drink_type',
                 ['valid_values' => $validTypes]
             );
         }
 
-        // Validar base_price si está presente
+        // Validación de precio base si está presente
         if (isset($data['base_price'])) {
             $basePrice = (float)$data['base_price'];
             if ($basePrice <= 0) {
-                ApiResponse::validationError('El "base_price" debe ser mayor a 0.', 'base_price');
+                ApiResponse::validationError('El \"base_price\" debe ser mayor a 0.', 'base_price');
             }
         }
 
-        // Validar image_url si está presente
+        // Validación de imagen si está presente
         if (isset($data['image_url']) && !empty($data['image_url'])) {
             $imageUrl = $data['image_url'];
-            // Validar que sea una URL válida
             if (!filter_var($imageUrl, FILTER_VALIDATE_URL)) {
                 ApiResponse::validationError(
                     'La URL de la imagen no es válida.',
@@ -506,7 +464,6 @@ class ProductController {
                     ['provided_url' => $imageUrl]
                 );
             }
-            // Validar que comience con BASE_URL (asegurar que es del servidor)
             if (strpos($imageUrl, BASE_URL) !== 0) {
                 ApiResponse::validationError(
                     'La imagen debe estar alojada en el servidor.',
@@ -516,19 +473,18 @@ class ProductController {
             }
         }
 
-        // Validar que public_code no esté duplicado (si se está actualizando)
+        // Validación de código público duplicado si se actualiza
         if (isset($data['public_code']) && $data['public_code'] !== $existingProduct['public_code']) {
             $existingByCode = $this->productModel->findByPublicCode($data['public_code'], $productId);
             if ($existingByCode) {
                 ApiResponse::conflict(
-                    'Ya existe un producto con el código "' . $data['public_code'] . '".',
+                    'Ya existe un producto con el código \"' . $data['public_code'] . '\".',
                     'public_code'
                 );
             }
         }
 
-        // Validar que no exista un producto idéntico (mismo nombre, bodega, tipo y año)
-        // Usar valores actualizados o existentes
+        // Validación de producto duplicado (nombre, bodega, tipo y año)
         $nameToCheck = isset($data['name']) ? $data['name'] : $existingProduct['name'];
         $wineryToCheck = isset($data['winery_distillery']) ? $data['winery_distillery'] : $existingProduct['winery_distillery'];
         $drinkTypeToCheck = isset($data['drink_type']) ? $data['drink_type'] : $existingProduct['drink_type'];
@@ -541,7 +497,7 @@ class ProductController {
             $wineryToCheck,
             $drinkTypeToCheck,
             $vintageYearToCheck,
-            $productId // Excluir el producto actual
+            $productId // Excluye el producto actual
         );
 
         if ($duplicate) {
@@ -558,25 +514,24 @@ class ProductController {
             );
         }
 
-        // Intentar actualizar el producto
+        // Intenta actualizar el producto
         try {
             $adminId = (int)($_SERVER['WPQ_USER']['sub'] ?? 0);
             $this->productModel->update($productId, $data, $adminId);
 
-            // Recuperar el producto actualizado
+            // Recupera el producto actualizado
             $product = $this->productModel->findById($productId);
 
             if (!$product) {
                 throw new \Exception('No se pudo recuperar el producto actualizado.');
             }
 
-            // Obtener promoción activa si existe
+            // Obtiene promoción activa si existe
             $promotion = $this->productModel->getActivePromotion($productId);
             $responseData = $this->formatProductResponse($product, $promotion);
 
             ApiResponse::success($responseData, 200);
         } catch (\Exception $e) {
-            // Error genérico
             ApiResponse::serverError(
                 'Error al actualizar el producto.',
                 ['error' => $e->getMessage()]
@@ -585,14 +540,8 @@ class ProductController {
     }
 
     /**
-     * GET /api/admin/productos?limit=...&offset=...
-     * Listar todos los productos para el panel de administración (paginado).
-     *
-     * Query params:
-     * - limit: Límite de resultados (default: 20, max: 100)
-     * - offset: Offset para paginación (default: 0)
-     *
-     * Solo para administradores autenticados.
+     * Lista todos los productos para el panel de administración (paginado).
+     * Endpoint: GET /api/admin/productos?limit=...&offset=...
      */
     public function listAllAdmin(): void
     {
@@ -617,25 +566,21 @@ class ProductController {
     }
 
     /**
-     * DELETE /api/admin/productos/{id}
      * Elimina un producto por su ID.
-     * Solo para administradores autenticados.
+     * Endpoint: DELETE /api/admin/productos/{id}
      */
     public function delete(string $id): void
     {
-        // Validar ID
         $productId = (int) $id;
         if ($productId <= 0) {
             ApiResponse::validationError('ID de producto inválido.', 'id');
         }
 
-        // Verificar que el producto existe
         $product = $this->productModel->findById($productId);
         if (!$product) {
             ApiResponse::notFound('Producto no encontrado.');
         }
 
-        // Ejecutar delete
         $success = $this->productModel->delete($productId);
         if (!$success) {
             ApiResponse::serverError('Error al eliminar el producto.');
