@@ -34,28 +34,48 @@ if (file_exists($envFile)) {
     }
 }
 
-// Entorno de ejecución: 'dev' | 'prod'
+
+/**
+ * Entorno de ejecución: 'dev' | 'prod'
+ * @var string
+ */
 define('WPQ_ENV', $_ENV['WPQ_ENV'] ?? 'dev');
 
-// Parámetros de conexión a base de datos (MySQL/MariaDB)
+
+/**
+ * Parámetros de conexión a base de datos (MySQL/MariaDB)
+ * @var string
+ */
 define('DB_HOST', $_ENV['DB_HOST'] ?? 'localhost');
 define('DB_NAME', $_ENV['DB_NAME'] ?? 'wine_pick_qr');
 define('DB_USER', $_ENV['DB_USER'] ?? 'root');
 define('DB_PASS', $_ENV['DB_PASS'] ?? '');
 define('DB_CHARSET', $_ENV['DB_CHARSET'] ?? 'utf8mb4');
 
-// Rutas del sistema de archivos
+
+/**
+ * Rutas del sistema de archivos
+ * @var string
+ */
 define('BASE_PATH', dirname(__DIR__));
 define('APP_PATH', BASE_PATH . '/app');
 define('PUBLIC_PATH', BASE_PATH . '/public');
 define('CONFIG_PATH', BASE_PATH . '/config');
 define('LOGS_PATH', BASE_PATH . '/logs');
 
-// URL base de la aplicación
+
+/**
+ * URL base de la aplicación
+ * @var string
+ */
 define('BASE_URL', $_ENV['BASE_URL'] ?? 'http://localhost/proyectos/Wine-Pick-QR-TFI');
 
-// Autenticación (JWT) - configurable vía .env
-// CRÍTICO: En producción, JWT_SECRET DEBE estar configurado en .env
+
+/**
+ * Autenticación (JWT) - configurable vía .env
+ * CRÍTICO: En producción, JWT_SECRET DEBE estar configurado en .env
+ * @var string
+ */
 $jwtSecret = $_ENV['JWT_SECRET'] ?? '';
 if (WPQ_ENV === 'prod' && (empty($jwtSecret) || $jwtSecret === 'change-this-in-.env')) {
     // En producción, no permitir secrets inseguros
@@ -64,7 +84,10 @@ if (WPQ_ENV === 'prod' && (empty($jwtSecret) || $jwtSecret === 'change-this-in-.
 define('JWT_SECRET', $jwtSecret ?: 'dev-only-secret-do-not-use-in-prod');
 define('AUTH_COOKIE_NAME', $_ENV['AUTH_COOKIE_NAME'] ?? 'wpq_auth');
 
-// Headers de seguridad HTTP (se aplican en producción)
+
+/**
+ * Headers de seguridad HTTP (se aplican en producción)
+ */
 if (WPQ_ENV === 'prod' && php_sapi_name() !== 'cli') {
     header('X-Content-Type-Options: nosniff');
     header('X-Frame-Options: SAMEORIGIN');
@@ -75,10 +98,10 @@ if (WPQ_ENV === 'prod' && php_sapi_name() !== 'cli') {
 
 /**
  * Registra mensajes de depuración en el archivo de logs.
- * 
+ *
  * Solo escribe en logs cuando el entorno está configurado como 'dev'.
  * En producción, esta función no produce salida.
- * 
+ *
  * @param string $message Mensaje a registrar en el log.
  * @return void
  */
