@@ -3,10 +3,11 @@
 declare(strict_types=1);
 
 /**
- * Utilidad JWT HS256 (sin dependencias externas)
- * - Encode/Decode con firma HMAC SHA-256
- * - Base64 URL safe
- * - Soporta iat, exp, nbf
+ * Clase Jwt
+ *
+ * Utilidad JWT HS256 (sin dependencias externas).
+ * Permite codificar y decodificar tokens JWT firmados con HMAC SHA-256.
+ * Implementa base64 URL safe y soporta claims estándar como iat, exp, nbf.
  */
 class Jwt
 {
@@ -84,11 +85,23 @@ class Jwt
         return $payload;
     }
 
+    /**
+     * Codifica datos en base64 URL safe (sin padding).
+     *
+     * @param string $data Datos a codificar.
+     * @return string Cadena codificada base64 URL safe.
+     */
     private static function b64url(string $data): string
     {
         return rtrim(strtr(base64_encode($data), '+/', '-_'), '=');
     }
 
+    /**
+     * Decodifica una cadena base64 URL safe.
+     *
+     * @param string $data Cadena codificada base64 URL safe.
+     * @return string Datos decodificados.
+     */
     private static function b64urlDecode(string $data): string
     {
         $pad = 4 - (strlen($data) % 4);

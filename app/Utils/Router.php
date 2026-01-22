@@ -14,10 +14,31 @@ declare(strict_types=1);
  * - GET /api/public/productos?search=.. - Buscar productos
  * - POST /api/admin/productos           - Crear nuevo producto
  */
+
+/**
+ * Clase Router
+ *
+ * Enrutador de solicitudes HTTP para la API.
+ * Gestiona el mapeo de URLs a controladores y acciones, y la protección de rutas.
+ */
 class Router
 {
+    /**
+     * URI de la solicitud actual (relativa al proyecto).
+     * @var string
+     */
     private string $requestUri;
+
+    /**
+     * Método HTTP de la solicitud actual (GET, POST, etc.).
+     * @var string
+     */
     private string $requestMethod;
+
+    /**
+     * Tabla de rutas registradas por método HTTP.
+     * @var array
+     */
     private array $routes = [];
 
     public function __construct()

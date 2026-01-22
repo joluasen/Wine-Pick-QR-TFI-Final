@@ -3,11 +3,12 @@
 declare(strict_types=1);
 
 /**
- * Wrapper de Respuestas de API
- * 
+ * Clase ApiResponse
+ *
+ * Wrapper de respuestas de API.
  * Proporciona métodos helper de alto nivel para construir respuestas HTTP comunes.
  * Encapsula JsonResponse, simplificando los llamados desde controladores.
- * 
+ *
  * Métodos disponibles:
  * - success: respuesta exitosa (200, 201)
  * - validationError: error de validación de datos (400)
@@ -20,22 +21,37 @@ declare(strict_types=1);
  */
 class ApiResponse
 {
-    // ========== CÓDIGOS HTTP ==========
+
+    // ========== CÓDIGOS HTTP ========== 
+    /** @var int Código HTTP 200 OK */
     const HTTP_OK = 200;
+    /** @var int Código HTTP 201 Created */
     const HTTP_CREATED = 201;
+    /** @var int Código HTTP 400 Bad Request */
     const HTTP_BAD_REQUEST = 400;
+    /** @var int Código HTTP 401 Unauthorized */
     const HTTP_UNAUTHORIZED = 401;
+    /** @var int Código HTTP 403 Forbidden */
     const HTTP_FORBIDDEN = 403;
+    /** @var int Código HTTP 404 Not Found */
     const HTTP_NOT_FOUND = 404;
+    /** @var int Código HTTP 409 Conflict */
     const HTTP_CONFLICT = 409;
+    /** @var int Código HTTP 500 Internal Server Error */
     const HTTP_SERVER_ERROR = 500;
 
-    // ========== CÓDIGOS DE ERROR LÓGICOS ==========
+    // ========== CÓDIGOS DE ERROR LÓGICOS ========== 
+    /** @var string Error de validación de datos */
     const ERROR_VALIDATION = 'VALIDATION_ERROR';
+    /** @var string Error de recurso no encontrado */
     const ERROR_NOT_FOUND = 'NOT_FOUND';
+    /** @var string Error de conflicto (duplicado, etc.) */
     const ERROR_CONFLICT = 'CONFLICT';
+    /** @var string Error de autenticación */
     const ERROR_UNAUTHORIZED = 'UNAUTHORIZED';
+    /** @var string Error de autorización */
     const ERROR_FORBIDDEN = 'FORBIDDEN';
+    /** @var string Error interno del servidor */
     const ERROR_SERVER = 'INTERNAL_ERROR';
 
     /**

@@ -3,23 +3,22 @@
 declare(strict_types=1);
 
 /**
- * Constructor de Respuestas JSON
- * 
+ * Clase JsonResponse
+ *
  * Centraliza la construcción de respuestas HTTP con formato JSON uniforme.
  * Garantiza que todas las respuestas de la API sigan la estructura:
- * { ok: bool, data: mixed, error: null|object }
- * 
+ *   { ok: bool, data: mixed, error: null|object }
+ *
  * Proporciona métodos estáticos para respuestas exitosas y de error,
  * manejando automáticamente códigos HTTP, headers y serialización JSON.
  */
 class JsonResponse
 {
     /**
-     * Construir una respuesta exitosa.
-     * 
+     * Construye y envía una respuesta exitosa en formato JSON.
+     *
      * @param mixed $data Los datos a devolver (array, string, etc.)
      * @param int $httpCode Código HTTP (200 por defecto, 201 para Created)
-     * 
      * @return void Envía el JSON y termina la ejecución.
      */
     public static function success($data, int $httpCode = 200): void
@@ -38,13 +37,12 @@ class JsonResponse
     }
 
     /**
-     * Construir una respuesta de error.
-     * 
+     * Construye y envía una respuesta de error en formato JSON.
+     *
      * @param string $errorCode Código de error (VALIDATION_ERROR, NOT_FOUND, etc.)
      * @param string $message Mensaje legible del error
      * @param int $httpCode Código HTTP (400, 404, 500, etc.)
      * @param array $details Información adicional (solo en dev)
-     * 
      * @return void Envía el JSON y termina la ejecución.
      */
     public static function error(

@@ -15,9 +15,24 @@ declare(strict_types=1);
  * - execute: ejecutar INSERT/UPDATE/DELETE
  * - getLastInsertId: obtener ID del último registro insertado
  */
+/**
+ * Clase Database
+ *
+ * Implementa un gestor de conexión a base de datos MySQL/MariaDB usando el patrón Singleton.
+ * Proporciona métodos seguros para consultas y operaciones de escritura.
+ */
 class Database
 {
+    /**
+     * Instancia singleton de la clase Database.
+     * @var self|null
+     */
     private static ?self $instance = null;
+
+    /**
+     * Conexión activa a MySQL.
+     * @var \mysqli
+     */
     private \mysqli $connection;
 
     /**

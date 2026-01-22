@@ -4,22 +4,34 @@ declare(strict_types=1);
 
 /**
  * Servicio de Autenticación basado en JWT + Cookie HttpOnly
+ *
+ * Proporciona métodos para emitir, validar y eliminar tokens JWT almacenados en cookies seguras.
+ * Permite la autenticación de usuarios administradores en la API.
  */
 class Auth
 {
-    /** Nombre de la cookie con el token */
+    /**
+     * Devuelve el nombre de la cookie de autenticación.
+     * @return string Nombre de la cookie.
+     */
     private static function cookieName(): string
     {
         return defined('AUTH_COOKIE_NAME') ? AUTH_COOKIE_NAME : 'wpq_auth';
     }
 
-    /** Secret para firmar JWT */
+    /**
+     * Devuelve el secreto para firmar/verificar JWT.
+     * @return string Secreto JWT.
+     */
     private static function secret(): string
     {
         return defined('JWT_SECRET') ? JWT_SECRET : 'dev-secret-change-me';
     }
 
-    /** Determina si debe marcar Secure en la cookie */
+    /**
+     * Determina si la cookie debe marcarse como Secure.
+     * @return bool True si debe ser Secure.
+     */
     private static function isSecureCookie(): bool
     {
         // Usar HTTPS real o si BASE_URL es https
@@ -28,7 +40,13 @@ class Auth
         return $isHttps;
     }
 
-    /** Emite un JWT para el usuario y lo setea en cookie HttpOnly */
+    /**
+     * Emite un JWT para el usuario y lo setea en cookie HttpOnly.
+     *
+     * @param array $user Datos del usuario (debe incluir id y username).
+     * @param int $ttl Tiempo de vida del token en segundos (default: 1800).
+     * @return string Token JWT generado.
+     */
     public static function issueToken(array $user, int $ttl = 1800): string
     {
         $payload = [
@@ -42,7 +60,13 @@ class Auth
         return $token;
     }
 
-    /** Setea la cookie de autenticación */
+    /**
+     * Setea la cookie de autenticación con el token JWT.
+     *
+     * @param string $token Token JWT.
+     * @param int $ttl Tiempo de vida en segundos.
+     * @return void
+     */
     public static function setAuthCookie(string $token, int $ttl): void
     {
         $params = [
@@ -56,7 +80,11 @@ class Auth
         setcookie(self::cookieName(), $token, $params);
     }
 
-    /** Borra la cookie de autenticación (logout) */
+    /**
+     * Borra la cookie de autenticación (logout).
+     *
+     * @return void
+     */
     public static function clearAuthCookie(): void
     {
         $params = [
@@ -70,7 +98,11 @@ class Auth
         setcookie(self::cookieName(), '', $params);
     }
 
-    /** Obtiene y valida el JWT desde la cookie; devuelve claims o lanza 401 */
+    /**
+     * Obtiene y valida el JWT desde la cookie; devuelve claims o lanza 401.
+     *
+     * @return array Claims del usuario autenticado.
+     */
     public static function assertAuthenticated(): array
     {
         $token = $_COOKIE[self::cookieName()] ?? '';
@@ -88,7 +120,11 @@ class Auth
         return [];
     }
 
-    /** Devuelve claims si el usuario está autenticado, o null si no */
+    /**
+     * Devuelve claims si el usuario está autenticado, o null si no.
+     *
+     * @return array|null Claims del usuario o null si no está autenticado.
+     */
     public static function getUser(): ?array
     {
         $token = $_COOKIE[self::cookieName()] ?? '';
