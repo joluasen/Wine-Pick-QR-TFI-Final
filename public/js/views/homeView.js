@@ -121,11 +121,19 @@ function createProductCard(product) {
   `;
   
   // Event listeners
-  card.addEventListener('click', () => modalManager.showProduct(product));
+  card.addEventListener('click', () => {
+    import('../core/utils.js').then(({ registerMetric }) => {
+      registerMetric(product.id, 'BUSQUEDA');
+      modalManager.showProduct(product, null);
+    });
+  });
   card.addEventListener('keydown', (e) => {
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
-      modalManager.showProduct(product);
+      import('../core/utils.js').then(({ registerMetric }) => {
+        registerMetric(product.id, 'BUSQUEDA');
+        modalManager.showProduct(product, null);
+      });
     }
   });
   

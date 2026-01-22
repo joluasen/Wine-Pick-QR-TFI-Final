@@ -209,5 +209,57 @@ class Metric
             'count' => (int)$result['count'],
         ];
     }
+
+    /**
+     * Registra una consulta de producto.
+     * 
+     * Inserta un evento en la tabla consult_events para registrar
+     * que un producto fue consultado, ya sea por QR o por búsqueda.
+     * 
+     * @param int $productId ID del producto consultado
+     * @param string $channel Canal de consulta: 'QR' o 'BUSQUEDA'
+     * @return bool True si se registró exitosamente
+     * @throws \Exception Si hay error en la base de datos
+     */
+    public function registerConsult(int $productId, string $channel): bool
+    {
+        // Validar que el canal sea válido
+        $validChannels = ['QR', 'BUSQUEDA'];
+        if (!in_array($channel, $validChannels, true)) {
+            throw new \InvalidArgumentException(
+                'El canal debe ser "QR" o "BUSQUEDA". Recibido: ' . $channel
+            );
+        }
+
+        // Validar que el producto existe
+        $productCheck = "SELECT id FROM products WHERE id = ? LIMIT 1";
+        $product = $this->db->fetchOne($productCheck, [$productId], 'i');
+        
+        if (!$product) {
+            throw new \InvalidArgumentException(
+                'El producto con ID ' . $productId . ' no existe.'
+            );
+        }
+
+        // Insertar el evento de consulta
+        $now = date('Y-m-d H:i:s');
+        $query = "
+            INSERT INTO consult_events (product_id, occurred_at, channel)
+            VALUES (?, ?, ?)
+        ";
+
+        $params = [$productId, $now, $channel];
+        $types = 'iss';
+
+        try {
+            $this->db->execute($query, $params, $types);
+            return true;
+        } catch (\Exception $e) {
+            // Loguear el error pero no lanzar excepción
+            // para que no afecte la experiencia del usuario
+            error_log('Error registrando consulta: ' . $e->getMessage());
+            throw $e;
+        }
+    }
 }
 ?>

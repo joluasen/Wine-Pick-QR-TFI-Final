@@ -84,4 +84,70 @@ class MetricController
             );
         }
     }
+
+    /**
+     * Registra una consulta de producto.
+     * Endpoint: POST /api/public/metricas
+     * 
+     * Body JSON:
+     * {
+     *   "product_id": 123,
+     *   "channel": "QR" | "BUSQUEDA",
+     *   "context_info": "opcional"
+     * }
+     * 
+     * Este endpoint es público y no requiere autenticación.
+     * Si falla, retorna 200 OK para no afectar la experiencia del usuario.
+     */
+    public function register(): void
+    {
+        // Obtener datos del body JSON
+        $body = file_get_contents('php://input');
+        $data = json_decode($body, true);
+
+        if ($data === null) {
+            // No fallar, solo loguear y retornar éxito
+            error_log('Métrica: Body JSON inválido');
+            ApiResponse::success(['registered' => false, 'reason' => 'invalid_json'], 200);
+            return;
+        }
+
+        // Validar campos requeridos
+        if (!isset($data['product_id']) || !isset($data['channel'])) {
+            error_log('Métrica: Faltan campos requeridos');
+            ApiResponse::success(['registered' => false, 'reason' => 'missing_fields'], 200);
+            return;
+        }
+
+        $productId = (int)$data['product_id'];
+        $channel = strtoupper(trim($data['channel']));
+
+        // Validar product_id
+        if ($productId <= 0) {
+            error_log('Métrica: product_id inválido: ' . $productId);
+            ApiResponse::success(['registered' => false, 'reason' => 'invalid_product_id'], 200);
+            return;
+        }
+
+        // Validar channel
+        if (!in_array($channel, ['QR', 'BUSQUEDA'], true)) {
+            error_log('Métrica: canal inválido: ' . $channel);
+            ApiResponse::success(['registered' => false, 'reason' => 'invalid_channel'], 200);
+            return;
+        }
+
+        // Intentar registrar la métrica
+        try {
+            $this->metricModel->registerConsult($productId, $channel);
+            ApiResponse::success(['registered' => true], 200);
+        } catch (\InvalidArgumentException $e) {
+            // Producto no existe u otro error de validación
+            error_log('Métrica: ' . $e->getMessage());
+            ApiResponse::success(['registered' => false, 'reason' => 'validation_error'], 200);
+        } catch (\Exception $e) {
+            // Error de base de datos u otro error
+            error_log('Métrica: Error al registrar: ' . $e->getMessage());
+            ApiResponse::success(['registered' => false, 'reason' => 'database_error'], 200);
+        }
+    }
 }

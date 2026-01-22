@@ -42,6 +42,47 @@ export function setStatus(el, message, type = 'info') {
 }
 
 /**
+ * Registra una métrica de consulta de producto
+ * @param {number} productId - ID del producto consultado
+ * @param {('QR'|'BUSQUEDA')} channel - Canal por el que se consultó
+ * @returns {Promise<void>}
+ */
+export async function registerMetric(productId, channel) {
+  // Validación básica
+  if (!productId || typeof productId !== 'number' || productId <= 0) {
+    console.warn('registerMetric: productId inválido:', productId);
+    return;
+  }
+
+  if (!['QR', 'BUSQUEDA'].includes(channel)) {
+    console.warn('registerMetric: canal inválido:', channel);
+    return;
+  }
+
+  try {
+    const response = await fetch('./api/public/metricas', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        product_id: productId,
+        channel: channel,
+      }),
+    });
+
+    // No validamos respuesta - es fire-and-forget
+    // Si falla, no queremos afectar la experiencia del usuario
+    if (!response.ok) {
+      console.warn('registerMetric: respuesta no OK', response.status);
+    }
+  } catch (error) {
+    // Silenciosamente fallar - no afectar UX
+    console.warn('registerMetric: error al registrar métrica', error);
+  }
+}
+
+/**
  * Calcula el precio final considerando promociones
  * @param {Object} product - Producto con base_price y promotion opcional
  * @returns {Object} { final, type, savings, discount, hasPromo }

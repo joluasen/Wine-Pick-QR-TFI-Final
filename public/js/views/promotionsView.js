@@ -5,7 +5,7 @@
  * Muestra productos con promociones vigentes
  */
 
-import { setStatus, calculatePromoPrice, fetchJSON, escapeHtml, formatDate } from '../core/utils.js';
+import { setStatus, calculatePromoPrice, fetchJSON, escapeHtml, formatDate, registerMetric } from '../core/utils.js';
 import { modalManager } from '../core/modalManager.js';
 
 const PAGE_SIZE = 20;
@@ -117,11 +117,15 @@ function createPromoCard(product) {
     </div>
   `;
   
-  card.addEventListener('click', () => modalManager.showProduct(product));
+  card.addEventListener('click', () => {
+    registerMetric(product.id, 'BUSQUEDA');
+    modalManager.showProduct(product, null);
+  });
   card.addEventListener('keydown', (e) => {
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
-      modalManager.showProduct(product);
+      registerMetric(product.id, 'BUSQUEDA');
+      modalManager.showProduct(product, null);
     }
   });
   

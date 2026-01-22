@@ -79,6 +79,9 @@ class Router
         // GET /api/public/mas-buscados - Listar productos más buscados
         $this->get('/api/public/mas-buscados', 'ProductController@listMostSearched');
 
+        // POST /api/public/metricas - Registrar consulta de producto (público)
+        $this->post('/api/public/metricas', 'MetricController@register');
+
         // Auth
         $this->post('/api/admin/login', 'AuthController@login');
         $this->post('/api/admin/logout', 'AuthController@logout');

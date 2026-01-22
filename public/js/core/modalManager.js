@@ -190,8 +190,13 @@ class ModalManager {
   /**
    * Muestra el modal de producto
    * @param {Object} product - Datos del producto
+   * @param {null} _ - Parámetro no usado (compatibilidad hacia atrás)
    */
-  showProduct(product) {
+  showProduct(product, _ = null) {
+    // NOTA: El registro de métricas se hace ANTES de llamar a este método
+    // desde las vistas específicas (searchView, homeView, etc.)
+    // NO registramos aquí para evitar duplicados
+
     const content = this.renderProductCard(product);
     this.open("product-modal", content, {
       onOpen: (modalEl) => {
@@ -295,7 +300,8 @@ class ModalManager {
    */
   showProductAdmin(product) {
     // Usa exactamente el mismo método - misma ficha, mismo estilo
-    this.showProduct(product);
+    // No registra métricas (es una vista interna del admin)
+    this.showProduct(product, null);
   }
 
   /**
@@ -634,10 +640,38 @@ class ModalManager {
     // Cerrar el modal QR
     this.close();
 
-    // Navegar a la búsqueda tras un pequeño delay para asegurar cierre visual
-    setTimeout(() => {
-      window.location.href = `/spa.php?view=search&code=${encodeURIComponent(code)}`;
-    }, 250);
+    // Buscar el producto por código QR
+    (async () => {
+      try {
+        const response = await fetch(`./api/public/productos/${encodeURIComponent(code)}`);
+        const data = await response.json();
+        
+        if (data.ok && data.data) {
+          // Si encontró el producto, abrir directamente
+          const product = data.data;
+          const { registerMetric } = await import('./utils.js');
+          
+          // Registrar métrica como QR
+          registerMetric(product.id, 'QR');
+          
+          // Mostrar el producto sin registrar de nuevo
+          this.showProduct(product, null);
+        } else {
+          // Si no encuentra, ir a search view para que busque
+          sessionStorage.setItem('lastSearchChannel', 'QR');
+          setTimeout(() => {
+            window.location.hash = `#search?query=${encodeURIComponent(code)}`;
+          }, 250);
+        }
+      } catch (err) {
+        console.error('Error buscando QR:', err);
+        // Si hay error, ir a search view
+        sessionStorage.setItem('lastSearchChannel', 'QR');
+        setTimeout(() => {
+          window.location.hash = `#search?query=${encodeURIComponent(code)}`;
+        }, 250);
+      }
+    })();
   }
 
   // ============================================

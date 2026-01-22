@@ -2,7 +2,21 @@
 // Lógica unificada y profesional para el buscador header (desktop y mobile)
 // Autocompletado, accesibilidad, UX robusta
 
-import { fetchJSON, escapeHtml } from './core/utils.js';
+import { fetchJSON, escapeHtml, registerMetric } from './core/utils.js';
+
+// Cache simple para saber si el usuario es admin
+let isAdminUser = null;
+
+async function checkAdmin() {
+  if (isAdminUser !== null) return isAdminUser;
+  try {
+    const res = await fetch('./api/admin/me', { credentials: 'same-origin' });
+    isAdminUser = res.ok;
+  } catch {
+    isAdminUser = false;
+  }
+  return isAdminUser;
+}
 
 const AUTOCOMPLETE_LIMIT = 5;
 let debounceTimeout = null;
@@ -88,11 +102,24 @@ function initUnifiedSearchBar() {
         li.addEventListener('mouseleave', () => {
           li.style.background = '#fff';
         });
-        li.addEventListener('mousedown', (e) => {
+        li.addEventListener('mousedown', async (e) => {
           e.preventDefault();
-          newInput.value = item.name;
+          const query = item.name;
+          newInput.value = query;
           clearDropdown();
-          newForm.dispatchEvent(new Event('submit'));
+
+          const isAdmin = await checkAdmin();
+          const { modalManager } = await import('./core/modalManager.js');
+
+          if (isAdmin) {
+            // Admin no registra métricas
+            modalManager.showProductAdmin(item);
+            return;
+          }
+
+          // Registrar métrica y abrir directamente desde sugerencia
+          registerMetric(item.id, 'BUSQUEDA');
+          modalManager.showProduct(item, null); // null = no registrar de nuevo
         });
         dropdown.appendChild(li);
       });
@@ -116,17 +143,42 @@ function initUnifiedSearchBar() {
     newForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       const query = newInput.value.trim();
-      if (query) {
-        let target = '#search';
-        try {
-          const res = await fetch('./api/admin/me', { credentials: 'same-origin' });
-          if (res.ok) target = '#admin-search';
-        } catch {}
+      if (!query) return;
+      
+      try {
+        const isAdmin = await checkAdmin();
+
+        // Buscar productos
+        const params = new URLSearchParams({ search: query, limit: 100 });
+        const url = `./api/public/productos?${params.toString()}`;
+        const data = await fetchJSON(url);
+        const products = data?.data?.products || [];
+        
+        // Si hay exactamente 1 resultado, abrir directamente
+        if (products.length === 1) {
+          const product = products[0];
+          const { modalManager } = await import('./core/modalManager.js');
+
+          if (isAdmin) {
+            // Admin no registra métricas
+            modalManager.showProductAdmin(product);
+          } else {
+            registerMetric(product.id, 'BUSQUEDA');
+            modalManager.showProduct(product, null); // null = no registrar de nuevo
+          }
+          clearDropdown();
+          return;
+        }
+        
+        // Si hay múltiples resultados, ir a vista search (sin registrar aún)
+        const target = isAdmin ? '#admin-search' : '#search';
         window.location.hash = `${target}?query=${encodeURIComponent(query)}`;
         setTimeout(() => {
           newInput.value = query;
         }, 200);
         clearDropdown();
+      } catch (err) {
+        console.error('Error en búsqueda:', err);
       }
     });
 

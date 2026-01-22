@@ -5,7 +5,7 @@
  * Muestra resultados de búsqueda con filtros y paginación
  */
 
-import { setStatus, getHashParams, fetchJSON, escapeHtml, calculatePromoPrice } from '../core/utils.js';
+import { setStatus, getHashParams, fetchJSON, escapeHtml, calculatePromoPrice, registerMetric } from '../core/utils.js';
 import { modalManager } from '../core/modalManager.js';
 
 const PAGE_SIZE = 20;
@@ -81,11 +81,30 @@ function createResultCard(product) {
     <p class="code"><small>Código: ${escapeHtml(product.public_code)}</small></p>
   `;
   
-  card.addEventListener('click', () => modalManager.showProduct(product));
+  // Detectar si esta búsqueda viene de un QR scan
+  const channel = sessionStorage.getItem('lastSearchChannel') || 'BUSQUEDA';
+  const isAdminContext = window.location.hash.startsWith('#admin');
+  
+  card.addEventListener('click', () => {
+    if (isAdminContext) {
+      // Admin no registra métricas
+      modalManager.showProductAdmin(product);
+      return;
+    }
+    registerMetric(product.id, channel);
+    modalManager.showProduct(product, null);
+    sessionStorage.removeItem('lastSearchChannel');
+  });
   card.addEventListener('keydown', (e) => {
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
-      modalManager.showProduct(product);
+      if (isAdminContext) {
+        modalManager.showProductAdmin(product);
+        return;
+      }
+      registerMetric(product.id, channel);
+      modalManager.showProduct(product, null);
+      sessionStorage.removeItem('lastSearchChannel');
     }
   });
   
