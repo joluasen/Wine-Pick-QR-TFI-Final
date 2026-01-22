@@ -483,43 +483,16 @@ class ModalManager {
       <div class="qr-scanner-modal">
         <h2 class="qr-title">Escanear Código QR</h2>
         <p class="qr-subtitle">Apuntá la cámara al código QR del producto</p>
-        
+
         <div id="qr-reader" class="qr-reader"></div>
         <div id="qr-status" class="qr-status" aria-live="polite"></div>
-        
-        <div class="qr-manual">
-          <p class="qr-manual-label">¿No podés escanear? Ingresá el código manualmente:</p>
-          <form id="qr-manual-form" class="qr-manual-form">
-            <input 
-              type="text" 
-              id="qr-manual-input" 
-              name="code" 
-              placeholder="Ej: MALBEC-001" 
-              required
-              autocomplete="off"
-            >
-            <button type="submit" class="btn-modal btn-modal-primary">Buscar</button>
-          </form>
-        </div>
       </div>
     `;
 
-    const modal = this.open("qr-scanner-modal", content, {
+    this.open("qr-scanner-modal", content, {
       onOpen: () => this.initQrScanner(),
       onClose: () => this.stopQrScanner(),
     });
-
-    // Setup del formulario manual
-    const form = modal.querySelector("#qr-manual-form");
-    if (form) {
-      form.addEventListener("submit", (e) => {
-        e.preventDefault();
-        const code = form.querySelector("#qr-manual-input")?.value?.trim();
-        if (code) {
-          this.handleQrResult(code);
-        }
-      });
-    }
   }
 
   /**
@@ -553,13 +526,13 @@ class ModalManager {
       if (statusEl) {
         if (err && err.name === "NotAllowedError") {
           statusEl.textContent =
-            "Permiso denegado para usar la cámara. Usá el ingreso manual.";
+            "Permiso denegado para usar la cámara. Realizá la búsqueda manual desde el buscador.";
         } else if (err && err.name === "NotFoundError") {
           statusEl.textContent =
-            "No se encontró ninguna cámara en el dispositivo.";
+            "No se encontró ninguna cámara en el dispositivo. Realizá la búsqueda manual desde el buscador.";
         } else {
           statusEl.textContent =
-            "No se pudo acceder a la cámara. Usá el ingreso manual.";
+            "No se pudo acceder a la cámara. Realizá la búsqueda manual desde el buscador.";
         }
         statusEl.dataset.type = "error";
       }
@@ -590,7 +563,7 @@ class ModalManager {
       console.error("Error iniciando QR scanner:", err);
       if (statusEl) {
         statusEl.textContent =
-          "No se pudo acceder a la cámara. Usá el ingreso manual.";
+          "No se pudo acceder a la cámara. Realizá la búsqueda manual desde el buscador.";
         statusEl.dataset.type = "error";
       }
     }

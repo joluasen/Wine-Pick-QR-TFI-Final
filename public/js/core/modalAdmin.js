@@ -1,7 +1,7 @@
 import { modalManager } from './modalManager.js';
 
 // Modal QR exclusivo para admin
-function showAdminQrModal(onResult) {
+function showAdminQrModal() {
   // Crear contenido exclusivo para admin
   const content = `
     <div class="qr-scanner-modal admin">
@@ -9,36 +9,9 @@ function showAdminQrModal(onResult) {
       <p class="qr-subtitle">Apuntá la cámara al código QR del producto para editarlo.<br><strong>Solo administradores.</strong></p>
       <div id="qr-reader-admin" class="qr-reader"></div>
       <div id="qr-status-admin" class="qr-status" aria-live="polite"></div>
-      <div class="qr-manual">
-        <p class="qr-manual-label">¿No podés escanear? Ingresá el código manualmente:</p>
-        <form id="qr-manual-form-admin" class="qr-manual-form">
-          <input
-            type="text"
-            id="qr-manual-input-admin"
-            name="code"
-            placeholder="Ej: MALBEC-001"
-            required
-            autocomplete="off"
-          >
-          <button type="submit" class="btn-modal btn-modal-primary">Buscar</button>
-        </form>
-      </div>
     </div>
   `;
   const modal = modalManager.open('admin-qr-modal', content);
-  // Setup del formulario manual
-  const form = modal.querySelector('#qr-manual-form-admin');
-  if (form) {
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const code = form.querySelector('#qr-manual-input-admin')?.value?.trim();
-      if (code) {
-        modalManager.close();
-        // Reutiliza la lógica del buscador del header: navega a admin-search con el query
-        window.location.hash = `#admin-search?query=${encodeURIComponent(code)}`;
-      }
-    });
-  }
   return modal;
 }
 
@@ -46,9 +19,7 @@ function showAdminQrModal(onResult) {
 
 export async function showAdminQrScanner() {
   // Modal exclusivo admin
-  const modal = showAdminQrModal(async (code) => {
-    // callback no usado aquí, se maneja abajo
-  });
+  const modal = showAdminQrModal();
   // Iniciar escáner QR en el contenedor admin
   const statusEl = modal.querySelector('#qr-status-admin');
   let scanner;
@@ -79,7 +50,7 @@ export async function showAdminQrScanner() {
     }
   } catch (err) {
     if (statusEl) {
-      statusEl.textContent = 'No se pudo acceder a la cámara. Usá el ingreso manual.';
+      statusEl.textContent = 'No se pudo acceder a la cámara. Realizá la búsqueda manual desde el buscador.';
       statusEl.dataset.type = 'error';
     }
   }
