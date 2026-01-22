@@ -1,16 +1,27 @@
 <?php
 
 /**
- * spa.php - Shell principal de la aplicación SPA
+ * spa.php - Shell principal de la aplicación SPA (Single Page Application)
+ *
+ * Punto de entrada de la interfaz de usuario. Genera el HTML base con:
+ * - Meta tags y configuración del navegador
+ * - Carga de recursos (CSS, JS, bibliotecas)
+ * - Estructura DOM para la aplicación React/Vue
+ * - Configuración global pasada a JavaScript
+ * - Service Worker para PWA
  */
 
-// Cargar configuración
+// Cargar configuración del proyecto
 require_once __DIR__ . '/../config/config.php';
 
-// Normalizar BASE_URL - asegurar que termine con /
+// Normalizar BASE_URL para asegurar que termina con /
 $baseUrl = rtrim(BASE_URL, '/') . '/';
 
-// Configuración para JavaScript
+/**
+ * Configuración global de la aplicación
+ * Se pasa a JavaScript a través de window.APP_CONFIG
+ * @var array
+ */
 $appConfig = [
   'baseUrl' => $baseUrl,
   'apiUrl' => $baseUrl . 'api/',

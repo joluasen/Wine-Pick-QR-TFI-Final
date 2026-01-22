@@ -3,19 +3,31 @@
 declare(strict_types=1);
 
 /**
- * Front controller (entrada HTTP)
+ * index.php - Front controller (entrada HTTP principal)
  *
- * Responsabilidad:
- * - Delegar solicitudes cuyo path comienza con `/api/` al enrutador del backend.
- * - Servir archivos estáticos desde `public/` cuando existan (manifest, JS, CSS, imágenes).
- * - Ejecutar archivos PHP de vistas cuando se soliciten.
- * - Para cualquier otra ruta, devolver la SPA `public/spa.php`.
+ * Este archivo es el punto de entrada ÚNICO para todas las solicitudes HTTP del proyecto.
+ * Implementa el patrón Front Controller, típico en aplicaciones SPA modernas.
+ *
+ * ¿Qué hace este archivo?
+ *
+ * 1. Carga la configuración global del proyecto (rutas, entorno, etc.).
+ * 2. Configura el manejo de errores según el entorno (dev/prod).
+ * 3. Registra un autoloader para cargar clases PHP automáticamente.
+ * 4. Analiza la URL solicitada y decide:
+ *    a) Si la ruta comienza con /api/, delega la solicitud al backend (Router PHP).
+ *    b) Si la ruta corresponde a un archivo estático (CSS, JS, imagen, etc.), lo sirve directamente.
+ *    c) Si la ruta es un archivo PHP de vista, lo ejecuta.
+ *    d) Si no es ninguna de las anteriores, sirve la SPA (Single Page Application) para que el frontend maneje la navegación.
+ *
+ * Esto permite que la aplicación funcione como una PWA/SPA moderna, con rutas amigables y backend seguro.
  */
 
-// Cargar configuración primero (incluye WPQ_ENV)
+// 1. Cargar configuración global del proyecto (define rutas, entorno, etc.)
 require_once __DIR__ . '/../config/config.php';
 
-// Configurar manejo de errores según entorno
+// 2. Configurar manejo de errores según entorno (dev/prod)
+//    - En producción: oculta errores al usuario y los guarda en logs
+//    - En desarrollo: muestra todos los errores en pantalla
 if (WPQ_ENV === 'prod') {
     // Producción: NO mostrar errores, solo loguearlos
     ini_set('display_errors', '0');
@@ -30,16 +42,18 @@ if (WPQ_ENV === 'prod') {
     error_reporting(E_ALL);
 }
 
-$fullUri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) ?? '/';
-$projectPath = parse_url(BASE_URL, PHP_URL_PATH) ?: '/proyectos/Wine-Pick-QR-TFI';
-$relative = (strpos($fullUri, $projectPath) === 0) ? substr($fullUri, strlen($projectPath)) : $fullUri;
 
-// Autoloader PSR-4 para cargar clases del backend (disponible globalmente)
+// 3. Determinar la ruta solicitada por el usuario
+$fullUri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) ?? '/'; // Ej: /proyectos/Wine-Pick-QR-TFI/api/public/productos
+$projectPath = parse_url(BASE_URL, PHP_URL_PATH) ?: '/proyectos/Wine-Pick-QR-TFI'; // Ruta base del proyecto
+$relative = (strpos($fullUri, $projectPath) === 0) ? substr($fullUri, strlen($projectPath)) : $fullUri; // Ruta relativa dentro del proyecto
+
+
+// 4. Autoloader PSR-4: permite cargar clases PHP automáticamente según su nombre
+//    Ejemplo: App\Models\Product → app/Models/Product.php
 spl_autoload_register(function ($class) {
-    // Soportar namespaces PSR-4: App\Helpers\ViewHelper → app/Helpers/ViewHelper.php
     $classPath = str_replace('\\', '/', $class);
     $classPath = str_replace('App/', '', $classPath); // Quitar namespace raíz
-
     $paths = [
         BASE_PATH . '/app/' . $classPath . '.php',
         BASE_PATH . '/app/Utils/' . $class . '.php',
@@ -47,7 +61,6 @@ spl_autoload_register(function ($class) {
         BASE_PATH . '/app/Controllers/' . $class . '.php',
         BASE_PATH . '/app/Helpers/' . $class . '.php',
     ];
-
     foreach ($paths as $file) {
         if (file_exists($file)) {
             require_once $file;
@@ -56,16 +69,16 @@ spl_autoload_register(function ($class) {
     }
 });
 
-// Si es una petición a la API, delegar al router backend
+
+// 5. Si la ruta solicitada comienza con /api/, delegar al backend (Router PHP)
 if (strpos($relative, '/api/') === 0) {
-
-    // Registrar solicitud
+    // Loguear la solicitud API
     wpq_debug_log('Solicitud API: ' . $_SERVER['REQUEST_METHOD'] . ' ' . $_SERVER['REQUEST_URI'] . ' desde ' . ($_SERVER['REMOTE_ADDR'] ?? 'desconocido'));
-
     try {
-        $router = new Router();
-        $router->dispatch();
+        $router = new Router(); // Instanciar el enrutador backend
+        $router->dispatch();    // Procesar la solicitud y devolver respuesta JSON
     } catch (\Exception $e) {
+        // Si ocurre un error, devolver respuesta JSON de error
         JsonResponse::error(
             'INTERNAL_ERROR',
             'Error interno del servidor.',
@@ -76,28 +89,25 @@ if (strpos($relative, '/api/') === 0) {
     exit;
 }
 
-// Antes de servir la SPA, comprobar si el recurso solicitado existe
+
+// 6. Si la ruta solicitada corresponde a un archivo estático (CSS, JS, imagen, etc.), servirlo directamente
 $publicDir = __DIR__;
 $requestedPath = $relative;
-
 // Normalizar ruta (asegurar que empieza con '/')
 if ($requestedPath === '' || $requestedPath[0] !== '/') {
     $requestedPath = '/' . ltrim($requestedPath, '/');
 }
-
 $candidate = realpath($publicDir . $requestedPath);
-
 if ($candidate !== false && strpos($candidate, $publicDir) === 0 && is_file($candidate)) {
     // Determinar tipo MIME básico por extensión
     $ext = strtolower(pathinfo($candidate, PATHINFO_EXTENSION));
-    
-    // Si es un archivo PHP, ejecutarlo
+    // Si es un archivo PHP, ejecutarlo como vista
     if ($ext === 'php') {
         header('Content-Type: text/html; charset=utf-8');
         include $candidate;
         exit;
     }
-    
+    // Mapear extensiones a tipos MIME
     $mimeMap = [
         'html' => 'text/html; charset=utf-8',
         'htm'  => 'text/html; charset=utf-8',
@@ -117,31 +127,28 @@ if ($candidate !== false && strpos($candidate, $publicDir) === 0 && is_file($can
         'map'  => 'application/json; charset=utf-8',
         'txt'  => 'text/plain; charset=utf-8'
     ];
-
     $contentType = $mimeMap[$ext] ?? 'application/octet-stream';
     header('Content-Type: ' . $contentType, true, 200);
     readfile($candidate);
     exit;
 }
 
-// Si no es un archivo estático, servir la SPA
-// Primero intentar spa.php, luego spa.html como fallback
+
+// 7. Si no es un archivo estático ni una API, servir la SPA (Single Page Application)
+//    Esto permite que el frontend maneje rutas amigables (ej: /producto/123)
 $spaPhp = $publicDir . '/spa.php';
 $spaHtml = $publicDir . '/spa.html';
-
 if (file_exists($spaPhp)) {
     header('Content-Type: text/html; charset=utf-8', true, 200);
     include $spaPhp;
     exit;
 }
-
 if (file_exists($spaHtml)) {
     header('Content-Type: text/html; charset=utf-8', true, 200);
     readfile($spaHtml);
     exit;
 }
-
-// Fallback mínimo
+// Fallback mínimo si no existe SPA
 header('Content-Type: text/plain; charset=utf-8', true, 200);
 echo "Wine-Pick-QR - API / PWA\n";
 exit;
