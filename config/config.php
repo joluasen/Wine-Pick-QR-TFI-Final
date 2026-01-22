@@ -93,7 +93,7 @@ if (WPQ_ENV === 'prod' && php_sapi_name() !== 'cli') {
     header('X-Frame-Options: SAMEORIGIN');
     header('X-XSS-Protection: 1; mode=block');
     header('Referrer-Policy: strict-origin-when-cross-origin');
-    header('Permissions-Policy: geolocation=(), microphone=(), camera=()');
+    header('Permissions-Policy: geolocation=(), microphone=(), camera=(self)');
 }
 
 /**

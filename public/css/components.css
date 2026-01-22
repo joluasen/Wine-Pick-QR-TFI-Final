@@ -709,6 +709,20 @@
   border-radius: 4px;
 }
 
+.qr-retry-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 1rem;
+}
+
+.qr-retry-container button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+}
+
 /* =========================================
    BÚSQUEDA
    ========================================= */

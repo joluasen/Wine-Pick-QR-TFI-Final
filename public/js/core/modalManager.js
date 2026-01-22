@@ -486,6 +486,15 @@ class ModalManager {
 
         <div id="qr-reader" class="qr-reader"></div>
         <div id="qr-status" class="qr-status" aria-live="polite"></div>
+        <div id="qr-retry-container" class="qr-retry-container" style="display: none;">
+          <button id="qr-retry-btn" class="btn-modal btn-modal-primary">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 8px; vertical-align: middle;">
+              <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+              <circle cx="12" cy="13" r="4"></circle>
+            </svg>
+            Abrir cámara
+          </button>
+        </div>
       </div>
     `;
 
@@ -501,8 +510,20 @@ class ModalManager {
   async initQrScanner() {
     const statusEl = document.getElementById("qr-status");
     const readerEl = document.getElementById("qr-reader");
+    const retryContainer = document.getElementById("qr-retry-container");
+    const retryBtn = document.getElementById("qr-retry-btn");
 
     if (!readerEl) return;
+
+    // Configurar botón de reintentar
+    if (retryBtn) {
+      retryBtn.onclick = () => this.initQrScanner();
+    }
+
+    // Ocultar botón de reintentar al iniciar
+    if (retryContainer) {
+      retryContainer.style.display = "none";
+    }
 
     // Verificar que la librería esté disponible
     if (typeof Html5Qrcode === "undefined") {
@@ -520,21 +541,28 @@ class ModalManager {
     }
 
     // Probar acceso a la cámara antes de iniciar el escáner
+    let testStream = null;
     try {
-      await navigator.mediaDevices.getUserMedia({ video: true });
+      testStream = await navigator.mediaDevices.getUserMedia({ video: true });
+      // Liberar el stream de prueba inmediatamente
+      testStream.getTracks().forEach((track) => track.stop());
     } catch (err) {
       if (statusEl) {
         if (err && err.name === "NotAllowedError") {
           statusEl.textContent =
-            "Permiso denegado para usar la cámara. Realizá la búsqueda manual desde el buscador.";
+            "Permiso denegado para usar la cámara.";
         } else if (err && err.name === "NotFoundError") {
           statusEl.textContent =
-            "No se encontró ninguna cámara en el dispositivo. Realizá la búsqueda manual desde el buscador.";
+            "No se encontró ninguna cámara en el dispositivo.";
         } else {
           statusEl.textContent =
-            "No se pudo acceder a la cámara. Realizá la búsqueda manual desde el buscador.";
+            "No se pudo acceder a la cámara.";
         }
         statusEl.dataset.type = "error";
+      }
+      // Mostrar botón de reintentar
+      if (retryContainer) {
+        retryContainer.style.display = "flex";
       }
       return;
     }
@@ -562,9 +590,12 @@ class ModalManager {
     } catch (err) {
       console.error("Error iniciando QR scanner:", err);
       if (statusEl) {
-        statusEl.textContent =
-          "No se pudo acceder a la cámara. Realizá la búsqueda manual desde el buscador.";
+        statusEl.textContent = "No se pudo iniciar la cámara.";
         statusEl.dataset.type = "error";
+      }
+      // Mostrar botón de reintentar
+      if (retryContainer) {
+        retryContainer.style.display = "flex";
       }
     }
   }
