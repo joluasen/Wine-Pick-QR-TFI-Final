@@ -76,7 +76,6 @@ CREATE TABLE consult_events (
     product_id INT UNSIGNED NOT NULL,
     occurred_at DATETIME NOT NULL,
     channel ENUM('QR','BUSQUEDA') NOT NULL,
-    context_info VARCHAR(100) NULL,
     CONSTRAINT fk_consult_events_product
         FOREIGN KEY (product_id)
         REFERENCES products(id)
