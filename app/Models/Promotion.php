@@ -2,10 +2,33 @@
 declare(strict_types=1);
 // app/Models/Promotion.php
 
+/**
+ * Modelo de Promoción
+ * 
+ * Encapsula la lógica de acceso a datos para la tabla 'promotions'.
+ * Permite crear, consultar, actualizar, desactivar y eliminar promociones,
+ * así como validar solapamientos y obtener promociones activas.
+ * 
+ * Responsabilidades:
+ * - Construcción de queries SQL
+ * - Binding de parámetros preparados
+ * - Transformación de resultados a arrays asociativos
+ * - Validación de solapamiento de fechas
+ */
 class Promotion
 {
+
+    /**
+     * Instancia de acceso a base de datos.
+     * @var Database
+     */
     private \Database $db;
 
+
+    /**
+     * Constructor del modelo Promotion.
+     * @param Database $database Instancia de base de datos inyectada.
+     */
     public function __construct(Database $database)
     {
         $this->db = $database;
@@ -13,10 +36,11 @@ class Promotion
 
     /**
      * Listar todas las promociones con datos de producto (paginado).
+     * Devuelve promociones junto con nombre y precio del producto asociado.
      *
-     * @param int $limit
-     * @param int $offset
-     * @return array
+     * @param int $limit  Límite de resultados.
+     * @param int $offset Desplazamiento para paginación.
+     * @return array Lista de promociones con datos de producto.
      */
     public function findAllWithProduct(int $limit = 10, int $offset = 0): array
     {
@@ -31,9 +55,9 @@ class Promotion
     }
 
     /**
-     * Contar todas las promociones.
+     * Contar todas las promociones existentes en la base de datos.
      *
-     * @return int
+     * @return int Total de promociones.
      */
     public function countAll(): int
     {
@@ -44,6 +68,15 @@ class Promotion
 
     /**
      * Crear una nueva promoción.
+     *
+     * @param int $productId ID del producto asociado.
+     * @param string $type Tipo de promoción.
+     * @param float $value Valor del parámetro de la promoción.
+     * @param string $text Texto visible de la promoción.
+     * @param string $startAt Fecha/hora de inicio (Y-m-d H:i:s).
+     * @param string|null $endAt Fecha/hora de fin (o null si es indefinida).
+     * @param int $adminId ID del admin que crea la promoción.
+     * @return int ID de la promoción creada.
      */
     public function create(
         int $productId,
@@ -78,6 +111,9 @@ class Promotion
 
     /**
      * Obtener todas las promociones de un producto.
+     *
+     * @param int $productId ID del producto.
+     * @return array Lista de promociones asociadas al producto.
      */
     public function findByProductId(int $productId): array
     {
@@ -93,6 +129,9 @@ class Promotion
 
     /**
      * Obtener promoción activa vigente de un producto.
+     *
+     * @param int $productId ID del producto.
+     * @return array|null Datos de la promoción activa o null si no hay.
      */
     public function getActiveByProductId(int $productId): ?array
     {
@@ -113,7 +152,15 @@ class Promotion
     }
 
     /**
-     * Actualizar una promoción.
+     * Actualizar una promoción existente.
+     *
+     * @param int $id ID de la promoción a actualizar.
+     * @param string $type Tipo de promoción.
+     * @param float $value Valor del parámetro de la promoción.
+     * @param string $text Texto visible de la promoción.
+     * @param string $startAt Fecha/hora de inicio (Y-m-d H:i:s).
+     * @param string|null $endAt Fecha/hora de fin (o null si es indefinida).
+     * @return bool True si se actualizó correctamente.
      */
     public function update(
         int $id,
@@ -134,7 +181,10 @@ class Promotion
     }
 
     /**
-     * Desactivar una promoción.
+     * Desactivar una promoción (soft delete).
+     *
+     * @param int $id ID de la promoción a desactivar.
+     * @return bool True si se desactivó correctamente.
      */
     public function deactivate(int $id): bool
     {
@@ -144,7 +194,10 @@ class Promotion
     }
 
     /**
-     * Eliminar una promoción permanentemente.
+     * Eliminar una promoción permanentemente (borrado físico).
+     *
+     * @param int $id ID de la promoción a eliminar.
+     * @return bool True si se eliminó correctamente.
      */
     public function delete(int $id): bool
     {
@@ -155,6 +208,9 @@ class Promotion
 
     /**
      * Obtener promoción por ID.
+     *
+     * @param int $id ID de la promoción.
+     * @return array|null Datos de la promoción o null si no existe.
      */
     public function findById(int $id): ?array
     {
@@ -165,6 +221,10 @@ class Promotion
     /**
      * Verificar si existe una promoción activa que se solape con el rango de fechas dado.
      * RF12: Un producto no puede tener más de una promoción vigente al mismo tiempo.
+     *
+     * Dos rangos [A_start, A_end] y [B_start, B_end] se solapan si:
+     *   A_start <= B_end AND B_start <= A_end
+     * Considerando que end puede ser NULL (sin fin), se trata como infinito futuro.
      *
      * @param int $productId ID del producto
      * @param string $startAt Fecha de inicio de la nueva promoción

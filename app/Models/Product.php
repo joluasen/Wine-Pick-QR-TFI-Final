@@ -2,18 +2,18 @@
 declare(strict_types=1);
 // app/Models/Product.php
 
-/* 
- * Modelo de Producto (Data Access Layer)
- * 
- * Encapsula toda la lógica de acceso a datos para la tabla 'products'.
- * Proporciona métodos para consultar, buscar y crear productos en la base de datos.
- * 
+/**
+ * Modelo de Producto 
+ *
+ * Encapsula la lógica de acceso a datos para la tabla 'products'.
+ * Proporciona métodos para consultar, buscar, crear, actualizar y eliminar productos en la base de datos.
+ *
  * Responsabilidades:
  * - Construcción de queries SQL
  * - Binding de parámetros preparados
  * - Transformación de resultados a arrays asociativos
  * - Validación de datos antes de inserción
-*/
+ */
 class Product
 {
     /**
@@ -54,6 +54,10 @@ public function getMostConsultedPromotionProduct(): ?array
         $row = $this->db->fetchOne($query, [$now, $now], 'ss');
         return $row ?: null;
     }
+    /**
+     * Instancia de acceso a base de datos.
+     * @var Database
+     */
     private \Database $db;
 
     public function __construct(Database $database)

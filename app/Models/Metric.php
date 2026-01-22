@@ -10,18 +10,24 @@ declare(strict_types=1);
  */
 class Metric
 {
+    /**
+     * Instancia de la base de datos
+     */
     private \Database $db;
 
+    /**
+     * Constructor: recibe la instancia de base de datos.
+     */
     public function __construct(Database $database)
     {
         $this->db = $database;
     }
 
     /**
-     * Obtener resumen de consultas en un período.
-     *
-     * @param int $days Número de días hacia atrás (7, 30, 90)
-     * @return array {total, qr_count, search_count, unique_products}
+     * Devuelve un resumen de consultas en un período.
+     * Incluye total, por canal y productos únicos.
+     * @param int $days Días hacia atrás (7, 30, 90)
+     * @return array
      */
     public function getSummary(int $days = 30): array
     {
@@ -48,11 +54,10 @@ class Metric
     }
 
     /**
-     * Obtener consultas por día en un período.
-     * Rellena con 0 los días sin datos para mostrar la serie completa.
-     *
-     * @param int $days Número de días hacia atrás
-     * @return array [{date, total, qr, search}, ...]
+     * Devuelve la cantidad de consultas por día en un período.
+     * Rellena con 0 los días sin datos.
+     * @param int $days Días hacia atrás
+     * @return array
      */
     public function getConsultsByDay(int $days = 30): array
     {
@@ -99,11 +104,10 @@ class Metric
     }
 
     /**
-     * Obtener productos más consultados en un período.
-     *
-     * @param int $days Número de días hacia atrás
-     * @param int $limit Número de productos a retornar
-     * @return array [{product_id, name, winery, qr_count, search_count, total}, ...]
+     * Devuelve los productos más consultados en un período.
+     * @param int $days Días hacia atrás
+     * @param int $limit Máximo de productos a retornar
+     * @return array
      */
     public function getTopProducts(int $days = 30, int $limit = 10): array
     {
@@ -140,10 +144,9 @@ class Metric
     }
 
     /**
-     * Obtener el día con más consultas en un período.
-     *
-     * @param int $days Número de días hacia atrás
-     * @return array|null {date, count} o null si no hay datos
+     * Devuelve el día con más consultas en un período.
+     * @param int $days Días hacia atrás
+     * @return array|null
      */
     public function getPeakDay(int $days = 30): ?array
     {
@@ -173,10 +176,9 @@ class Metric
     }
 
     /**
-     * Obtener el producto más consultado en un período.
-     *
-     * @param int $days Número de días hacia atrás
-     * @return array|null {product_id, name, count} o null si no hay datos
+     * Devuelve el producto más consultado en un período.
+     * @param int $days Días hacia atrás
+     * @return array|null
      */
     public function getTopProduct(int $days = 30): ?array
     {
