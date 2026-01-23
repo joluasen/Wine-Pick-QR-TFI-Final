@@ -44,6 +44,11 @@ $appConfig = [
   <!-- Manifest PWA -->
   <link rel="manifest" href="<?= $baseUrl ?>manifest.json">
 
+  <!-- iOS PWA Meta Tags -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="<?= $appConfig['appName'] ?>">
+
   <!-- Iconos -->
   <link rel="icon" type="image/png" sizes="192x192" href="<?= $baseUrl ?>assets/icons/icon-192.png">
   <link rel="apple-touch-icon" href="<?= $baseUrl ?>assets/icons/icon-192.png">
@@ -89,7 +94,15 @@ $appConfig = [
   <header class="bg-white border-bottom sticky-top">
     <div class="py-3">
       <div class="container-fluid header-container">
-        <div class="d-flex align-items-center justify-content-center gap-4">
+        <div class="d-flex align-items-center justify-content-center gap-2 gap-md-4">
+
+          <!-- Botón Instalar PWA - MOBILE (izquierda, solo visible en mobile) -->
+          <button id="pwa-install-btn-mobile" class="btn-table btn-pwa-mobile pwa-btn-hidden" title="Instalar aplicación">
+            <i class="fas fa-download"></i>
+          </button>
+
+          <!-- Espaciador (Desktop) -->
+          <div class="d-none d-md-flex header-spacer"></div>
 
           <!-- Logo (Desktop) -->
           <div class="d-none d-md-flex align-items-center header-logo">
@@ -108,7 +121,11 @@ $appConfig = [
             <!-- Inyectado dinámicamente -->
           </div>
 
-          <!-- Espaciador (Desktop) -->
+          <!-- Botón Instalar PWA - DESKTOP (derecha, solo visible en desktop) -->
+          <button id="pwa-install-btn" class="btn-table pwa-btn-hidden" title="Instalar aplicación">
+            <i class="fas fa-download me-1"></i>
+            <span>Instalar App</span>
+          </button>
           <div class="d-none d-md-flex header-spacer"></div>
         </div>
       </div>
