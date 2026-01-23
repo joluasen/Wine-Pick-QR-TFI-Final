@@ -501,8 +501,8 @@
 
   .product-image-column .image-preview-box,
   .product-qr-column .qr-preview-box {
-    min-height: 130px;
-    max-height: 130px;
+    min-height: 160px;
+    max-height: 180px;
     aspect-ratio: 1 !important;
     padding: 0.5rem !important;
   }
