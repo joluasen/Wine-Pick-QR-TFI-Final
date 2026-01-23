@@ -152,23 +152,22 @@ function createPagination(page, total) {
 function getActiveFilters() {
   const params = getHashParams();
   const filters = {};
-  
-  // Filtros de campo
+
+  // Filtros de campo (checkboxes)
   if (params.varietal === '1') filters.field = 'varietal';
   else if (params.origin === '1') filters.field = 'origin';
   else if (params.winery_distillery === '1') filters.field = 'winery_distillery';
-  else if (params.drink_type === '1') filters.field = 'drink_type';
-  
+
+  // Filtro de tipo de bebida (select con valor)
+  if (params.drink_type && params.drink_type !== '1') {
+    filters.drink_type = params.drink_type;
+  }
+
   // Filtro de año
   if (params.vintage_year) {
     filters.vintage_year = params.vintage_year;
   }
-  
-  // Filtro de código público
-  if (params.public_code) {
-    filters.public_code = params.public_code;
-  }
-  
+
   return filters;
 }
 
@@ -249,15 +248,20 @@ export function initSearchView(container) {
   viewContainer = container;
   const params = getHashParams();
   const query = params.query || '';
-  
+
+  // Verificar si hay filtros activos
+  const filters = getActiveFilters();
+  const hasFilters = filters.field || filters.drink_type || filters.vintage_year;
+
   // Crear estructura de la vista si está vacía
   if (!container.querySelector('#search-results')) {
     container.innerHTML = `
       <div id="search-results" class="search-results"></div>
     `;
   }
-  
-  if (!query) {
+
+  // Si no hay query ni filtros, mostrar estado vacío
+  if (!query && !hasFilters) {
     container.innerHTML = `
       <div class="empty-search">
         <h2>Buscar Productos</h2>
@@ -267,16 +271,15 @@ export function initSearchView(container) {
     `;
     return;
   }
-  
+
   // Actualizar título
   const title = document.createElement('h2');
   title.className = 'search-title';
   container.insertBefore(title, container.firstChild);
-  
+
   // Mostrar resumen de filtros activos
-  const filters = getActiveFilters();
   renderActiveFilters(container, filters);
-  
+
   // Listener para limpiar filtros
   setTimeout(() => {
     const clearBtn = container.querySelector('#clearFiltersBtn');
@@ -287,6 +290,6 @@ export function initSearchView(container) {
       };
     }
   }, 0);
-  
+
   loadResults(query, 0, container);
 }

@@ -149,16 +149,25 @@ $appConfig = [
           </button>
         </div>
         <div class="modal-body pt-2">
-          <!-- Código público -->
+          <!-- Tipo de bebida (select) -->
           <div class="mb-3">
-            <label for="filterPublicCode" class="form-label fw-semibold">Buscar por código público</label>
-            <input type="text" class="form-control" id="filterPublicCode" placeholder="Ej: WINE-123-456">
+            <label for="filterDrinkType" class="form-label fw-semibold">Tipo de bebida</label>
+            <select class="form-select" id="filterDrinkType">
+              <option value="">Todos los tipos</option>
+              <option value="vino">Vino</option>
+              <option value="espumante">Espumante</option>
+              <option value="whisky">Whisky</option>
+              <option value="gin">Gin</option>
+              <option value="licor">Licor</option>
+              <option value="cerveza">Cerveza</option>
+              <option value="otro">Otro</option>
+            </select>
           </div>
 
           <!-- Checkboxes de filtros -->
           <div class="form-check mb-2">
             <input class="form-check-input" type="checkbox" id="filterVarietal">
-            <label class="form-check-label" for="filterVarietal">Filtrar por varietal</label>
+            <label class="form-check-label" for="filterVarietal">Filtrar por varietal (uva)</label>
           </div>
           <div class="form-check mb-2">
             <input class="form-check-input" type="checkbox" id="filterOrigin">
@@ -166,11 +175,7 @@ $appConfig = [
           </div>
           <div class="form-check mb-2">
             <input class="form-check-input" type="checkbox" id="filterWinery">
-            <label class="form-check-label" for="filterWinery">Filtrar por bodega</label>
-          </div>
-          <div class="form-check mb-2">
-            <input class="form-check-input" type="checkbox" id="filterDrinkType">
-            <label class="form-check-label" for="filterDrinkType">Filtrar por tipo de bebida</label>
+            <label class="form-check-label" for="filterWinery">Filtrar por bodega/destilería</label>
           </div>
 
           <!-- Filtro de año -->
@@ -180,8 +185,8 @@ $appConfig = [
           </div>
         </div>
         <div class="modal-footer border-0 pt-0 gap-2">
-          <button type="button" class="btn-modal btn-sm" data-bs-dismiss="modal">
-            Cancelar
+          <button type="button" class="btn-modal btn-sm" id="clearFiltersBtn">
+            Limpiar filtros
           </button>
           <button type="button" class="btn-modal btn-modal-primary btn-sm" id="applyFiltersBtn" data-bs-dismiss="modal">
             Aplicar filtros
@@ -222,44 +227,59 @@ $appConfig = [
       }
       const query = input?.value?.trim() || '';
 
-      const filters = [{
-          id: 'filterVarietal',
-          param: 'varietal'
-        },
-        {
-          id: 'filterOrigin',
-          param: 'origin'
-        },
-        {
-          id: 'filterWinery',
-          param: 'winery_distillery'
-        },
-        {
-          id: 'filterDrinkType',
-          param: 'drink_type'
-        }
+      // Filtros de checkbox
+      const checkboxFilters = [
+        { id: 'filterVarietal', param: 'varietal' },
+        { id: 'filterOrigin', param: 'origin' },
+        { id: 'filterWinery', param: 'winery_distillery' }
       ];
 
-      let hash = '#search?query=' + encodeURIComponent(query);
+      // Detectar si estamos en contexto admin
+      const currentHash = window.location.hash.split('?')[0];
+      const isAdmin = currentHash.startsWith('#admin');
+      const target = isAdmin ? '#admin-search' : '#search';
 
-      filters.forEach(f => {
+      let hash = target + '?query=' + encodeURIComponent(query);
+
+      // Agregar filtros de checkbox
+      checkboxFilters.forEach(f => {
         const el = document.getElementById(f.id);
         if (el?.checked) {
           hash += `&${f.param}=1`;
         }
       });
 
+      // Agregar filtro de tipo de bebida (select)
+      const drinkTypeSelect = document.getElementById('filterDrinkType');
+      if (drinkTypeSelect?.value) {
+        hash += `&drink_type=${encodeURIComponent(drinkTypeSelect.value)}`;
+      }
+
+      // Agregar filtro de año
       const yearInput = document.getElementById('filterYearInput');
       if (yearInput?.value) {
         hash += `&vintage_year=${encodeURIComponent(yearInput.value)}`;
       }
 
-      const codeInput = document.getElementById('filterPublicCode');
-      if (codeInput?.value) {
-        hash += `&public_code=${encodeURIComponent(codeInput.value)}`;
-      }
-
       window.location.hash = hash;
+    });
+
+    // Limpiar filtros
+    document.getElementById('clearFiltersBtn')?.addEventListener('click', function() {
+      // Limpiar select de tipo de bebida
+      const drinkTypeSelect = document.getElementById('filterDrinkType');
+      if (drinkTypeSelect) drinkTypeSelect.value = '';
+
+      // Limpiar checkboxes
+      const checkboxes = ['filterVarietal', 'filterOrigin', 'filterWinery'];
+      checkboxes.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.checked = false;
+      });
+
+      // Limpiar input de año
+      const yearInput = document.getElementById('filterYearInput');
+      if (yearInput) yearInput.value = '';
     });
   </script>
 

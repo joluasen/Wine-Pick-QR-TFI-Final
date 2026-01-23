@@ -108,37 +108,49 @@ public function getMostConsultedPromotionProduct(): ?array
      * @return array Lista de productos coincidentes.
      */
 
-    public function search(string $searchText, int $limit = 20, int $offset = 0, ?string $field = null, ?float $minPrice = null, ?float $maxPrice = null, ?int $vintageYear = null): array
+    public function search(string $searchText, int $limit = 20, int $offset = 0, ?string $field = null, ?float $minPrice = null, ?float $maxPrice = null, ?int $vintageYear = null, ?string $drinkType = null): array
     {
-        $allowedFields = ['name', 'drink_type', 'varietal', 'origin', 'public_code'];
+        $allowedFields = ['name', 'drink_type', 'varietal', 'origin', 'winery_distillery', 'public_code'];
         $where = '';
         $params = [];
         $types = '';
-        if (!empty($field) && in_array($field, $allowedFields, true)) {
-            // Precisión: beginsWith para name, exacto para public_code, contiene para otros
-            if ($field === 'name') {
-                $where = "name LIKE ?";
-                $params[] = $searchText . '%'; // beginsWith
-                $types .= 's';
-            } elseif ($field === 'public_code') {
-                $where = "public_code = ?";
-                $params[] = $searchText;
-                $types .= 's';
+
+        // Si hay texto de búsqueda, aplicar condiciones de búsqueda
+        if (!empty($searchText)) {
+            if (!empty($field) && in_array($field, $allowedFields, true)) {
+                // Precisión: beginsWith para name, exacto para public_code, contiene para otros
+                if ($field === 'name') {
+                    $where = "name LIKE ?";
+                    $params[] = $searchText . '%'; // beginsWith
+                    $types .= 's';
+                } elseif ($field === 'public_code') {
+                    $where = "public_code = ?";
+                    $params[] = $searchText;
+                    $types .= 's';
+                } else {
+                    $where = "{$field} LIKE ?";
+                    $params[] = '%' . $searchText . '%';
+                    $types .= 's';
+                }
             } else {
-                $where = "{$field} LIKE ?";
-                $params[] = '%' . $searchText . '%';
-                $types .= 's';
+                // Búsqueda por defecto: solo en public_code, name y drink_type
+                $searchPattern = '%' . $searchText . '%';
+                $where = 'public_code LIKE ? OR name LIKE ? OR drink_type LIKE ?';
+                $params = array_fill(0, 3, $searchPattern);
+                $types = 'sss';
             }
         } else {
-            // Búsqueda por defecto: solo en public_code, name y drink_type
-            $searchPattern = '%' . $searchText . '%';
-            $where = 'public_code LIKE ? OR name LIKE ? OR drink_type LIKE ?';
-            $params = array_fill(0, 3, $searchPattern);
-            $types = 'sss';
+            // Sin texto de búsqueda: mostrar todos (los filtros se aplican después)
+            $where = '1=1';
         }
 
-        // Filtros de precio y año
+        // Filtros adicionales
         $extraWhere = '';
+        if ($drinkType !== null) {
+            $extraWhere .= ' AND drink_type = ?';
+            $params[] = $drinkType;
+            $types .= 's';
+        }
         if ($minPrice !== null) {
             $extraWhere .= ' AND base_price >= ?';
             $params[] = $minPrice;
@@ -189,21 +201,32 @@ public function getMostConsultedPromotionProduct(): ?array
         $countExtraWhere = '';
         $countParams = [];
         $countTypes = '';
-        if (!empty($field) && in_array($field, $allowedFields, true)) {
-            if ($field === 'name') {
-                $countParams[] = $searchText . '%';
-                $countTypes .= 's';
-            } elseif ($field === 'public_code') {
-                $countParams[] = $searchText;
-                $countTypes .= 's';
+
+        // Misma lógica de búsqueda para el count
+        if (!empty($searchText)) {
+            if (!empty($field) && in_array($field, $allowedFields, true)) {
+                if ($field === 'name') {
+                    $countParams[] = $searchText . '%';
+                    $countTypes .= 's';
+                } elseif ($field === 'public_code') {
+                    $countParams[] = $searchText;
+                    $countTypes .= 's';
+                } else {
+                    $countParams[] = '%' . $searchText . '%';
+                    $countTypes .= 's';
+                }
             } else {
-                $countParams[] = '%' . $searchText . '%';
-                $countTypes .= 's';
+                $searchPattern = '%' . $searchText . '%';
+                $countParams = array_fill(0, 3, $searchPattern);
+                $countTypes = 'sss';
             }
-        } else {
-            $searchPattern = '%' . $searchText . '%';
-            $countParams = array_fill(0, 3, $searchPattern);
-            $countTypes = 'sss';
+        }
+        // Si searchText está vacío, no se agregan params de búsqueda (where = '1=1')
+
+        if ($drinkType !== null) {
+            $countExtraWhere .= ' AND drink_type = ?';
+            $countParams[] = $drinkType;
+            $countTypes .= 's';
         }
         if ($minPrice !== null) {
             $countExtraWhere .= ' AND base_price >= ?';
@@ -227,7 +250,9 @@ public function getMostConsultedPromotionProduct(): ?array
             AND ($where)
             $countExtraWhere
         ";
-        $row = $this->db->fetchOne($countQuery, $countParams, $countTypes);
+        $row = empty($countTypes)
+            ? $this->db->fetchOne($countQuery)
+            : $this->db->fetchOne($countQuery, $countParams, $countTypes);
         $total = $row ? (int)$row['total'] : 0;
 
         return [

@@ -166,15 +166,12 @@ class ProductController {
     {
         $searchText = trim($_GET['search'] ?? '');
 
-        if ($searchText === '') {
-            ApiResponse::validationError('El parámetro "search" es requerido y no puede estar vacío.', 'search');
-        }
-
-        // Limita longitud de búsqueda
+        // Limita longitud de búsqueda (permite vacío para filtros sin término)
         $searchText = mb_substr($searchText, 0, 100);
 
         // Parámetros de filtrado
         $field = isset($_GET['field']) && $_GET['field'] !== '' ? $_GET['field'] : null;
+        $drinkType = isset($_GET['drink_type']) && $_GET['drink_type'] !== '' ? $_GET['drink_type'] : null;
         $minPrice = isset($_GET['min_price']) && $_GET['min_price'] !== '' ? (float)$_GET['min_price'] : null;
         $maxPrice = isset($_GET['max_price']) && $_GET['max_price'] !== '' ? (float)$_GET['max_price'] : null;
         $vintageYear = isset($_GET['vintage_year']) && $_GET['vintage_year'] !== '' ? (int)$_GET['vintage_year'] : null;
@@ -188,7 +185,7 @@ class ProductController {
         if ($offset < 0) $offset = 0;
 
         // Ejecuta búsqueda con filtros
-        $results = $this->productModel->search($searchText, $limit, $offset, $field, $minPrice, $maxPrice, $vintageYear);
+        $results = $this->productModel->search($searchText, $limit, $offset, $field, $minPrice, $maxPrice, $vintageYear, $drinkType);
 
         // Formatea cada producto con su promoción activa
         $data = array_map(function ($product) {

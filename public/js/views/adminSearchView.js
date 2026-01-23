@@ -15,6 +15,60 @@ let currentPage = 0;
 let currentQuery = '';
 let totalProducts = 0;
 let cachedProducts = [];
+let currentFilters = {};
+
+/**
+ * Obtiene los filtros activos desde el hash
+ */
+function getActiveFilters() {
+  const params = getHashParams();
+  const filters = {};
+
+  // Filtros de campo (checkboxes)
+  if (params.varietal === '1') filters.field = 'varietal';
+  else if (params.origin === '1') filters.field = 'origin';
+  else if (params.winery_distillery === '1') filters.field = 'winery_distillery';
+
+  // Filtro de tipo de bebida (select con valor)
+  if (params.drink_type && params.drink_type !== '1') {
+    filters.drink_type = params.drink_type;
+  }
+
+  // Filtro de año
+  if (params.vintage_year) {
+    filters.vintage_year = params.vintage_year;
+  }
+
+  return filters;
+}
+
+/**
+ * Genera el texto de filtros activos para el subtítulo
+ */
+function getFiltersText(filters) {
+  const fieldLabels = {
+    varietal: 'Varietal',
+    origin: 'Origen',
+    winery_distillery: 'Bodega/Destilería',
+  };
+
+  const drinkTypeLabels = {
+    vino: 'Vino',
+    espumante: 'Espumante',
+    whisky: 'Whisky',
+    gin: 'Gin',
+    licor: 'Licor',
+    cerveza: 'Cerveza',
+    otro: 'Otro',
+  };
+
+  const parts = [];
+  if (filters.field) parts.push(fieldLabels[filters.field]);
+  if (filters.drink_type) parts.push(`Tipo: ${drinkTypeLabels[filters.drink_type] || filters.drink_type}`);
+  if (filters.vintage_year) parts.push(`Año: ${filters.vintage_year}`);
+
+  return parts.length > 0 ? ` | Filtros: ${parts.join(', ')}` : '';
+}
 
 /**
  * Renderiza las filas de la tabla
@@ -204,16 +258,28 @@ async function loadSearchResults(query, page = 0, promosOnly = false) {
   currentQuery = query;
   currentPage = page;
 
+  // Obtener filtros activos
+  currentFilters = getActiveFilters();
+  const filtersText = getFiltersText(currentFilters);
+
   // Actualizar título según el modo
   if (titleEl) {
     titleEl.innerHTML = promosOnly
       ? '<i class="fas fa-tags me-2"></i>Productos con promoción'
-      : '<i class="fas fa-search me-2"></i>Resultados de búsqueda';
+      : '<i class="fas fa-filter me-2"></i>Resultados';
   }
   if (subtitleEl) {
-    subtitleEl.innerHTML = promosOnly
-      ? `Mostrando productos con promoción que coinciden con: <strong id="admin-search-query">${query}</strong>`
-      : `Mostrando resultados para: <strong id="admin-search-query">${query}</strong>`;
+    let baseText;
+    if (promosOnly) {
+      baseText = query
+        ? `Productos con promoción que coinciden con: <strong>${query}</strong>`
+        : 'Productos con promoción activa';
+    } else {
+      baseText = query
+        ? `Resultados para: <strong>${query}</strong>`
+        : 'Mostrando productos filtrados';
+    }
+    subtitleEl.innerHTML = baseText + filtersText;
   }
 
   try {
@@ -234,12 +300,24 @@ async function loadSearchResults(query, page = 0, promosOnly = false) {
       // Filtrar por el query de búsqueda
       const allProducts = data?.data?.products || [];
       const queryLower = query.toLowerCase();
-      const filtered = allProducts.filter(p =>
+      let filtered = allProducts.filter(p =>
         p.name?.toLowerCase().includes(queryLower) ||
         p.public_code?.toLowerCase().includes(queryLower) ||
         p.winery_distillery?.toLowerCase().includes(queryLower) ||
         p.varietal?.toLowerCase().includes(queryLower)
       );
+
+      // Aplicar filtros adicionales en modo promos
+      if (currentFilters.field) {
+        const field = currentFilters.field;
+        filtered = filtered.filter(p => p[field] && p[field].trim() !== '');
+      }
+      if (currentFilters.drink_type) {
+        filtered = filtered.filter(p => p.drink_type?.toLowerCase() === currentFilters.drink_type.toLowerCase());
+      }
+      if (currentFilters.vintage_year) {
+        filtered = filtered.filter(p => String(p.vintage_year) === String(currentFilters.vintage_year));
+      }
 
       // Paginar los resultados filtrados
       total = filtered.length;
@@ -251,6 +329,18 @@ async function loadSearchResults(query, page = 0, promosOnly = false) {
         limit: PAGE_SIZE,
         offset: offset,
       });
+
+      // Agregar filtros activos a los parámetros
+      if (currentFilters.field) {
+        params.set('field', currentFilters.field);
+      }
+      if (currentFilters.drink_type) {
+        params.set('drink_type', currentFilters.drink_type);
+      }
+      if (currentFilters.vintage_year) {
+        params.set('vintage_year', currentFilters.vintage_year);
+      }
+
       const fetchPromise = fetchJSON(`./api/public/productos?${params.toString()}`);
       const delayPromise = new Promise((resolve) => setTimeout(resolve, 250));
       const [data] = await Promise.all([fetchPromise, delayPromise]);
@@ -299,8 +389,12 @@ export function initAdminSearchView(_container) {
   const prevBtn = document.getElementById('admin-search-prev');
   const nextBtn = document.getElementById('admin-search-next');
 
-  // Si no hay query, mostrar estado vacío
-  if (!query) {
+  // Verificar si hay filtros activos
+  const filters = getActiveFilters();
+  const hasFilters = filters.field || filters.drink_type || filters.vintage_year;
+
+  // Si no hay query ni filtros, mostrar estado vacío
+  if (!query && !hasFilters) {
     if (loadingEl) loadingEl.style.display = 'none';
     if (contentEl) contentEl.style.display = 'none';
     if (emptyEl) emptyEl.style.display = 'block';
