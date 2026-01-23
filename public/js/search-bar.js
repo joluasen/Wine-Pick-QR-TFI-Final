@@ -172,7 +172,10 @@ function initUnifiedSearchBar() {
         
         // Si hay múltiples resultados, ir a vista search (sin registrar aún)
         const target = isAdmin ? '#admin-search' : '#search';
-        window.location.hash = `${target}?query=${encodeURIComponent(query)}`;
+        // Si estamos en la vista de promociones, agregar filtro de promociones
+        const currentHash = window.location.hash.split('?')[0];
+        const promosFilter = currentHash === '#admin-promotions' ? '&promos=1' : '';
+        window.location.hash = `${target}?query=${encodeURIComponent(query)}${promosFilter}`;
         setTimeout(() => {
           newInput.value = query;
         }, 200);
