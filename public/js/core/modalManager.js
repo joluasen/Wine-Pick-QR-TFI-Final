@@ -678,6 +678,36 @@ class ModalManager {
     })();
   }
 
+  /**
+   * Abre el modal de producto desde una URL externa (ej: escaneo QR nativo)
+   * @param {string} code - Código público del producto
+   * @returns {Promise<boolean>} true si se encontró y mostró el producto
+   */
+  async openProductFromUrl(code) {
+    if (!code) return false;
+
+    try {
+      const response = await fetch(`./api/public/productos/${encodeURIComponent(code)}`);
+      const data = await response.json();
+
+      if (data.ok && data.data) {
+        const product = data.data;
+        const { registerMetric } = await import('./utils.js');
+
+        // Registrar métrica como QR (viene de escaneo externo)
+        registerMetric(product.id, 'QR');
+
+        // Mostrar el producto
+        this.showProduct(product, null);
+        return true;
+      }
+    } catch (err) {
+      console.error('Error abriendo producto desde URL:', err);
+    }
+
+    return false;
+  }
+
   // ============================================
   // HELPERS PARA MODALES DE PRODUCTO
   // ============================================
@@ -2382,6 +2412,16 @@ class ModalManager {
   }
 
   /**
+   * Genera la URL completa para el QR de un producto
+   * @param {string} publicCode - Código público del producto
+   * @returns {string} URL completa con hash de producto
+   */
+  _getProductQRUrl(publicCode) {
+    const baseUrl = window.APP_CONFIG?.baseUrl || getBasePath();
+    return `${baseUrl}#product/${encodeURIComponent(publicCode)}`;
+  }
+
+  /**
    * Genera y muestra un QR Code personalizado
    * @param {string} publicCode - Código público del producto
    * @param {HTMLElement|string} container - Donde renderizar el QR
@@ -2423,10 +2463,13 @@ class ModalManager {
     // Crear canvas para el QR
     const canvas = document.createElement("canvas");
 
+    // Usar URL completa para que funcione con cámaras nativas
+    const qrContent = this._getProductQRUrl(publicCode);
+
     try {
       window.QRCode.toCanvas(
         canvas,
-        publicCode,
+        qrContent,
         {
           width: 140,
           margin: 1,
@@ -2534,10 +2577,13 @@ class ModalManager {
       const helperColor = "#333333";
       const bgColor = "#FFFFFF";
 
+      // Usar URL completa para que funcione con cámaras nativas
+      const qrContent = this._getProductQRUrl(publicCode);
+
       // Generar el QR base
       window.QRCode.toCanvas(
         qrCanvas,
-        publicCode,
+        qrContent,
         {
           width: qrSize,
           margin: 2,

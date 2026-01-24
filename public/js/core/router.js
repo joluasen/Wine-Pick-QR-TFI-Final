@@ -68,10 +68,15 @@ async function checkAuth() {
 
 /**
  * Obtiene el nombre de la vista desde el hash actual
- * @returns {string} Nombre de la vista
+ * @returns {string} Nombre de la vista o "product" si es ruta de producto
  */
 function getViewFromHash() {
   const hash = window.location.hash.split("?")[0] || "#home";
+
+  // Detectar ruta de producto: #product/CODIGO
+  if (hash.startsWith("#product/")) {
+    return "product";
+  }
 
   // Validar si la ruta existe en ROUTES
   if (ROUTES.hasOwnProperty(hash)) {
@@ -292,6 +297,24 @@ async function loadView(viewName) {
         isNavigating = false;
         return;
       }
+    }
+
+    // Ruta especial #product/CODIGO (acceso directo desde QR externo)
+    if (viewName === "product") {
+      const hash = window.location.hash;
+      const code = hash.replace("#product/", "");
+
+      if (code) {
+        const found = await modalManager.openProductFromUrl(code);
+        if (!found) {
+          // Si no encuentra el producto, buscar
+          window.location.hash = `#search?query=${encodeURIComponent(code)}`;
+        }
+      } else {
+        window.location.hash = "#home";
+      }
+      isNavigating = false;
+      return;
     }
 
     // Ruta especial #scan (modal QR)
