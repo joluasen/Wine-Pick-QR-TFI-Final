@@ -34,12 +34,19 @@ export async function getAllProducts() {
  * @returns {Promise<Object|null>}
  */
 export async function searchProductByCode(code) {
-  const data = await fetchJSON('./api/public/productos/buscar', {
-    method: 'POST',
-    body: JSON.stringify({ search: code, limit: 10 })
-  });
-  const products = Array.isArray(data?.data?.products) ? data.data.products : [];
-  return products.find(p => (p.public_code || '').toUpperCase() === code.toUpperCase()) || null;
+  try {
+    // Usar API directa por código (más eficiente y exacta)
+    const response = await fetch(`./api/public/productos/${encodeURIComponent(code)}`);
+    const data = await response.json();
+
+    if (data.ok && data.data) {
+      return data.data;
+    }
+    return null;
+  } catch (err) {
+    console.error('Error buscando producto por código:', err);
+    return null;
+  }
 }
 
 /**

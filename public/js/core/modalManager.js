@@ -623,9 +623,17 @@ class ModalManager {
   handleQrResult(result) {
     // Extraer código de la URL si es necesario
     let code = result;
-    const match = result.match(/code=([^&]+)/);
-    if (match) {
-      code = decodeURIComponent(match[1]);
+
+    // Formato nuevo: URL con #product/CODIGO
+    const hashMatch = result.match(/#product\/([^?&]+)/);
+    if (hashMatch) {
+      code = decodeURIComponent(hashMatch[1]);
+    } else {
+      // Formato legacy: ?code=CODIGO
+      const queryMatch = result.match(/code=([^&]+)/);
+      if (queryMatch) {
+        code = decodeURIComponent(queryMatch[1]);
+      }
     }
 
     // Detener el escáner si está activo

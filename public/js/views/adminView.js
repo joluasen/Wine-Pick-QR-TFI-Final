@@ -43,10 +43,13 @@ export async function editProductByCode(code) {
     return;
   }
 
-  // Abrir directamente el modal de edición
-  modalManager.showEditProduct(product, (updatedProduct) => {
-    // Callback opcional: aquí se podría actualizar la UI tras editar
-  });
+  // Asegurar contexto admin para que se muestren las acciones
+  if (!window.location.hash.startsWith('#admin')) {
+    window.location.hash = '#admin-products';
+  }
+
+  // Mostrar ficha del producto con acciones admin (editar, eliminar, QR)
+  modalManager.showProductAdmin(product);
 }
 
 

@@ -99,13 +99,26 @@ async function initAdminScanner(modal) {
         adminScanner.clear();
         adminScanner = null;
         modalManager.close();
+
+        // Extraer código de la URL si es necesario
+        let code = decodedText;
+        const hashMatch = decodedText.match(/#product\/([^?&]+)/);
+        if (hashMatch) {
+          code = decodeURIComponent(hashMatch[1]);
+        } else {
+          const queryMatch = decodedText.match(/code=([^&]+)/);
+          if (queryMatch) {
+            code = decodeURIComponent(queryMatch[1]);
+          }
+        }
+
         // Mostrar ficha admin
         const module = await import('../views/adminView.js');
         if (module && typeof module.editProductByCode === 'function') {
-          module.editProductByCode(decodedText);
+          module.editProductByCode(code);
         } else {
           window.location.hash = '#admin-products';
-          alert('Producto escaneado: ' + decodedText + '. Implementa editProductByCode para edición directa.');
+          alert('Producto escaneado: ' + code + '. Implementa editProductByCode para edición directa.');
         }
       },
       () => {}
