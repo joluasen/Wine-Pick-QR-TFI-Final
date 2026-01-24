@@ -122,9 +122,6 @@ export async function initAdminPromotionsView(container) {
             <div class="card-mobile-title">${p.product_name || "Sin producto"}</div>
             <div class="card-mobile-code">ID: ${p.id}</div>
           </div>
-          <div class="card-mobile-status ${p.is_active ? "active" : ""}">
-            ${p.is_active ? "Activa" : "Inactiva"}
-          </div>
         </div>
         <div class="card-mobile-body">
           <div class="card-mobile-info">

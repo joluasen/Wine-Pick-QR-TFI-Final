@@ -546,10 +546,6 @@
   margin-top: 0.75rem;
 }
 
-/* El botón de toggle ocupa toda la fila inferior */
-.admin-promo-card-mobile .card-mobile-actions button[data-toggle-promo] {
-  grid-column: 1 / -1;
-}
 
 /* Responsividad para cards de promociones */
 @media (max-width: 360px) {
