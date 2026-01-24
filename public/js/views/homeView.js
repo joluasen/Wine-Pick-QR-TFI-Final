@@ -1,8 +1,18 @@
-// public/js/views/homeView.js
+
 /**
- * Vista de inicio - Catálogo destacado
- * 
- * Muestra los productos más buscados con paginación
+ * homeView.js
+ *
+ * Vista de inicio del catálogo público.
+ *
+ * Muestra los productos más buscados con paginación, renderiza tarjetas de producto,
+ * gestiona el estado de carga y UX accesible, y permite ver detalles de productos destacados.
+ *
+ * Funcionalidades principales:
+ * - Renderizado de tarjetas de productos destacados
+ * - Paginación dinámica
+ * - Manejo de precios promocionales y badges
+ * - Accesibilidad (teclado, roles, focus)
+ * - Feedback visual y estados vacíos
  */
 
 import { setStatus, calculatePromoPrice, fetchJSON, escapeHtml } from '../core/utils.js';
@@ -10,41 +20,47 @@ import { modalManager } from '../core/modalManager.js';
 
 const PAGE_SIZE = 20;
 
+
 /**
- * Renderiza las tarjetas de productos
+ * Renderiza todas las tarjetas de productos en el contenedor dado.
+ * @param {HTMLElement} container - Contenedor donde se insertan las tarjetas
+ * @param {Array} products - Lista de productos a mostrar
  */
 function renderProducts(container, products) {
   if (!container) return;
-  
+
   const grid = document.createElement('div');
   grid.className = 'product-grid';
-  
+
   products.forEach(product => {
     const card = createProductCard(product);
     grid.appendChild(card);
   });
-  
+
   container.innerHTML = '';
   container.appendChild(grid);
 }
 
+
 /**
- * Crea una tarjeta de producto
+ * Crea una tarjeta de producto destacada con toda la información relevante y UX accesible.
+ * @param {Object} product - Objeto producto
+ * @returns {HTMLElement} - Elemento de la tarjeta
  */
 function createProductCard(product) {
   const card = document.createElement('article');
   card.className = 'product-card';
-  card.setAttribute('role', 'button');
+  card.setAttribute('role', 'button'); // Accesibilidad: permite foco y click
   card.setAttribute('tabindex', '0');
-  
+
   const basePrice = parseFloat(product.base_price);
   const priceData = calculatePromoPrice(product);
-  
-  // Generar badge y texto de promoción
+
+  // Generar badge y texto de promoción según el tipo de promo
   let badge = '';
   let priceHtml = '';
   let savingsHtml = '';
-  
+
   if (priceData.hasPromo) {
     switch (priceData.type) {
       case 'porcentaje':
@@ -82,11 +98,12 @@ function createProductCard(product) {
   } else {
     priceHtml = `<span class="price-final">$${priceData.final.toFixed(2)}</span>`;
   }
-  
+
+  // Mostrar stock si está disponible
   const stockHtml = product.visible_stock !== null 
     ? `<p class="stock"><strong>Stock:</strong> ${product.visible_stock} unidades</p>` 
     : '';
-  
+
   const imageUrl = product.image_url || '';
 
   card.innerHTML = `
@@ -119,8 +136,8 @@ function createProductCard(product) {
       <span class="code">Cód: ${escapeHtml(product.public_code)}</span>
     </div>
   `;
-  
-  // Event listeners
+
+  // UX: Permite abrir el modal de producto con click o teclado
   card.addEventListener('click', () => {
     import('../core/utils.js').then(({ registerMetric }) => {
       registerMetric(product.id, 'BUSQUEDA');
@@ -136,12 +153,18 @@ function createProductCard(product) {
       });
     }
   });
-  
+
   return card;
 }
 
+
 /**
- * Renderiza los controles de paginación
+ * Renderiza los controles de paginación para la vista de inicio.
+ * @param {HTMLElement} container - Contenedor principal
+ * @param {number} currentPage - Página actual (base 0)
+ * @param {boolean} hasMore - Si hay más páginas siguientes
+ * @param {function} onPageChange - Callback para cambiar de página
+ * @param {number|null} totalPages - Total de páginas (opcional)
  */
 function renderPagination(container, currentPage, hasMore, onPageChange, totalPages = null) {
   const paginationEl = container.querySelector('#home-pagination');
@@ -152,7 +175,7 @@ function renderPagination(container, currentPage, hasMore, onPageChange, totalPa
   const controls = document.createElement('div');
   controls.className = 'pagination-controls';
 
-  // Botón anterior SIEMPRE visible, deshabilitado en la primera página
+  // Botón anterior: siempre visible, deshabilitado en la primera página
   const prevBtn = document.createElement('button');
   prevBtn.type = 'button';
   prevBtn.className = 'btn-pagination';
@@ -164,7 +187,7 @@ function renderPagination(container, currentPage, hasMore, onPageChange, totalPa
   }
   controls.appendChild(prevBtn);
 
-  // Indicador de página con total
+  // Indicador de página actual y total
   const pageInfo = document.createElement('span');
   pageInfo.className = 'page-info';
   if (totalPages && totalPages > 0) {
@@ -174,7 +197,7 @@ function renderPagination(container, currentPage, hasMore, onPageChange, totalPa
   }
   controls.appendChild(pageInfo);
 
-  // Botón siguiente
+  // Botón siguiente solo si hay más páginas
   if (hasMore) {
     const nextBtn = document.createElement('button');
     nextBtn.type = 'button';
@@ -187,8 +210,12 @@ function renderPagination(container, currentPage, hasMore, onPageChange, totalPa
   paginationEl.appendChild(controls);
 }
 
+
 /**
- * Carga una página de productos
+ * Carga y renderiza una página de productos destacados desde la API pública.
+ * Muestra estados de carga, vacíos y errores.
+ * @param {HTMLElement} container - Contenedor principal de la vista
+ * @param {number} page - Número de página (base 0)
  */
 async function loadPage(container, page = 0) {
   const statusEl = container.querySelector('#home-status');
@@ -206,6 +233,7 @@ async function loadPage(container, page = 0) {
     const totalItems = data?.data?.total ?? null;
     const totalPages = totalItems ? Math.ceil(totalItems / PAGE_SIZE) : null;
 
+    // Estado vacío: sin productos en la primera página
     if (products.length === 0 && page === 0) {
       setStatus(statusEl, 'No hay productos para mostrar aún.', 'info');
       if (resultsEl) {
@@ -214,12 +242,14 @@ async function loadPage(container, page = 0) {
       return;
     }
 
+    // Estado vacío: sin más productos en páginas siguientes
     if (products.length === 0) {
       setStatus(statusEl, 'No hay más productos.', 'info');
       renderPagination(container, page, false, (p) => loadPage(container, p), totalPages);
       return;
     }
 
+    // Mostrar rango de productos actuales
     const from = page * PAGE_SIZE + 1;
     const to = from + products.length - 1;
     setStatus(statusEl, `Mostrando productos ${from} al ${to}`, 'success');
@@ -233,8 +263,11 @@ async function loadPage(container, page = 0) {
   }
 }
 
+
 /**
- * Inicializa la vista de inicio
+ * Inicializa la vista de inicio del catálogo público.
+ * Carga la primera página de productos destacados.
+ * @param {HTMLElement} container - Contenedor principal de la vista
  */
 export function initHomeView(container) {
   loadPage(container, 0);

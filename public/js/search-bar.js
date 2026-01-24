@@ -1,12 +1,27 @@
-// search-bar.js
-// Lógica unificada y profesional para el buscador header (desktop y mobile)
-// Autocompletado, accesibilidad, UX robusta
+
+/**
+ * search-bar.js
+ *
+ * Lógica unificada y profesional para el buscador del header (desktop y mobile).
+ * Incluye autocompletado, accesibilidad, UX robusta y soporte para usuarios admin y públicos.
+ *
+ * Funcionalidades principales:
+ * - Autocompletado de productos con sugerencias dinámicas
+ * - Detección de usuario administrador
+ * - Sincronización con el hash de la URL
+ * - UX accesible y responsiva
+ */
 
 import { fetchJSON, escapeHtml, registerMetric } from './core/utils.js';
 
 // Cache simple para saber si el usuario es admin
 let isAdminUser = null;
 
+/**
+ * Verifica si el usuario actual es administrador.
+ * Utiliza cache para evitar múltiples requests.
+ * @returns {Promise<boolean>}
+ */
 async function checkAdmin() {
   if (isAdminUser !== null) return isAdminUser;
   try {
@@ -21,6 +36,10 @@ async function checkAdmin() {
 const AUTOCOMPLETE_LIMIT = 5;
 let debounceTimeout = null;
 
+/**
+ * Inicializa el buscador unificado en todos los headers (desktop y mobile).
+ * Configura autocompletado, listeners y sincronización con la URL.
+ */
 function initUnifiedSearchBar() {
   // Buscar todos los formularios de buscador en la página (desktop y mobile)
   const forms = document.querySelectorAll('#desktop-search-header #searchForm, #mobile-search-header #searchForm');
@@ -38,6 +57,7 @@ function initUnifiedSearchBar() {
     if (!dropdown) {
       dropdown = document.createElement('ul');
       dropdown.id = 'search-autocomplete';
+      // Estilos para el dropdown de sugerencias
       dropdown.style.position = 'absolute';
       dropdown.style.top = 'calc(100% + 0.5em)';
       dropdown.style.left = '0';
@@ -58,11 +78,18 @@ function initUnifiedSearchBar() {
       newForm.appendChild(dropdown);
     }
 
+    /**
+     * Limpia y oculta el dropdown de sugerencias.
+     */
     function clearDropdown() {
       dropdown.innerHTML = '';
       dropdown.style.display = 'none';
     }
 
+    /**
+     * Obtiene sugerencias de productos desde la API pública.
+     * @param {string} query
+     */
     async function fetchSuggestions(query) {
       if (!query || query.length < 2) {
         clearDropdown();
@@ -75,11 +102,15 @@ function initUnifiedSearchBar() {
         const suggestions = data?.data?.products || [];
         renderSuggestions(suggestions);
       } catch (err) {
-        // console.error('[search-bar] fetchSuggestions error:', err);
+        // Si hay error, limpiar el dropdown
         clearDropdown();
       }
     }
 
+    /**
+     * Renderiza las sugerencias en el dropdown.
+     * @param {Array} items
+     */
     function renderSuggestions(items) {
       dropdown.innerHTML = '';
       if (!items.length) {
@@ -89,6 +120,7 @@ function initUnifiedSearchBar() {
       items.slice(0, AUTOCOMPLETE_LIMIT).forEach(item => {
         const li = document.createElement('li');
         li.textContent = item.name;
+        // Estilos y UX para cada sugerencia
         li.style.padding = '0.75em 1em';
         li.style.fontSize = '0.95em';
         li.style.color = '#1A1A1A';
@@ -102,6 +134,7 @@ function initUnifiedSearchBar() {
         li.addEventListener('mouseleave', () => {
           li.style.background = '#fff';
         });
+        // Al hacer click en una sugerencia
         li.addEventListener('mousedown', async (e) => {
           e.preventDefault();
           const query = item.name;
@@ -130,16 +163,19 @@ function initUnifiedSearchBar() {
       dropdown.style.display = 'block';
     }
 
+    // Listener para autocompletado en el input
     newInput.addEventListener('input', (e) => {
       const query = e.target.value.trim();
       clearTimeout(debounceTimeout);
       debounceTimeout = setTimeout(() => fetchSuggestions(query), 250);
     });
 
+    // Ocultar el dropdown al perder foco
     newInput.addEventListener('blur', () => {
       setTimeout(clearDropdown, 100);
     });
 
+    // Listener para el submit del formulario de búsqueda
     newForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       const query = newInput.value.trim();
@@ -185,7 +221,10 @@ function initUnifiedSearchBar() {
       }
     });
 
-    // Sincronizar el valor del input con el hash al cargar o cambiar la vista
+    /**
+     * Sincroniza el valor del input con el hash de la URL.
+     * Permite mantener la búsqueda al navegar entre vistas.
+     */
     function syncInputWithHash() {
       const params = new URLSearchParams(window.location.hash.split('?')[1] || '');
       const query = params.get('query') || '';

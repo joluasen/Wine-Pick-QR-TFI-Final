@@ -1,8 +1,14 @@
+
 // public/js/views/promotionsView.js
 /**
- * Vista de promociones
- * 
- * Muestra productos con promociones vigentes
+ * Vista de promociones públicas
+ *
+ * Muestra productos con promociones vigentes, tarjetas interactivas y paginación.
+ *
+ * Funcionalidades principales:
+ * - Renderizado de tarjetas de productos en promoción
+ * - Paginación dinámica
+ * - Manejo de estados de carga, vacío y error
  */
 
 import { setStatus, calculatePromoPrice, fetchJSON, escapeHtml, formatDate, registerMetric } from '../core/utils.js';
@@ -12,6 +18,8 @@ const PAGE_SIZE = 20;
 
 /**
  * Renderiza las tarjetas de productos con promoción
+ * @param {HTMLElement} container - Contenedor donde se muestran las tarjetas
+ * @param {Array} products - Lista de productos en promoción
  */
 function renderPromotions(container, products) {
   if (!container) return;
@@ -30,6 +38,8 @@ function renderPromotions(container, products) {
 
 /**
  * Crea una tarjeta de producto con promoción
+ * @param {Object} product - Producto a mostrar
+ * @returns {HTMLElement} - Elemento de la tarjeta
  */
 function createPromoCard(product) {
   const card = document.createElement('article');
@@ -44,6 +54,7 @@ function createPromoCard(product) {
   let priceHtml = '';
   let savingsHtml = '';
   
+  // Determinar el tipo de promoción y renderizar los elementos visuales
   switch (priceData.type) {
     case 'porcentaje':
       badge = `<span class="badge badge-discount">${priceData.discount}% OFF</span>`;
@@ -117,6 +128,7 @@ function createPromoCard(product) {
     </div>
   `;
   
+  // Accesibilidad: click y enter/espacio abren el modal del producto
   card.addEventListener('click', () => {
     registerMetric(product.id, 'BUSQUEDA');
     modalManager.showProduct(product, null);
@@ -134,6 +146,10 @@ function createPromoCard(product) {
 
 /**
  * Renderiza los controles de paginación
+ * @param {HTMLElement} container - Contenedor principal
+ * @param {number} currentPage - Página actual
+ * @param {boolean} hasMore - Si hay más páginas
+ * @param {function} onPageChange - Callback para cambiar de página
  */
 function renderPagination(container, currentPage, hasMore, onPageChange) {
   const paginationEl = container.querySelector('#promos-pagination');
@@ -178,7 +194,9 @@ function renderPagination(container, currentPage, hasMore, onPageChange) {
 }
 
 /**
- * Carga una página de promociones
+ * Carga una página de promociones desde la API
+ * @param {HTMLElement} container - Contenedor principal
+ * @param {number} page - Página a cargar
  */
 async function loadPage(container, page = 0) {
   const statusEl = container.querySelector('#promos-status');
@@ -225,6 +243,7 @@ async function loadPage(container, page = 0) {
 
 /**
  * Inicializa la vista de promociones
+ * @param {HTMLElement} container - Contenedor principal de la vista
  */
 export function initPromotionsView(container) {
   loadPage(container, 0);

@@ -1,11 +1,15 @@
+
 // public/js/app.js
 /**
- * Punto de entrada de la aplicación
- * 
- * Responsabilidades:
+ * Punto de entrada de la aplicación Wine-Pick-QR
+ *
+ * Responsabilidades principales:
  * - Inicializar el router SPA
- * - Registrar el Service Worker
- * 
+ * - Registrar el Service Worker para PWA
+ * - Gestionar la instalación como PWA
+ * - Inicializar el modal de login global
+ * - Configurar el comportamiento de los dropdowns del sidebar
+ *
  * NOTA: La navegación se maneja ÚNICAMENTE en router.js
  */
 
@@ -13,13 +17,14 @@ import { initRouter } from './core/router.js';
 import { modalManager } from './core/modalManager.js';
 
 /**
- * Variable para almacenar el evento de instalación PWA
+ * Variable global para almacenar el evento de instalación PWA (beforeinstallprompt)
+ * Permite mostrar el prompt de instalación bajo demanda.
  */
 let deferredPrompt = null;
 
 /**
- * Inicializa la funcionalidad de instalación PWA
- * Captura el evento beforeinstallprompt y muestra los botones de instalar
+ * Inicializa la funcionalidad de instalación PWA.
+ * Captura el evento beforeinstallprompt y muestra los botones de instalar en desktop y mobile.
  */
 function initPWAInstall() {
   const installBtnDesktop = document.getElementById('pwa-install-btn');
@@ -28,12 +33,12 @@ function initPWAInstall() {
 
   if (installBtns.length === 0) return;
 
-  // Función para mostrar ambos botones
+  // Función para mostrar ambos botones de instalación
   const showInstallBtns = () => {
     installBtns.forEach(btn => btn.classList.remove('pwa-btn-hidden'));
   };
 
-  // Función para ocultar ambos botones
+  // Función para ocultar ambos botones de instalación
   const hideInstallBtns = () => {
     installBtns.forEach(btn => btn.classList.add('pwa-btn-hidden'));
   };
@@ -54,7 +59,7 @@ function initPWAInstall() {
     showInstallBtns();
   }
 
-  // Capturar el evento beforeinstallprompt
+  // Capturar el evento beforeinstallprompt para controlar el prompt manualmente
   window.addEventListener('beforeinstallprompt', (e) => {
     e.preventDefault();
     deferredPrompt = e;
@@ -62,7 +67,7 @@ function initPWAInstall() {
     showInstallBtns();
   });
 
-  // Función para manejar instalación
+  // Función para manejar el click en los botones de instalación
   const handleInstallClick = async () => {
     if (deferredPrompt) {
       deferredPrompt.prompt();
@@ -86,7 +91,8 @@ function initPWAInstall() {
 }
 
 /**
- * Registra el Service Worker para funcionalidad PWA
+ * Registra el Service Worker para funcionalidad PWA.
+ * Permite navegación offline y otras capacidades PWA.
  */
 function registerServiceWorker() {
   if (!('serviceWorker' in navigator)) {
@@ -96,6 +102,7 @@ function registerServiceWorker() {
   window.addEventListener('load', async () => {
     try {
       const registration = await navigator.serviceWorker.register('./service-worker.js');
+      // Se puede agregar lógica adicional aquí si se requiere
     } catch (err) {
       console.error('Error registrando Service Worker:', err);
     }
@@ -103,7 +110,8 @@ function registerServiceWorker() {
 }
 
 /**
- * Inicializa el modal de login global (Bootstrap)
+ * Inicializa el modal de login global (no usa Bootstrap, es custom).
+ * Importa dinámicamente la lógica del modal de login.
  */
 async function initGlobalLoginModal() {
   try {
@@ -115,7 +123,8 @@ async function initGlobalLoginModal() {
 }
 
 /**
- * Muestra estado en el modal de login
+ * (Obsoleta) Muestra estado en el modal de login.
+ * Ya no se utiliza autenticación por estado.
  */
 function showLoginStatus(el, message, type) {
   // FUNCIÓN ELIMINADA - Ya no se utiliza autenticación
@@ -123,7 +132,8 @@ function showLoginStatus(el, message, type) {
 
 /**
  * Inicializa los dropdowns del sidebar para que se muestren correctamente
- * fuera del contenedor con overflow
+ * fuera del contenedor con overflow hidden.
+ * Corrige problemas de visualización en menús laterales.
  */
 function initSidebarDropdowns() {
   document.addEventListener('show.bs.dropdown', (e) => {
@@ -150,7 +160,8 @@ function initSidebarDropdowns() {
 }
 
 /**
- * Inicializa la aplicación cuando el DOM está listo
+ * Inicializa la aplicación cuando el DOM está listo.
+ * Llama a todos los inicializadores principales.
  */
 function init() {
   // Inicializar router (maneja toda la navegación)
@@ -169,7 +180,7 @@ function init() {
   initSidebarDropdowns();
 }
 
-// Esperar a que el DOM esté listo
+// Esperar a que el DOM esté listo antes de inicializar la app
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', init);
 } else {

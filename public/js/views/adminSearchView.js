@@ -1,6 +1,18 @@
+
 /**
  * adminSearchView.js
- * Vista de búsqueda para admin: muestra resultados en tabla
+ *
+ * Vista de búsqueda avanzada para el panel de administración.
+ *
+ * Permite buscar productos, aplicar filtros, paginar resultados y realizar acciones
+ * (ver, editar, eliminar) tanto en modo tabla (desktop) como cards (mobile).
+ *
+ * Funcionalidades principales:
+ * - Búsqueda y filtrado de productos
+ * - Renderizado de resultados en tabla y cards
+ * - Paginación y control de estado
+ * - Acciones de producto: ver, editar, eliminar
+ * - Soporte para modo "promociones activas"
  */
 
 import { getHashParams, fetchJSON } from '../core/utils.js';
@@ -18,7 +30,9 @@ let cachedProducts = [];
 let currentFilters = {};
 
 /**
- * Obtiene los filtros activos desde el hash
+ * Obtiene los filtros activos desde el hash de la URL.
+ * Devuelve un objeto con los filtros seleccionados por el usuario.
+ * @returns {Object} Filtros activos
  */
 function getActiveFilters() {
   const params = getHashParams();
@@ -43,7 +57,9 @@ function getActiveFilters() {
 }
 
 /**
- * Genera el texto de filtros activos para el subtítulo
+ * Genera el texto descriptivo de los filtros activos para mostrar en el subtítulo.
+ * @param {Object} filters - Filtros activos
+ * @returns {string} Texto de filtros
  */
 function getFiltersText(filters) {
   const fieldLabels = {
@@ -71,7 +87,9 @@ function getFiltersText(filters) {
 }
 
 /**
- * Renderiza las filas de la tabla
+ * Renderiza las filas de la tabla de resultados (modo desktop).
+ * @param {Array} products - Lista de productos
+ * @returns {string} HTML de filas
  */
 function renderRows(products) {
   if (products.length === 0) {
@@ -100,7 +118,9 @@ function renderRows(products) {
 }
 
 /**
- * Renderiza las cards para vista mobile
+ * Renderiza las cards de productos para la vista mobile.
+ * @param {Array} products - Lista de productos
+ * @returns {string} HTML de cards
  */
 function renderCards(products) {
   if (products.length === 0) {
@@ -152,7 +172,9 @@ function renderCards(products) {
 }
 
 /**
- * Actualiza los controles de paginación
+ * Actualiza los controles de paginación (número de página y botones).
+ * @param {number} page - Página actual (base 0)
+ * @param {number} total - Total de productos
  */
 function updatePagination(page, total) {
   const paginationEl = document.getElementById('admin-search-page');
@@ -168,7 +190,8 @@ function updatePagination(page, total) {
 }
 
 /**
- * Adjunta event listeners a los botones de acciones
+ * Adjunta event listeners a los botones de acciones (ver, editar, borrar).
+ * Utiliza el cache de productos para encontrar el producto correspondiente.
  */
 function attachActionListeners() {
   const allViewBtns = document.querySelectorAll('[data-view-product]');
@@ -237,7 +260,11 @@ function attachActionListeners() {
 }
 
 /**
- * Carga los resultados de búsqueda
+ * Carga los resultados de búsqueda desde la API y renderiza la tabla/cards.
+ * Aplica filtros, controla el estado de carga y errores.
+ * @param {string} query - Texto de búsqueda
+ * @param {number} page - Página actual (base 0)
+ * @param {boolean} promosOnly - Si solo se buscan productos con promoción activa
  */
 async function loadSearchResults(query, page = 0, promosOnly = false) {
   const loadingEl = document.getElementById('admin-search-loading');
@@ -372,11 +399,13 @@ async function loadSearchResults(query, page = 0, promosOnly = false) {
   }
 }
 
-// Variable para guardar si estamos en modo promociones
+// Variable global para guardar si estamos en modo promociones
 let promosMode = false;
 
 /**
- * Inicializa la vista de búsqueda admin
+ * Inicializa la vista de búsqueda admin.
+ * Configura listeners, detecta filtros y carga resultados iniciales.
+ * @param {HTMLElement} _container - Contenedor principal (no usado, por compatibilidad)
  */
 export function initAdminSearchView(_container) {
   const params = getHashParams();

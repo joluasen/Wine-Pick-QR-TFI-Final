@@ -1,8 +1,16 @@
+
 // public/js/views/searchView.js
 /**
- * Vista de búsqueda
- * 
- * Muestra resultados de búsqueda con filtros y paginación
+ * Vista de búsqueda pública y administrativa
+ *
+ * Muestra resultados de búsqueda con filtros y paginación.
+ * Permite interacción con productos, métricas y navegación entre páginas.
+ *
+ * Funcionalidades principales:
+ * - Renderizado de resultados y tarjetas de producto
+ * - Paginación dinámica
+ * - Filtros activos desde el hash
+ * - Manejo de errores y estados vacíos
  */
 
 import { setStatus, getHashParams, fetchJSON, escapeHtml, calculatePromoPrice, registerMetric } from '../core/utils.js';
@@ -16,7 +24,11 @@ let currentQuery = '';
 let viewContainer = null;
 
 /**
- * Renderiza los resultados de búsqueda
+ * Renderiza los resultados de búsqueda en la vista
+ * @param {HTMLElement} container - Contenedor donde se muestran los resultados
+ * @param {Array} products - Lista de productos encontrados
+ * @param {number} total - Total de resultados
+ * @param {number} page - Página actual
  */
 function renderResults(container, products, total, page) {
   container.innerHTML = '';
@@ -31,6 +43,7 @@ function renderResults(container, products, total, page) {
     return;
   }
   
+  // Crear grilla de productos
   const grid = document.createElement('div');
   grid.className = 'product-grid';
   
@@ -41,7 +54,7 @@ function renderResults(container, products, total, page) {
   
   container.appendChild(grid);
   
-  // Paginación
+  // Paginación si hay más de una página
   if (total > PAGE_SIZE) {
     const pagination = createPagination(page, total);
     container.appendChild(pagination);
@@ -49,7 +62,9 @@ function renderResults(container, products, total, page) {
 }
 
 /**
- * Crea una tarjeta de resultado
+ * Crea una tarjeta de resultado de producto
+ * @param {Object} product - Producto a mostrar
+ * @returns {HTMLElement} - Elemento de la tarjeta
  */
 function createResultCard(product) {
   const card = document.createElement('article');
@@ -85,6 +100,7 @@ function createResultCard(product) {
   const channel = sessionStorage.getItem('lastSearchChannel') || 'BUSQUEDA';
   const isAdminContext = window.location.hash.startsWith('#admin');
   
+  // Accesibilidad: click y enter/espacio abren el modal del producto
   card.addEventListener('click', () => {
     if (isAdminContext) {
       // Admin no registra métricas
@@ -112,7 +128,10 @@ function createResultCard(product) {
 }
 
 /**
- * Crea los controles de paginación
+ * Crea los controles de paginación para los resultados
+ * @param {number} page - Página actual
+ * @param {number} total - Total de resultados
+ * @returns {HTMLElement} - Elemento de paginación
  */
 function createPagination(page, total) {
   const totalPages = Math.ceil(total / PAGE_SIZE);
@@ -147,7 +166,8 @@ function createPagination(page, total) {
 }
 
 /**
- * Obtiene los filtros activos desde el hash
+ * Obtiene los filtros activos desde el hash de la URL
+ * @returns {Object} - Filtros activos
  */
 function getActiveFilters() {
   const params = getHashParams();
@@ -171,6 +191,11 @@ function getActiveFilters() {
   return filters;
 }
 
+/**
+ * Renderiza el resumen de filtros activos sobre los resultados
+ * @param {HTMLElement} container
+ * @param {Object} filters
+ */
 function renderActiveFilters(container, filters) {
   let summary = '';
   const filterLabels = {
@@ -196,7 +221,10 @@ function renderActiveFilters(container, filters) {
 }
 
 /**
- * Carga los resultados de búsqueda
+ * Carga los resultados de búsqueda desde la API
+ * @param {string} query - Término de búsqueda
+ * @param {number} page - Página a mostrar
+ * @param {HTMLElement|null} containerOverride - Contenedor alternativo
  */
 async function loadResults(query, page = 0, containerOverride = null) {
   const container = containerOverride || viewContainer || document.querySelector('[data-view="search"], [data-view="adminSearch"]');
@@ -243,6 +271,7 @@ async function loadResults(query, page = 0, containerOverride = null) {
 
 /**
  * Inicializa la vista de búsqueda
+ * @param {HTMLElement} container - Contenedor principal de la vista
  */
 export function initSearchView(container) {
   viewContainer = container;
@@ -272,7 +301,7 @@ export function initSearchView(container) {
     return;
   }
 
-  // Actualizar título
+  // Actualizar título de la vista
   const title = document.createElement('h2');
   title.className = 'search-title';
   container.insertBefore(title, container.firstChild);

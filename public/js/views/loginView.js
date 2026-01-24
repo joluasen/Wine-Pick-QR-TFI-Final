@@ -1,16 +1,36 @@
+
 /**
- * loginView.js - Manejo del formulario de login
+ * loginView.js
+ *
+ * Manejo del formulario y modal de login para el panel administrativo.
+ * Incluye validaciones en vivo, UX accesible y compatibilidad con modales custom y Bootstrap.
+ *
+ * Funcionalidades principales:
+ * - Validación en vivo de campos
+ * - Manejo de login vía API
+ * - Feedback visual y toasts
+ * - Soporte para mostrar/ocultar contraseña
+ * - Compatibilidad con dos tipos de modal (custom y Bootstrap)
  */
 
 import { fetchJSON } from '../core/utils.js';
 import { showToast } from '../admin/components/Toast.js';
 
-// Toggle clase de error para imitar validación de modales de producto/promoción
+
+/**
+ * Agrega o quita la clase de error en un input
+ * @param {HTMLElement} input - Campo de entrada
+ * @param {boolean} isInvalid - Si debe marcarse como inválido
+ */
 const toggleInvalid = (input, isInvalid) => {
   if (!input) return;
   input.classList.toggle('is-invalid', Boolean(isInvalid));
 };
 
+/**
+ * Adjunta validación en vivo a los inputs
+ * @param {HTMLElement[]} inputs - Lista de campos a validar
+ */
 const attachLiveValidation = (inputs) => {
   inputs.forEach((input) => {
     if (!input) return;
@@ -26,8 +46,12 @@ const attachLiveValidation = (inputs) => {
   });
 };
 
+
 /**
- * Maneja el proceso de login
+ * Maneja el proceso de login vía API
+ * @param {string} username - Usuario
+ * @param {string} password - Contraseña
+ * @returns {Promise<boolean>} - true si el login fue exitoso
  */
 async function handleLogin(username, password) {
   if (!username || !password) {
@@ -62,8 +86,10 @@ async function handleLogin(username, password) {
   }
 }
 
+
 /**
- * Inicializa la vista de login
+ * Inicializa la vista de login (modal custom)
+ * @param {HTMLElement} container - Contenedor principal de la vista
  */
 export function initLoginView(container) {
   const form = document.getElementById('login-form');
@@ -72,6 +98,7 @@ export function initLoginView(container) {
   const userInput = document.getElementById('login-username');
   const passInput = document.getElementById('login-password');
 
+  // Validación en vivo de campos
   attachLiveValidation([userInput, passInput]);
 
   const modalEl = document.getElementById('login-modal-page');
@@ -80,7 +107,7 @@ export function initLoginView(container) {
   // Desactivar scroll del body al abrir el modal
   document.body.style.overflow = 'hidden';
 
-  // OJO: Mostrar/Ocultar contraseña
+  // Mostrar/Ocultar contraseña con el ícono de ojo
   const eyeBtn = document.querySelector('.btn-eye[data-eye="login-password"]');
   if (eyeBtn && passInput) {
     eyeBtn.addEventListener('click', () => {
@@ -96,6 +123,7 @@ export function initLoginView(container) {
     });
   }
 
+  // Listener para submit del formulario de login
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
 
@@ -134,18 +162,7 @@ export function initLoginView(container) {
     closeBtn.addEventListener('click', closeModal);
   }
 
-  // Cerrar al clickear overlay (fuera del contenido)
-  // BLOQUEADO: Solo se puede cerrar con la X
-  // if (modalEl) {
-  //   modalEl.addEventListener('click', (e) => {
-  //     if (e.target === modalEl) {
-  //       document.body.style.overflow = '';
-  //       closeModal();
-  //     }
-  //   });
-  //   // Asegurar que se muestre el modal (modals.css usa display:none por defecto)
-  //   modalEl.style.display = 'flex';
-  // }
+  // Mostrar el modal (modals.css usa display:none por defecto)
   if (modalEl) {
     modalEl.style.display = 'flex';
   }
@@ -156,8 +173,10 @@ export function initLoginView(container) {
   }
 }
 
+
 /**
- * Inicializa el modal de login (compatibilidad)
+ * Inicializa el modal de login (compatibilidad Bootstrap)
+ * @returns {void}
  */
 export function initLoginModal() {
   const form = document.getElementById('login-form-modal');
@@ -172,8 +191,10 @@ export function initLoginModal() {
   const userInput = document.getElementById('login-username-modal');
   const passInput = document.getElementById('login-password-modal');
 
+  // Validación en vivo de campos
   attachLiveValidation([userInput, passInput]);
 
+  // Listener para submit del formulario de login
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
 

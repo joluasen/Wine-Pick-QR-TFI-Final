@@ -1,11 +1,17 @@
+
 /**
  * adminProductsView.js
- * Vista de gestión de productos - Refactorizada siguiendo principios SOLID y MVC
  *
- * RESPONSABILIDAD: Controlador de vista de productos
- * - Renderiza tabla de productos
- * - Maneja paginación
- * - Delega operaciones CRUD a servicios
+ * Vista de gestión de productos para el panel de administración.
+ *
+ * Orquesta la carga, renderizado y acciones CRUD sobre productos, tanto en tabla (desktop)
+ * como en cards (mobile), delegando operaciones a servicios y componentes.
+ *
+ * Principales responsabilidades:
+ * - Renderizar tabla y cards de productos
+ * - Manejar paginación y estado de carga
+ * - Delegar operaciones CRUD a servicios
+ * - Adjuntar listeners para ver, editar y eliminar
  */
 
 import { getProducts, deleteProduct as deleteProductService } from "../admin/services/productService.js";
@@ -14,7 +20,8 @@ import { showConfirmDialog } from "../admin/components/ConfirmDialog.js";
 import { modalManager } from "../core/modalManager.js";
 
 /**
- * Inicializa la vista de gestión de productos
+ * Inicializa la vista de gestión de productos.
+ * Configura listeners, renderiza tabla/cards y maneja paginación y acciones CRUD.
  * @param {HTMLElement} _container - Contenedor (no usado, HTML está en adminProducts.php)
  */
 export async function initAdminProductsView(_container) {
@@ -32,8 +39,11 @@ export async function initAdminProductsView(_container) {
   let totalProducts = 0;
   let cachedProducts = [];
 
+
   /**
-   * Actualiza los controles de paginación
+   * Actualiza los controles de paginación (número de página y botones).
+   * @param {number} page - Página actual (base 0)
+   * @param {number} total - Total de productos
    */
   function updatePagination(page, total) {
     const totalPages = Math.ceil(total / PAGE_SIZE) || 1;
@@ -43,7 +53,9 @@ export async function initAdminProductsView(_container) {
   }
 
   /**
-   * Renderiza las filas de la tabla
+   * Renderiza las filas de la tabla de productos (modo desktop).
+   * @param {Array} products - Lista de productos
+   * @returns {string} HTML de filas
    */
   function renderRows(products) {
     let rows = products.map(
@@ -73,7 +85,9 @@ export async function initAdminProductsView(_container) {
   }
 
   /**
-   * Renderiza las cards para vista mobile
+   * Renderiza las cards de productos para la vista mobile.
+   * @param {Array} products - Lista de productos
+   * @returns {string} HTML de cards
    */
   function renderCards(products) {
     if (products.length === 0) {
@@ -128,7 +142,8 @@ export async function initAdminProductsView(_container) {
   }
 
   /**
-   * Adjunta event listeners a los botones de acciones
+   * Adjunta event listeners a los botones de acciones (ver, editar, eliminar).
+   * Utiliza el cache de productos para encontrar el producto correspondiente.
    */
   function attachActionListeners() {
     // Obtener todos los botones tanto de tabla como de cards
@@ -220,7 +235,9 @@ export async function initAdminProductsView(_container) {
   }
 
   /**
-   * Carga productos de la página especificada
+   * Carga productos de la página especificada desde el servicio.
+   * Renderiza tabla/cards, actualiza paginación y maneja estados vacíos y errores.
+   * @param {number} page - Página a cargar (base 0)
    */
   async function loadProducts(page = 0) {
     // Mostrar loading, ocultar contenido

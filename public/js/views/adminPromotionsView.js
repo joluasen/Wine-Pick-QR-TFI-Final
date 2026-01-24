@@ -1,11 +1,17 @@
+
 /**
  * adminPromotionsView.js
- * Vista de gestión de promociones - Refactorizada siguiendo principios SOLID y MVC
  *
- * RESPONSABILIDAD: Controlador de vista de promociones
- * - Renderiza tabla de promociones
- * - Maneja paginación
- * - Delega operaciones CRUD a servicios
+ * Vista de gestión de promociones para el panel de administración.
+ *
+ * Orquesta la carga, renderizado y acciones CRUD sobre promociones, tanto en tabla (desktop)
+ * como en cards (mobile), delegando operaciones a servicios y componentes.
+ *
+ * Principales responsabilidades:
+ * - Renderizar tabla y cards de promociones
+ * - Manejar paginación y estado de carga
+ * - Delegar operaciones CRUD a servicios
+ * - Adjuntar listeners para editar y eliminar
  */
 
 import {
@@ -17,7 +23,8 @@ import { showConfirmDialog } from "../admin/components/ConfirmDialog.js";
 import { modalManager } from "../core/modalManager.js";
 
 /**
- * Inicializa la vista de gestión de promociones
+ * Inicializa la vista de gestión de promociones.
+ * Configura listeners, renderiza tabla/cards y maneja paginación y acciones CRUD.
  * @param {HTMLElement} container - Contenedor de la vista
  */
 export async function initAdminPromotionsView(container) {
@@ -34,18 +41,28 @@ export async function initAdminPromotionsView(container) {
   let currentPage = 0;
   let totalPromos = 0;
 
+
+  /**
+   * Muestra el estado de carga (oculta contenido)
+   */
   function showLoading() {
     if (loadingEl) loadingEl.style.display = "block";
     if (contentEl) contentEl.style.display = "none";
   }
 
+  /**
+   * Muestra el contenido (oculta loading)
+   */
   function showContent() {
     if (loadingEl) loadingEl.style.display = "none";
     if (contentEl) contentEl.style.display = "block";
   }
 
+
   /**
-   * Actualiza los controles de paginación
+   * Actualiza los controles de paginación (número de página y botones).
+   * @param {number} page - Página actual (base 0)
+   * @param {number} total - Total de promociones
    */
   function updatePagination(page, total) {
     const totalPages = Math.ceil(total / PAGE_SIZE) || 1;
@@ -55,7 +72,9 @@ export async function initAdminPromotionsView(container) {
   }
 
   /**
-   * Renderiza las filas de la tabla
+   * Renderiza las filas de la tabla de promociones (modo desktop).
+   * @param {Array} promos - Lista de promociones
+   * @returns {string} HTML de filas
    */
   function renderRows(promos) {
     let rows = promos.map(
@@ -85,7 +104,9 @@ export async function initAdminPromotionsView(container) {
   }
 
   /**
-   * Renderiza las cards para vista mobile
+   * Renderiza las cards de promociones para la vista mobile.
+   * @param {Array} promos - Lista de promociones
+   * @returns {string} HTML de cards
    */
   function renderCards(promos) {
     if (promos.length === 0) {
@@ -144,7 +165,8 @@ export async function initAdminPromotionsView(container) {
   }
 
   /**
-   * Adjunta event listeners a los botones de acciones
+   * Adjunta event listeners a los botones de acciones (editar, eliminar).
+   * Utiliza la lista actual de promociones para encontrar la promoción correspondiente.
    */
   function attachActionListeners() {
     // Obtener todos los botones tanto de tabla como de cards
@@ -227,7 +249,9 @@ export async function initAdminPromotionsView(container) {
   }
 
   /**
-   * Carga promociones de la página especificada
+   * Carga promociones de la página especificada desde el servicio.
+   * Renderiza tabla/cards, actualiza paginación y maneja estados vacíos y errores.
+   * @param {number} page - Página a cargar (base 0)
    */
   async function loadPromos(page = 0) {
     showLoading();

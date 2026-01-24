@@ -1,13 +1,31 @@
+
 /**
- * adminMetricsView.js - REFACTORIZADO 100%
- * Vista de métricas con gráficos informativos
+ * adminMetricsView.js
+ *
+ * Vista de métricas para el panel de administración.
+ *
+ * Orquesta la carga y visualización de métricas clave del sistema, incluyendo:
+ * - KPIs principales (consultas, QR, búsquedas)
+ * - Gráficos de distribución y evolución diaria
+ * - Top productos consultados
+ * - Tabla detallada de productos
+ *
+ * Principales responsabilidades:
+ * - Renderizar gráficos y KPIs usando Chart.js y HTML
+ * - Manejar estados de carga, error y contenido
+ * - Permitir cambio de período y recarga de datos
  */
 
 import { getMetrics } from '../admin/services/metricService.js';
 import { showToast } from '../admin/components/Toast.js';
 
+/**
+ * Inicializa la vista de métricas admin.
+ * Configura listeners, renderiza KPIs y gráficos, y maneja estados de carga y error.
+ * @param {HTMLElement} container - Contenedor principal de la vista
+ */
 export async function initAdminMetricsView(container) {
-  // Esperar a que el DOM esté listo (máx 1s)
+  // Esperar a que el DOM esté listo (máx 1s). Permite cargar la vista aunque se renderice asincrónicamente.
   let loadingEl, contentEl, errorEl, periodButtons, retryBtn;
   let tries = 0;
   while (tries < 20) { // 20 * 50ms = 1s máx
@@ -20,17 +38,19 @@ export async function initAdminMetricsView(container) {
     await new Promise(res => setTimeout(res, 50));
     tries++;
   }
-  // Si no están, mostrar error básico
+  // Si no están los elementos requeridos, mostrar error básico
   if (!loadingEl || !contentEl || !errorEl || periodButtons.length === 0) {
     if (container) container.innerHTML = '<div class="text-danger">Error cargando métricas. Intenta recargar la página.</div>';
     return;
   }
 
+
   let currentPeriod = 30;
-  // Usar window para persistencia global y limpieza cross-view
+  // Usar window para persistencia global y limpieza cross-view de gráficos
   window.dailyChartInstance = null;
 
-  // Funciones de estado
+
+  // Funciones de estado para mostrar/ocultar loading, contenido y error
   function showLoading() {
     loadingEl.style.display = 'block';
     contentEl.style.display = 'none';
@@ -51,7 +71,8 @@ export async function initAdminMetricsView(container) {
     if (errorMsg) errorMsg.textContent = message;
   }
 
-  // Formateadores
+
+  // Formateadores auxiliares
   function formatDate(dateStr) {
     if (!dateStr) return '-';
     try {
@@ -69,7 +90,12 @@ export async function initAdminMetricsView(container) {
     return div.innerHTML;
   }
 
-  // Renderizar KPIs principales
+  /**
+   * Renderiza los KPIs principales (consultas, QR, búsquedas, promedios y porcentajes)
+   * @param {Object} summary - Resumen de métricas
+   * @param {number|null} averageDaily - Promedio diario
+   * @param {number|null} periodDays - Días del período
+   */
   function renderKPIs(summary, averageDaily = null, periodDays = null) {
     const total = summary.total || 0;
     const qr = summary.qr_count || 0;
@@ -97,7 +123,10 @@ export async function initAdminMetricsView(container) {
 
   // (Se elimina stub obsoleto de renderDailyChart)
 
-  // Gráfico de distribución QR vs Búsqueda
+  /**
+   * Renderiza el gráfico de barras de distribución QR vs Búsqueda
+   * @param {Object} summary - Resumen de métricas
+   */
   function renderDistributionChart(summary) {
     const container = document.getElementById('distribution-chart');
     if (!container) return;
@@ -134,7 +163,10 @@ export async function initAdminMetricsView(container) {
     `;
   }
 
-  // Top 5 productos con gráfico
+  /**
+   * Renderiza el gráfico de Top 5 productos más consultados
+   * @param {Array} products - Lista de productos
+   */
   function renderTopProductsChart(products) {
     const container = document.getElementById('top-products-chart');
     if (!container) return;
@@ -176,7 +208,10 @@ export async function initAdminMetricsView(container) {
     }).join('');
   }
 
-  // Gráfico diario (Chart.js)
+  /**
+   * Renderiza el gráfico de evolución diaria de consultas usando Chart.js
+   * @param {Array} dailyData - Datos diarios
+   */
   function renderDailyChart(dailyData) {
     const canvas = document.getElementById('daily-chart-canvas');
     if (!canvas || !window.Chart) return;
@@ -294,7 +329,10 @@ export async function initAdminMetricsView(container) {
     });
   }
 
-  // Tabla detallada de productos
+  /**
+   * Renderiza la tabla detallada de productos consultados
+   * @param {Array} products - Lista de productos
+   */
   function renderProductsTable(products) {
     const tbody = document.getElementById('products-table-body');
     if (!tbody) return;
@@ -316,7 +354,10 @@ export async function initAdminMetricsView(container) {
     `).join('');
   }
 
-  // Cargar todos los datos
+  /**
+   * Carga todas las métricas desde el servicio y renderiza la vista
+   * @param {number} days - Período de días a consultar
+   */
   async function loadMetrics(days) {
     showLoading();
     
@@ -343,7 +384,8 @@ export async function initAdminMetricsView(container) {
     }
   }
 
-  // Event listeners
+
+  // Event listeners para cambio de período y recarga
   periodButtons.forEach(btn => {
     btn.addEventListener('click', (e) => {
       periodButtons.forEach(b => b.classList.remove('active'));
@@ -357,6 +399,6 @@ export async function initAdminMetricsView(container) {
     retryBtn.addEventListener('click', () => loadMetrics(currentPeriod));
   }
 
-  // Carga inicial
+  // Carga inicial de métricas
   loadMetrics(currentPeriod);
 }
