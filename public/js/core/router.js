@@ -1,13 +1,24 @@
-// public/js/core/router.js
+
 /**
- * Router SPA - Sistema de navegación unificado
+ * router.js
+ *
+ * Sistema de enrutamiento SPA para la aplicación Wine Pick QR.
+ *
+ * Permite navegación entre vistas, carga dinámica de componentes y manejo de rutas protegidas (admin).
+ *
+ * Principales responsabilidades:
+ * - Definir rutas y vistas asociadas
+ * - Controlar autenticación y acceso a vistas admin
+ * - Cargar navegación y headers dinámicamente
+ * - Inicializar vistas y delegar lógica a cada módulo
+ * - Gestionar navegación, eventos y estado de la SPA
  */
 
 import { getBasePath, getHashParams } from "./utils.js";
 import { modalManager } from "./modalManager.js";
 import { initUnifiedSearchBar } from "../search-bar.js";
 
-// Configuración de rutas
+// Configuración de rutas: hash -> nombre de vista
 const ROUTES = {
   "": "home",
   "#home": "home",
@@ -29,7 +40,8 @@ let currentView = null;
 let isNavigating = false;
 
 /**
- * Obtiene la URL base - prioriza APP_CONFIG inyectado por PHP
+ * Obtiene la URL base del proyecto (prioriza APP_CONFIG inyectado por PHP)
+ * @returns {string} URL base
  */
 function getBaseUrl() {
   if (window.APP_CONFIG?.baseUrl) {
@@ -40,6 +52,7 @@ function getBaseUrl() {
 
 /**
  * Verifica si el usuario está autenticado consultando /api/admin/me
+ * @returns {Promise<boolean>} true si autenticado
  */
 async function checkAuth() {
   try {
@@ -55,6 +68,7 @@ async function checkAuth() {
 
 /**
  * Obtiene el nombre de la vista desde el hash actual
+ * @returns {string} Nombre de la vista
  */
 function getViewFromHash() {
   const hash = window.location.hash.split("?")[0] || "#home";
@@ -73,7 +87,8 @@ function getViewFromHash() {
 }
 
 /**
- * Carga la navegación apropiada según el contexto
+ * Carga la navegación (navbar/sidebar) según el contexto y autenticación
+ * @param {string} viewName - Nombre de la vista actual
  */
 async function loadNavigation(viewName) {
   const navContainer = document.getElementById("nav-container");
@@ -133,7 +148,7 @@ async function loadNavigation(viewName) {
 }
 
 /**
- * Carga el header de búsqueda
+ * Carga el header de búsqueda (desktop y mobile)
  */
 async function loadSearchHeader() {
   const mobileSearch = document.getElementById("mobile-search-header");
@@ -175,7 +190,8 @@ function setupNavigationListeners() {
 }
 
 /**
- * Handler para clicks de navegación
+ * Handler para clicks de navegación en elementos con data-link
+ * @param {Event} e - Evento click
  */
 function handleNavClick(e) {
   const link = e.target.closest("[data-link]");
@@ -192,7 +208,7 @@ function handleNavClick(e) {
 }
 
 /**
- * Actualiza el item activo en la navegación
+ * Actualiza el item activo en la navegación según el hash actual
  */
 function updateActiveNavItem() {
   const currentHash = window.location.hash.split("?")[0] || "#home";
@@ -204,7 +220,7 @@ function updateActiveNavItem() {
 }
 
 /**
- * Inicializa los listeners del buscador
+ * Inicializa los listeners del buscador global
  */
 function initSearchListeners() {
   const form = document.getElementById("searchForm");
@@ -234,7 +250,8 @@ function initSearchListeners() {
 }
 
 /**
- * Carga e inicializa una vista
+ * Carga e inicializa una vista (HTML y lógica JS)
+ * @param {string} viewName - Nombre de la vista
  */
 async function loadView(viewName) {
   // Interceptar búsqueda QR admin: si venimos de adminScan y hay query, mostrar ficha admin
@@ -348,6 +365,8 @@ async function loadView(viewName) {
 
 /**
  * Inicializa la lógica específica de cada vista
+ * @param {string} viewName - Nombre de la vista
+ * @param {HTMLElement} container - Contenedor principal
  */
 async function initializeView(viewName, container) {
   const viewModules = {
@@ -378,7 +397,8 @@ async function initializeView(viewName, container) {
 }
 
 /**
- * Navega a una ruta específica
+ * Navega a una ruta específica (hash)
+ * @param {string} hash - Hash destino
  */
 export function navigate(hash) {
   modalManager.closeAll();
@@ -391,7 +411,7 @@ export function navigate(hash) {
 }
 
 /**
- * Handler para cambios de hash
+ * Handler para cambios de hash (evento hashchange)
  */
 function handleHashChange() {
   const viewName = getViewFromHash();
@@ -399,7 +419,7 @@ function handleHashChange() {
 }
 
 /**
- * Inicializa el router
+ * Inicializa el router SPA y listeners globales
  */
 export function initRouter() {
   modalManager.init();
@@ -408,7 +428,8 @@ export function initRouter() {
 }
 
 /**
- * Obtiene la vista actual
+ * Obtiene la vista actual cargada
+ * @returns {string|null} Nombre de la vista actual
  */
 export function getCurrentView() {
   return currentView;

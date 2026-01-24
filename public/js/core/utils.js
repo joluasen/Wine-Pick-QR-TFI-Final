@@ -1,7 +1,16 @@
-// public/js/core/utils.js
+
 /**
- * Utilidades compartidas para toda la aplicación
- * Centraliza funciones comunes para evitar duplicación
+ * utils.js
+ *
+ * Utilidades compartidas para toda la aplicación Wine Pick QR.
+ *
+ * Centraliza funciones comunes para evitar duplicación y facilitar el mantenimiento.
+ *
+ * Principales responsabilidades:
+ * - Obtener rutas y parámetros
+ * - Formatear precios y fechas
+ * - Registrar métricas y manejar estado
+ * - Funciones de debounce, fetch seguro y escape HTML
  */
 
 /**
