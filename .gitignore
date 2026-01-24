@@ -24,6 +24,7 @@ public/uploads/products/*
 
 # Documentación de desarrollo interno
 docs/tareas_pendientes/
+templates/
 
 # IDE y editores
 .vscode/
