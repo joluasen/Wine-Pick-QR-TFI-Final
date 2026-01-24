@@ -62,10 +62,10 @@ export async function initAdminPromotionsView(container) {
       (p) => `
       <tr>
         <td>${p.id}</td>
-        <td>${p.product_name || ""}</td>
-        <td>${p.promotion_type}</td>
-        <td>${p.parameter_value}</td>
-        <td>${p.visible_text}</td>
+        <td class="cell-truncate" title="${p.product_name || ""}">${p.product_name || ""}</td>
+        <td class="col-secondary">${p.promotion_type}</td>
+        <td class="col-secondary">${p.parameter_value}</td>
+        <td class="cell-truncate" title="${p.visible_text}">${p.visible_text}</td>
         <td>${p.start_at ? p.start_at.split(" ")[0] : ""}</td>
         <td>${p.end_at ? p.end_at.split(" ")[0] : ""}</td>
         <td>

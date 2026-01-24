@@ -23,8 +23,8 @@
               <th>ID</th>
               <th>Código</th>
               <th>Nombre</th>
-              <th>Tipo</th>
-              <th>Bodega</th>
+              <th class="col-secondary">Tipo</th>
+              <th class="col-secondary">Bodega</th>
               <th>Precio</th>
               <th>Acciones</th>
             </tr>

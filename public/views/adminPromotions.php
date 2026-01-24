@@ -28,8 +28,8 @@ header('Content-Type: text/html; charset=utf-8');
             <tr>
               <th>ID</th>
               <th>Producto</th>
-              <th>Tipo</th>
-              <th>Valor</th>
+              <th class="col-secondary">Tipo</th>
+              <th class="col-secondary">Valor</th>
               <th>Texto</th>
               <th>Inicio</th>
               <th>Fin</th>

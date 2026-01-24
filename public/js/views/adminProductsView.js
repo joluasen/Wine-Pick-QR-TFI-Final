@@ -51,9 +51,9 @@ export async function initAdminProductsView(_container) {
       <tr>
         <td>${p.id}</td>
         <td>${p.public_code}</td>
-        <td>${p.name}</td>
-        <td>${p.drink_type}</td>
-        <td>${p.winery_distillery}</td>
+        <td class="cell-truncate" title="${p.name}">${p.name}</td>
+        <td class="col-secondary">${p.drink_type}</td>
+        <td class="col-secondary cell-truncate" title="${p.winery_distillery}">${p.winery_distillery}</td>
         <td>$${p.base_price.toFixed(2)}</td>
         <td>
           <button class="btn-table" data-edit-product="${p.id}">Editar</button>

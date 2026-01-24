@@ -1127,12 +1127,53 @@ class ModalManager {
       });
     }
 
+    // Función para detectar si hay cambios en el formulario
+    const hasFormChanges = () => {
+      if (hasChangedImage) return true;
+      if (!isEdit || !product) return false;
+
+      // Comparar valores actuales con los originales
+      const getValue = (id) => {
+        const el = modal.querySelector(`#${prefix}-${id}`);
+        return el ? el.value.trim() : '';
+      };
+
+      if (getValue('name') !== (product.name || '')) return true;
+      if (getValue('winery') !== (product.winery_distillery || '')) return true;
+      if (getValue('drink-type') !== (product.drink_type || '')) return true;
+      if (getValue('varietal') !== (product.varietal || '')) return true;
+      if (getValue('origin') !== (product.origin || '')) return true;
+      if (getValue('vintage') !== String(product.vintage_year || '')) return true;
+      if (getValue('price') !== String(product.base_price || '')) return true;
+      if (getValue('description') !== (product.description || '')) return true;
+
+      return false;
+    };
+
+    // Función para manejar el cierre con confirmación
+    const handleCancelClick = async () => {
+      if (hasFormChanges()) {
+        const confirmed = await showConfirmDialog({
+          title: "¿Descartar cambios?",
+          message: "Tienes cambios sin guardar. Si sales ahora, perderás los cambios realizados.",
+          confirmText: "Descartar",
+          cancelText: "Seguir editando",
+          confirmClass: "btn-danger",
+        });
+        if (confirmed) {
+          this.close();
+        }
+      } else {
+        this.close();
+      }
+    };
+
     // Botones de cancelar
     if (closeBtn) {
-      closeBtn.addEventListener("click", () => this.close());
+      closeBtn.addEventListener("click", handleCancelClick);
     }
     if (dismissBtn) {
-      dismissBtn.addEventListener("click", () => this.close());
+      dismissBtn.addEventListener("click", handleCancelClick);
     }
 
     // Enviar formulario

@@ -1126,6 +1126,32 @@
 }
 
 /* =========================================
+   TABLAS ADMIN - TRUNCAMIENTO DE TEXTO
+   ========================================= */
+
+/* Truncar texto largo en celdas de tabla */
+.cell-truncate {
+  max-width: 150px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Ajustar max-width en tablets */
+@media (min-width: 768px) and (max-width: 1100px) {
+  .cell-truncate {
+    max-width: 100px;
+  }
+}
+
+/* Ocultar columnas secundarias solo en tablets pequeñas */
+@media (min-width: 768px) and (max-width: 900px) {
+  .col-secondary {
+    display: none !important;
+  }
+}
+
+/* =========================================
    FORMULARIO DE PRODUCTO (CREAR/EDITAR)
    Estilos específicos para subida de imagen
    ========================================= */
