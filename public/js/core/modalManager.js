@@ -1278,9 +1278,7 @@ class ModalManager {
               "./api/admin/upload/product-image",
               {
                 method: "POST",
-                headers: {
-                  Authorization: `Bearer ${localStorage.getItem("auth_token")}`,
-                },
+                credentials: "same-origin",
                 body: imageFormData,
               },
             );
@@ -1408,6 +1406,7 @@ class ModalManager {
 
           const response = await fetch("./api/admin/upload/product-image", {
             method: "POST",
+            credentials: "same-origin",
             body: formData,
           });
 

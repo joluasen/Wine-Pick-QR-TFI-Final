@@ -108,31 +108,57 @@ export function setupNewPromotionButtons() {
  * @param {HTMLElement} statusEl - Elemento para mostrar estados
  */
 export function setupLogout(container, statusEl) {
-  const btnDesktop = document.getElementById('logout-btn-desktop');
-  const btnMobile = document.getElementById('logout-btn-mobile');
+  // Delegación de eventos: escuchar clicks en el documento
+  if (window.__logoutDelegationBound) return;
+  window.__logoutDelegationBound = true;
 
-  // Lógica de logout: llamada a API, feedback y limpieza de estado
-  const doLogout = async () => {
-    try {
-      await fetchJSON('./api/admin/logout', { method: 'POST' });
-      setStatus(statusEl || document.createElement('div'), 'Sesión cerrada', 'success');
-      // Forzar salida a Home
-      window.location.hash = '#home';
-      // Destruir instancia de gráfico si existe (prevención bug Chart.js)
-      if (window.dailyChartInstance && typeof window.dailyChartInstance.destroy === 'function') {
-        try { window.dailyChartInstance.destroy(); } catch (_) {}
-        window.dailyChartInstance = null;
+  document.addEventListener('click', async function(e) {
+    // Captura clicks sobre el enlace o cualquier hijo (icono/span)
+    const logoutLink = e.target.closest('#logout-btn-desktop, #logout-btn-mobile');
+    if (logoutLink) {
+      e.preventDefault();
+      e.stopPropagation();
+
+      console.log('[LOGOUT] 1. Click detectado, iniciando...');
+
+      try {
+        console.log('[LOGOUT] 2. Haciendo fetch...');
+
+        const response = await fetch('./api/admin/logout', {
+          method: 'POST',
+          credentials: 'same-origin',
+          headers: { 'Accept': 'application/json' }
+        });
+
+        console.log('[LOGOUT] 3. Response status:', response.status);
+
+        if (!response.ok) {
+          throw new Error('Status: ' + response.status);
+        }
+
+        const data = await response.json();
+        console.log('[LOGOUT] 4. Response data:', data);
+        console.log('[LOGOUT] 5. Logout exitoso, esperando para recargar...');
+
+        // Destruir gráfico si existe
+        if (window.dailyChartInstance?.destroy) {
+          try { window.dailyChartInstance.destroy(); } catch (_) {}
+          window.dailyChartInstance = null;
+        }
+
+        // Esperar 500ms para que el navegador procese los headers Set-Cookie
+        await new Promise(resolve => setTimeout(resolve, 500));
+
+        console.log('[LOGOUT] 6. Recargando...');
+        window.location.href = window.location.pathname + '#home';
+        window.location.reload();
+
+      } catch (err) {
+        console.error('[LOGOUT] ERROR:', err);
+        alert('Error al cerrar sesión: ' + err.message);
       }
-      // Recargar navegación pública
-      setTimeout(() => window.location.reload(), 200);
-    } catch (err) {
-      console.error('Error al cerrar sesión:', err);
-      setStatus(statusEl || document.createElement('div'), 'Error al cerrar sesión', 'error');
     }
-  };
-
-  btnDesktop?.addEventListener('click', (e) => { e.preventDefault(); doLogout(); });
-  btnMobile?.addEventListener('click', (e) => { e.preventDefault(); doLogout(); });
+  });
 }
 
 

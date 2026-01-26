@@ -41,6 +41,18 @@ class Auth
     }
 
     /**
+     * Devuelve el path normalizado para la cookie.
+     * Asegura consistencia con trailing slash para evitar problemas al borrar.
+     * @return string Path de la cookie.
+     */
+    private static function cookiePath(): string
+    {
+        $path = parse_url(BASE_URL, PHP_URL_PATH) ?: '/';
+        // Normalizar: siempre con trailing slash para consistencia
+        return rtrim($path, '/') . '/';
+    }
+
+    /**
      * Emite un JWT para el usuario y lo setea en cookie HttpOnly.
      *
      * @param array $user Datos del usuario (debe incluir id y username).
@@ -71,7 +83,7 @@ class Auth
     {
         $params = [
             'expires' => time() + $ttl,
-            'path' => parse_url(BASE_URL, PHP_URL_PATH) ?: '/',
+            'path' => self::cookiePath(),
             'domain' => '', // origin-only
             'secure' => self::isSecureCookie(),
             'httponly' => true,
@@ -82,20 +94,51 @@ class Auth
 
     /**
      * Borra la cookie de autenticación (logout).
+     * Intenta borrar con múltiples paths y configuraciones para garantizar eliminación.
      *
      * @return void
      */
     public static function clearAuthCookie(): void
     {
-        $params = [
-            'expires' => time() - 3600,
-            'path' => parse_url(BASE_URL, PHP_URL_PATH) ?: '/',
-            'domain' => '',
-            'secure' => self::isSecureCookie(),
-            'httponly' => true,
-            'samesite' => 'Strict',
-        ];
-        setcookie(self::cookieName(), '', $params);
+        $cookieName = self::cookieName();
+        $basePath = parse_url(BASE_URL, PHP_URL_PATH) ?: '/';
+
+        // Paths posibles: con y sin trailing slash, y raíz
+        $paths = array_unique([
+            rtrim($basePath, '/') . '/',  // Con trailing slash
+            rtrim($basePath, '/'),         // Sin trailing slash
+            '/',                           // Raíz como fallback
+        ]);
+
+        // En desarrollo, intentar borrar con ambos valores de secure
+        // porque la cookie pudo haberse creado con configuración diferente
+        $secureValues = (defined('WPQ_ENV') && WPQ_ENV === 'dev')
+            ? [false, true]  // En dev, probar ambos
+            : [self::isSecureCookie()];  // En prod, usar el valor correcto
+
+        // Intentar borrar con cada combinación de path y secure
+        foreach ($paths as $path) {
+            foreach ($secureValues as $secure) {
+                // Método moderno con array de opciones
+                setcookie($cookieName, '', [
+                    'expires' => time() - 3600,
+                    'path' => $path,
+                    'domain' => '',
+                    'secure' => $secure,
+                    'httponly' => true,
+                    'samesite' => 'Strict',
+                ]);
+            }
+        }
+
+        // También intentar el método clásico de setcookie como fallback
+        // Algunos navegadores responden mejor a este formato
+        foreach ($paths as $path) {
+            setcookie($cookieName, '', time() - 3600, $path);
+        }
+
+        // Limpiar del array $_COOKIE para esta request
+        unset($_COOKIE[$cookieName]);
     }
 
     /**
