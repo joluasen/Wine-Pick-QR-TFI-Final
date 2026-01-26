@@ -16,20 +16,17 @@ logs/
 *.tmp
 *.bak
 *.swp
-tmpclaude-*
 
 # Uploads de usuarios (no versionar)
 public/uploads/products/*
 !public/uploads/products/.gitkeep
 
 # Documentación de desarrollo interno
-docs/tareas_pendientes/
+docs/
 templates/
 
 # IDE y editores
 .vscode/
-.idea/
-*.sublime-*
 
 # Sistema
 .DS_Store
