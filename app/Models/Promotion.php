@@ -42,16 +42,60 @@ class Promotion
      * @param int $offset Desplazamiento para paginación.
      * @return array Lista de promociones con datos de producto.
      */
-    public function findAllWithProduct(int $limit = 10, int $offset = 0): array
+    public function findAllWithProduct(int $limit = 10, int $offset = 0, ?string $search = null, array $filters = []): array
     {
         $sql = "
             SELECT p.*, pr.name AS product_name, pr.base_price AS product_price
             FROM promotions p
             JOIN products pr ON p.product_id = pr.id
-            ORDER BY p.id ASC
-            LIMIT ? OFFSET ?
         ";
-        return $this->db->fetchAll($sql, [$limit, $offset], 'ii') ?: [];
+
+        $params = [];
+        $types = '';
+        $conditions = [];
+
+        if ($search !== null && $search !== '') {
+            $conditions[] = "(pr.name LIKE ? OR pr.drink_type LIKE ?)";
+            $like = "%{$search}%";
+            $params[] = $like;
+            $params[] = $like;
+            $types .= 'ss';
+        }
+
+        // Filtros por campos específicos del producto
+        if (!empty($filters['field']) && !empty($filters['query'])) {
+            $field = $filters['field'];
+            $query = $filters['query'];
+            $allowedFields = ['varietal', 'origin', 'winery_distillery'];
+            if (in_array($field, $allowedFields, true)) {
+                $conditions[] = "pr.{$field} LIKE ?";
+                $params[] = "%{$query}%";
+                $types .= 's';
+            }
+        }
+
+        if (!empty($filters['drink_type'])) {
+            $conditions[] = "pr.drink_type = ?";
+            $params[] = $filters['drink_type'];
+            $types .= 's';
+        }
+
+        if (!empty($filters['vintage_year'])) {
+            $conditions[] = "pr.vintage_year = ?";
+            $params[] = $filters['vintage_year'];
+            $types .= 's';
+        }
+
+        if ($conditions) {
+            $sql .= ' WHERE ' . implode(' AND ', $conditions);
+        }
+
+        $sql .= " ORDER BY p.id ASC LIMIT ? OFFSET ?";
+        $params[] = $limit;
+        $params[] = $offset;
+        $types .= 'ii';
+
+        return $this->db->fetchAll($sql, $params, $types) ?: [];
     }
 
     /**
@@ -59,10 +103,50 @@ class Promotion
      *
      * @return int Total de promociones.
      */
-    public function countAll(): int
+    public function countAll(?string $search = null, array $filters = []): int
     {
-        $sql = "SELECT COUNT(*) as total FROM promotions";
-        $row = $this->db->fetchOne($sql);
+        $sql = "SELECT COUNT(*) as total FROM promotions p JOIN products pr ON p.product_id = pr.id";
+
+        $params = [];
+        $types = '';
+        $conditions = [];
+
+        if ($search !== null && $search !== '') {
+            $conditions[] = "(pr.name LIKE ? OR pr.drink_type LIKE ?)";
+            $like = "%{$search}%";
+            $params[] = $like;
+            $params[] = $like;
+            $types .= 'ss';
+        }
+
+        if (!empty($filters['field']) && !empty($filters['query'])) {
+            $field = $filters['field'];
+            $query = $filters['query'];
+            $allowedFields = ['varietal', 'origin', 'winery_distillery'];
+            if (in_array($field, $allowedFields, true)) {
+                $conditions[] = "pr.{$field} LIKE ?";
+                $params[] = "%{$query}%";
+                $types .= 's';
+            }
+        }
+
+        if (!empty($filters['drink_type'])) {
+            $conditions[] = "pr.drink_type = ?";
+            $params[] = $filters['drink_type'];
+            $types .= 's';
+        }
+
+        if (!empty($filters['vintage_year'])) {
+            $conditions[] = "pr.vintage_year = ?";
+            $params[] = $filters['vintage_year'];
+            $types .= 's';
+        }
+
+        if ($conditions) {
+            $sql .= ' WHERE ' . implode(' AND ', $conditions);
+        }
+
+        $row = $this->db->fetchOne($sql, $params, $types);
         return $row ? (int)$row['total'] : 0;
     }
 

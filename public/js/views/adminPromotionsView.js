@@ -18,6 +18,7 @@ import {
   getPromotions,
   deletePromotion,
 } from "../admin/services/promotionService.js";
+import { getHashParams } from "../core/utils.js";
 import { showToast } from "../admin/components/Toast.js";
 import { showConfirmDialog } from "../admin/components/ConfirmDialog.js";
 import { modalManager } from "../core/modalManager.js";
@@ -40,6 +41,36 @@ export async function initAdminPromotionsView(container) {
   const PAGE_SIZE = 20;
   let currentPage = 0;
   let totalPromos = 0;
+  let currentQuery = "";
+  let lastPromotions = [];
+  let currentFilters = {};
+
+  function getActiveFilters() {
+    const params = getHashParams();
+    const filters = {};
+
+    // Filtros de campo textual (varietal, origin, bodega)
+    if (params.varietal) {
+      filters.field = "varietal";
+      filters.query = params.varietal;
+    } else if (params.origin) {
+      filters.field = "origin";
+      filters.query = params.origin;
+    } else if (params.winery_distillery) {
+      filters.field = "winery_distillery";
+      filters.query = params.winery_distillery;
+    }
+
+    if (params.drink_type && params.drink_type !== "1") {
+      filters.drink_type = params.drink_type;
+    }
+
+    if (params.vintage_year) {
+      filters.vintage_year = params.vintage_year;
+    }
+
+    return filters;
+  }
 
 
   /**
@@ -90,6 +121,7 @@ export async function initAdminPromotionsView(container) {
         <td>
           <button class="btn-table" data-edit-promo="${p.id}">Editar</button>
           <button class="btn-table ms-1" data-delete-promo="${p.id}">Borrar</button>
+          <button class="btn-table ms-1" data-view-product="${p.product_id}">Ver</button>
         </td>
       </tr>
     `
@@ -169,6 +201,25 @@ export async function initAdminPromotionsView(container) {
     // Obtener todos los botones tanto de tabla como de cards
     const allEditBtns = container.querySelectorAll("[data-edit-promo]");
     const allDeleteBtns = container.querySelectorAll("[data-delete-promo]");
+    const allViewProductBtns = container.querySelectorAll("[data-view-product]");
+    // Ver producto
+    allViewProductBtns.forEach((btn) => {
+      btn.onclick = async () => {
+        const productId = btn.getAttribute("data-view-product");
+        try {
+          // Traer ficha completa del producto desde el backend
+          const { getProductById } = await import("../admin/services/productService.js");
+          const product = await getProductById(productId);
+          if (!product) {
+            showToast("No se pudo cargar el producto", "error");
+            return;
+          }
+          modalManager.showProductAdmin(product);
+        } catch (err) {
+          showToast("Error al cargar producto: " + err.message, "error");
+        }
+      };
+    });
 
     // Editar
     allEditBtns.forEach((btn) => {
@@ -177,12 +228,7 @@ export async function initAdminPromotionsView(container) {
         
         try {
           // Buscar la promoción en la lista actual
-          const { promotions } = await getPromotions({
-            limit: PAGE_SIZE,
-            offset: currentPage * PAGE_SIZE,
-          });
-          
-          const promotion = promotions.find(p => p.id == promoId);
+          const promotion = lastPromotions.find(p => p.id == promoId);
           
           if (!promotion) {
             showToast("No se pudo cargar la promoción", "error");
@@ -192,7 +238,7 @@ export async function initAdminPromotionsView(container) {
           // Abrir modal de edición
           modalManager.showEditPromotion(promotion, () => {
             // Recargar lista después de editar
-            loadPromos(currentPage);
+            loadPromos(currentPage, currentQuery);
           });
           
         } catch (err) {
@@ -237,7 +283,7 @@ export async function initAdminPromotionsView(container) {
           showToast("Promoción eliminada correctamente", "success");
           
           // Recargar lista
-          loadPromos(currentPage);
+          loadPromos(currentPage, currentQuery);
         } catch (err) {
           showToast(`Error al eliminar: ${err.message}`, "error");
         }
@@ -250,17 +296,21 @@ export async function initAdminPromotionsView(container) {
    * Renderiza tabla/cards, actualiza paginación y maneja estados vacíos y errores.
    * @param {number} page - Página a cargar (base 0)
    */
-  async function loadPromos(page = 0) {
+  async function loadPromos(page = 0, query = "") {
     showLoading();
     tableBody.innerHTML = `<tr><td colspan='9'>Cargando...</td></tr>`;
 
     try {
       const offset = page * PAGE_SIZE;
+      currentQuery = query;
+      currentFilters = getActiveFilters();
       
       // Crear promesas para el fetch y el delay de 250 milisegundos
       const fetchPromise = getPromotions({
         limit: PAGE_SIZE,
         offset,
+        search: query,
+        filters: currentFilters,
       });
       const delayPromise = new Promise((resolve) => setTimeout(resolve, 250));
 
@@ -270,6 +320,7 @@ export async function initAdminPromotionsView(container) {
         delayPromise,
       ]);
 
+      lastPromotions = promotions;
       totalPromos = total;
 
       if (promotions.length === 0 && totalPromos === 0) {
@@ -296,7 +347,7 @@ export async function initAdminPromotionsView(container) {
   prevBtn.onclick = () => {
     if (currentPage > 0) {
       currentPage--;
-      loadPromos(currentPage);
+      loadPromos(currentPage, currentQuery);
     }
   };
 
@@ -304,10 +355,11 @@ export async function initAdminPromotionsView(container) {
     const totalPages = Math.ceil(totalPromos / PAGE_SIZE) || 1;
     if (currentPage < totalPages - 1) {
       currentPage++;
-      loadPromos(currentPage);
+      loadPromos(currentPage, currentQuery);
     }
   };
 
-  // Inicializar carga
-  loadPromos(0);
+  const initialParams = getHashParams();
+  currentQuery = initialParams.query || "";
+  loadPromos(0, currentQuery);
 }

@@ -14,6 +14,7 @@ import { showToast } from "../admin/components/Toast.js";
 import { showConfirmDialog } from "../admin/components/ConfirmDialog.js";
 import { deleteProduct } from "../admin/services/productService.js";
 import { deletePromotion } from "../admin/services/promotionService.js";
+import { getActivePromotionByProduct } from "../admin/services/getActivePromotionByProduct.js";
 
 class ModalManager {
   constructor() {
@@ -219,12 +220,16 @@ class ModalManager {
           );
 
           editBtn?.addEventListener("click", () => {
-            this.showEditProduct(product);
+            this.close();
+            this.showEditProduct(product, () => {
+              window.location.reload();
+            });
           });
           deleteBtn?.addEventListener("click", async () => {
+            this.close();
             const confirmed = await showConfirmDialog({
               title: "Eliminar producto",
-              message: `¿Eliminar "${product.name}"?`,
+              message: `¿Eliminar \"${product.name}\"?`,
               confirmText: "Eliminar",
               cancelText: "Cancelar",
               confirmClass: "btn-danger",
@@ -240,29 +245,36 @@ class ModalManager {
               loadingToast.classList.remove("show");
               setTimeout(() => loadingToast.remove(), 300);
               showToast("Producto eliminado correctamente", "success");
-              this.close();
-              if (
-                window.adminView &&
-                typeof window.adminView.loadProducts === "function"
-              ) {
-                window.adminView.loadProducts();
-              }
+              window.location.reload();
             } catch (err) {
               showToast(`Error al eliminar: ${err.message}`, "error");
             }
           });
-          editPromoBtn?.addEventListener("click", () => {
-            const promo = product.promotion;
+          editPromoBtn?.addEventListener("click", async () => {
+            this.close();
+            let promo = product.promotion;
+            if (!promo || !promo.id) {
+              // Buscar promoción activa si no está embebida
+              promo = await getActivePromotionByProduct(product.id);
+              if (promo) product.promotion = promo;
+            }
             if (!promo || !promo.id) {
               showToast("El producto no tiene promoción asociada", "error");
               return;
             }
             this.showEditPromotion(promo, () => {
               showToast("Promoción actualizada", "success");
+              window.location.reload();
             });
           });
           deletePromoBtn?.addEventListener("click", async () => {
-            const promo = product.promotion;
+            this.close();
+            let promo = product.promotion;
+            if (!promo || !promo.id) {
+              // Buscar promoción activa si no está embebida
+              promo = await getActivePromotionByProduct(product.id);
+              if (promo) product.promotion = promo;
+            }
             if (!promo || !promo.id) {
               showToast("El producto no tiene promoción asociada", "error");
               return;
@@ -285,6 +297,7 @@ class ModalManager {
               loadingToast.classList.remove("show");
               setTimeout(() => loadingToast.remove(), 300);
               showToast("Promoción eliminada", "success");
+              window.location.reload();
             } catch (err) {
               showToast(`Error al eliminar: ${err.message}`, "error");
             }

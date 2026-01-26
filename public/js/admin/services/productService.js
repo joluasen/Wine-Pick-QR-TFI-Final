@@ -1,4 +1,23 @@
 /**
+ * Obtiene un producto por ID (admin, ficha completa)
+ * @param {number|string} productId
+ * @returns {Promise<Object|null>}
+ */
+export async function getProductById(productId) {
+  try {
+    // No existe endpoint GET /api/admin/productos/{id}, solo paginado y búsqueda pública
+    // Usar búsqueda pública por ID (solo para ficha)
+    const url = `./api/public/productos?search=${encodeURIComponent(productId)}`;
+    const data = await fetchJSON(url);
+    if (data?.data?.products?.length) {
+      return data.data.products[0];
+    }
+    return null;
+  } catch (err) {
+    return null;
+  }
+}
+/**
  * productService.js
  * Servicio de productos - centraliza todas las operaciones CRUD de productos
  */

@@ -13,9 +13,13 @@ import { fetchJSON } from '../../core/utils.js';
  * @param {number} [options.productId] - Filtrar por producto
  * @returns {Promise<Object>} { promotions, total }
  */
-export async function getPromotions({ limit = 20, offset = 0, productId = null } = {}) {
+export async function getPromotions({ limit = 20, offset = 0, productId = null, search = null, filters = {} } = {}) {
   const params = new URLSearchParams({ limit, offset });
   if (productId) params.append('product_id', productId);
+  if (search) params.append('search', search);
+  if (filters.field) params.append(filters.field, '1');
+  if (filters.drink_type) params.append('drink_type', filters.drink_type);
+  if (filters.vintage_year) params.append('vintage_year', filters.vintage_year);
 
   const url = `./api/admin/promociones?${params.toString()}`;
   const data = await fetchJSON(url);

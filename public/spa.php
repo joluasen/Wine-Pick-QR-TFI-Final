@@ -244,35 +244,36 @@ $appConfig = [
       }
       const query = input?.value?.trim() || '';
 
-      // Filtros de checkbox
-      const checkboxFilters = [
-        { id: 'filterVarietal', param: 'varietal' },
-        { id: 'filterOrigin', param: 'origin' },
-        { id: 'filterWinery', param: 'winery_distillery' }
-      ];
 
-      // Detectar si estamos en contexto admin
+      // Filtros de texto para varietal, origin, bodega
       const currentHash = window.location.hash.split('?')[0];
       const isAdmin = currentHash.startsWith('#admin');
-      const target = isAdmin ? '#admin-search' : '#search';
+      const target = currentHash === '#admin-promotions'
+        ? '#admin-promotions'
+        : (isAdmin ? '#admin-search' : '#search');
 
       let hash = target + '?query=' + encodeURIComponent(query);
 
-      // Agregar filtros de checkbox
-      checkboxFilters.forEach(f => {
-        const el = document.getElementById(f.id);
-        if (el?.checked) {
-          hash += `&${f.param}=1`;
-        }
-      });
+      // Filtros de texto
+      const varietalInput = document.getElementById('filterVarietalInput');
+      const originInput = document.getElementById('filterOriginInput');
+      const wineryInput = document.getElementById('filterWineryInput');
 
-      // Agregar filtro de tipo de bebida (select)
+      if (varietalInput?.value) {
+        hash += `&varietal=${encodeURIComponent(varietalInput.value)}`;
+      } else if (originInput?.value) {
+        hash += `&origin=${encodeURIComponent(originInput.value)}`;
+      } else if (wineryInput?.value) {
+        hash += `&winery_distillery=${encodeURIComponent(wineryInput.value)}`;
+      }
+
+      // Filtro de tipo de bebida (select)
       const drinkTypeSelect = document.getElementById('filterDrinkType');
       if (drinkTypeSelect?.value) {
         hash += `&drink_type=${encodeURIComponent(drinkTypeSelect.value)}`;
       }
 
-      // Agregar filtro de año
+      // Filtro de año
       const yearInput = document.getElementById('filterYearInput');
       if (yearInput?.value) {
         hash += `&vintage_year=${encodeURIComponent(yearInput.value)}`;

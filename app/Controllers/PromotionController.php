@@ -169,13 +169,32 @@ class PromotionController
         // Modo 2: Listar todas las promociones (paginado)
         $limit = isset($_GET['limit']) ? (int)$_GET['limit'] : 10;
         $offset = isset($_GET['offset']) ? (int)$_GET['offset'] : 0;
+        $search = isset($_GET['search']) ? trim((string)$_GET['search']) : null;
+
+        // Filtros opcionales (mismos que en búsqueda de productos admin)
+        $filters = [];
+        if (isset($_GET['varietal']) && $_GET['varietal'] === '1') {
+            $filters['field'] = 'varietal';
+        } elseif (isset($_GET['origin']) && $_GET['origin'] === '1') {
+            $filters['field'] = 'origin';
+        } elseif (isset($_GET['winery_distillery']) && $_GET['winery_distillery'] === '1') {
+            $filters['field'] = 'winery_distillery';
+        }
+
+        if (isset($_GET['drink_type']) && $_GET['drink_type'] !== '' && $_GET['drink_type'] !== '1') {
+            $filters['drink_type'] = trim((string)$_GET['drink_type']);
+        }
+
+        if (isset($_GET['vintage_year']) && $_GET['vintage_year'] !== '') {
+            $filters['vintage_year'] = trim((string)$_GET['vintage_year']);
+        }
 
         if ($limit <= 0) $limit = 10;
         if ($limit > 100) $limit = 100;
         if ($offset < 0) $offset = 0;
 
-        $promos = $this->promotionModel->findAllWithProduct($limit, $offset);
-        $total = $this->promotionModel->countAll();
+        $promos = $this->promotionModel->findAllWithProduct($limit, $offset, $search, $filters);
+        $total = $this->promotionModel->countAll($search, $filters);
 
         ApiResponse::success([
             'count' => count($promos),

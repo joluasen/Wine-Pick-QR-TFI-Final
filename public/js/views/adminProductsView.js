@@ -18,6 +18,7 @@ import { getProducts, deleteProduct as deleteProductService } from "../admin/ser
 import { showToast, showToastSequence } from "../admin/components/Toast.js";
 import { showConfirmDialog } from "../admin/components/ConfirmDialog.js";
 import { modalManager } from "../core/modalManager.js";
+import { getActivePromotionByProduct } from "../admin/services/getActivePromotionByProduct.js";
 
 /**
  * Inicializa la vista de gestión de productos.
@@ -153,12 +154,16 @@ export async function initAdminProductsView(_container) {
 
     // Ver producto
     allViewBtns.forEach((btn) => {
-      btn.onclick = () => {
+      btn.onclick = async () => {
         const productId = btn.getAttribute("data-view-product");
         const product = cachedProducts.find(
           (p) => String(p.id) === String(productId)
         );
         if (product) {
+          btn.setAttribute('aria-busy', 'true');
+          const promo = await getActivePromotionByProduct(product.id);
+          if (promo) product.promotion = promo;
+          btn.setAttribute('aria-busy', 'false');
           modalManager.showProductAdmin(product);
         }
       };

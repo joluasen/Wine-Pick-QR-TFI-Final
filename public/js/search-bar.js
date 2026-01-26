@@ -36,6 +36,13 @@ async function checkAdmin() {
 const AUTOCOMPLETE_LIMIT = 5;
 let debounceTimeout = null;
 
+async function fetchPromotionMatches(query) {
+  const params = new URLSearchParams({ search: query, limit: 50, offset: 0 });
+  const url = `./api/admin/promociones?${params.toString()}`;
+  const data = await fetchJSON(url);
+  return data?.data?.promotions || [];
+}
+
 /**
  * Inicializa el buscador unificado en todos los headers (desktop y mobile).
  * Configura autocompletado, listeners y sincronización con la URL.
@@ -183,6 +190,29 @@ function initUnifiedSearchBar() {
       
       try {
         const isAdmin = await checkAdmin();
+        const currentHash = window.location.hash.split('?')[0];
+
+        // Modo admin en vista de promociones: buscar promociones y mostrar acciones de promoción
+        if (isAdmin && currentHash === '#admin-promotions') {
+          const promotions = await fetchPromotionMatches(query);
+
+          if (promotions.length === 1) {
+            const promotion = promotions[0];
+            const { modalManager } = await import('./core/modalManager.js');
+            modalManager.showEditPromotion(promotion, () => {
+              window.location.hash = `#admin-promotions?query=${encodeURIComponent(query)}`;
+            });
+            clearDropdown();
+            return;
+          }
+
+          window.location.hash = `#admin-promotions?query=${encodeURIComponent(query)}`;
+          setTimeout(() => {
+            newInput.value = query;
+          }, 200);
+          clearDropdown();
+          return;
+        }
 
         // Buscar productos
         const params = new URLSearchParams({ search: query, limit: 100 });
@@ -208,10 +238,7 @@ function initUnifiedSearchBar() {
         
         // Si hay múltiples resultados, ir a vista search (sin registrar aún)
         const target = isAdmin ? '#admin-search' : '#search';
-        // Si estamos en la vista de promociones, agregar filtro de promociones
-        const currentHash = window.location.hash.split('?')[0];
-        const promosFilter = currentHash === '#admin-promotions' ? '&promos=1' : '';
-        window.location.hash = `${target}?query=${encodeURIComponent(query)}${promosFilter}`;
+        window.location.hash = `${target}?query=${encodeURIComponent(query)}`;
         setTimeout(() => {
           newInput.value = query;
         }, 200);

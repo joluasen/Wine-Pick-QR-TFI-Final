@@ -15,6 +15,7 @@
 
 import { setStatus, getHashParams, fetchJSON, escapeHtml, calculatePromoPrice, registerMetric } from '../core/utils.js';
 import { modalManager } from '../core/modalManager.js';
+import { getActivePromotionByProduct } from '../admin/services/getActivePromotionByProduct.js';
 
 const PAGE_SIZE = 20;
 
@@ -101,10 +102,18 @@ function createResultCard(product) {
   const isAdminContext = window.location.hash.startsWith('#admin');
   
   // Accesibilidad: click y enter/espacio abren el modal del producto
+  async function openAdminProductModal() {
+    // Buscar promoción activa antes de abrir el modal
+    card.setAttribute('aria-busy', 'true');
+    const promo = await getActivePromotionByProduct(product.id);
+    if (promo) product.promotion = promo;
+    card.setAttribute('aria-busy', 'false');
+    modalManager.showProductAdmin(product);
+  }
+
   card.addEventListener('click', () => {
     if (isAdminContext) {
-      // Admin no registra métricas
-      modalManager.showProductAdmin(product);
+      openAdminProductModal();
       return;
     }
     registerMetric(product.id, channel);
@@ -115,7 +124,7 @@ function createResultCard(product) {
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
       if (isAdminContext) {
-        modalManager.showProductAdmin(product);
+        openAdminProductModal();
         return;
       }
       registerMetric(product.id, channel);
