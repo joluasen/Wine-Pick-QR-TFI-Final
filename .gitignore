@@ -3,7 +3,6 @@
 # ============================================
 
 # Archivos de entorno (CRÍTICO - contienen credenciales)
-.env
 !.env.example
 !.env.production.template
 
