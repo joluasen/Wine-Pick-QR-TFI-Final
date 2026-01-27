@@ -205,6 +205,18 @@ function handleNavClick(e) {
 
   const target = link.getAttribute("data-link");
 
+  // Si el usuario hace clic en 'Ingresar' y ya está autenticado, redirigir al panel admin
+  if (target === "#login") {
+    checkAuth().then((authenticated) => {
+      if (authenticated) {
+        navigate("#admin-products");
+      } else {
+        navigate("#login");
+      }
+    });
+    return;
+  }
+
   if (target) {
     navigate(target);
   }
