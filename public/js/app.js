@@ -160,6 +160,12 @@ function initSidebarDropdowns() {
 }
 
 /**
+ * Inicializa el modal de filtros de búsqueda sin Bootstrap.
+ * Maneja la apertura/cierre y la aplicación de filtros.
+ */
+// Modal de filtros: vuelve a usar Bootstrap (no custom JS necesario)
+
+/**
  * Inicializa la aplicación cuando el DOM está listo.
  * Llama a todos los inicializadores principales.
  */
@@ -178,6 +184,7 @@ function init() {
 
   // Inicializar dropdowns del sidebar
   initSidebarDropdowns();
+
 }
 
 // Esperar a que el DOM esté listo antes de inicializar la app
