@@ -228,37 +228,29 @@ function showProfileModal() {
  * Inicializa el modal de perfil
  */
 export function setupProfileModal() {
-  function bindProfileEvents() {
-    const profileBtnMobile = document.getElementById('profile-btn-mobile');
-    const profileBtnDesktop = document.getElementById('profile-btn-desktop');
-
-    if (profileBtnMobile && !profileBtnMobile._profileBound) {
-      profileBtnMobile.addEventListener('click', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        showProfileModal();
-      });
-      profileBtnMobile._profileBound = true;
+  // Usar event delegation en lugar de attachar directamente a los botones
+  // Esto resuelve problemas con dropdowns de Bootstrap y elementos que se renderizar tarde
+  document.addEventListener('click', (e) => {
+    const profileBtn = e.target.closest('#profile-btn-mobile, #profile-btn-desktop');
+    if (!profileBtn) return;
+    
+    e.preventDefault();
+    e.stopPropagation();
+    
+    // Cerrar el dropdown si está abierto (en móvil)
+    const dropdown = profileBtn.closest('.dropdown');
+    if (dropdown) {
+      const dropdownToggle = dropdown.querySelector('[data-bs-toggle="dropdown"]');
+      if (dropdownToggle) {
+        // Usar Bootstrap API para cerrar el dropdown
+        const bsDropdown = bootstrap.Dropdown.getInstance(dropdownToggle);
+        if (bsDropdown) {
+          bsDropdown.hide();
+        }
+      }
     }
-    if (profileBtnDesktop && !profileBtnDesktop._profileBound) {
-      profileBtnDesktop.addEventListener('click', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        showProfileModal();
-      });
-      profileBtnDesktop._profileBound = true;
-    }
-  }
-
-  // Intentar bind inmediato
-  bindProfileEvents();
-
-  // Observer para reintentar si el nav se renderiza después
-  const observer = new MutationObserver(() => {
-    bindProfileEvents();
-  });
-  observer.observe(document.body, { childList: true, subtree: true });
-
-  // Opcional: desconectar observer tras éxito
-  setTimeout(() => observer.disconnect(), 5000);
+    
+    // Abrir el modal de perfil
+    showProfileModal();
+  }, true); // Usar capture phase para asegurar que se ejecuta antes que otros handlers
 }
