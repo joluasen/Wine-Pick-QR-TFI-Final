@@ -30,6 +30,12 @@
   }
 }
 
+/* Contenedores de resultados con altura consistente */
+#home-results,
+#promos-results {
+  min-height: 800px;
+}
+
 .product-card {
   background: var(--color-card);
   border: 1px solid var(--color-border);

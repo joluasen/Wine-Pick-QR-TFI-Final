@@ -162,10 +162,17 @@ function createProductCard(product) {
  * @param {boolean} hasMore - Si hay más páginas siguientes
  * @param {function} onPageChange - Callback para cambiar de página
  * @param {number|null} totalPages - Total de páginas (opcional)
+ * @param {number} totalProducts - Total de productos (para ocultar paginación si es <= 20)
  */
-function renderPagination(container, currentPage, hasMore, onPageChange, totalPages = null) {
+function renderPagination(container, currentPage, hasMore, onPageChange, totalPages = null, totalProducts = 0) {
   const paginationEl = container.querySelector('#home-pagination');
   if (!paginationEl) return;
+
+  // Ocultar paginación si el total de productos es <= 20
+  if (totalProducts <= 20 && totalProducts > 0) {
+    paginationEl.innerHTML = '';
+    return;
+  }
 
   paginationEl.innerHTML = '';
 
@@ -242,7 +249,7 @@ async function loadPage(container, page = 0) {
     // Estado vacío: sin más productos en páginas siguientes
     if (products.length === 0) {
       setStatus(statusEl, 'No hay más productos.', 'info');
-      renderPagination(container, page, false, (p) => loadPage(container, p), totalPages);
+      renderPagination(container, page, false, (p) => loadPage(container, p), totalPages, totalItems);
       return;
     }
 
@@ -251,8 +258,10 @@ async function loadPage(container, page = 0) {
     const to = from + products.length - 1;
     setStatus(statusEl, `Mostrando productos ${from} al ${to}`, 'success');
 
+    // Calcular total real: si es primera página y hay < 20, ese es el total. Si no, usar el que viene de la API
+    const estimatedTotal = page === 0 && products.length < PAGE_SIZE ? products.length : totalItems;
     renderProducts(resultsEl, products);
-    renderPagination(container, page, products.length === PAGE_SIZE, (p) => loadPage(container, p), totalPages);
+    renderPagination(container, page, products.length === PAGE_SIZE, (p) => loadPage(container, p), totalPages, estimatedTotal);
 
   } catch (err) {
     console.error('Error cargando productos:', err);
