@@ -73,6 +73,17 @@ export async function initAdminProductsView(_container) {
     paginationEl.textContent = `${page + 1} de ${totalPages}`;
     prevBtn.disabled = page <= 0;
     nextBtn.disabled = page >= totalPages - 1;
+
+    // Ocultar paginación si hay menos de PAGE_SIZE productos
+    if (total < PAGE_SIZE) {
+      paginationEl.style.display = 'none';
+      prevBtn.style.display = 'none';
+      nextBtn.style.display = 'none';
+    } else {
+      paginationEl.style.display = '';
+      prevBtn.style.display = '';
+      nextBtn.style.display = '';
+    }
   }
 
   /**
