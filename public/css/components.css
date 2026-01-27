@@ -1,3 +1,4 @@
+/* Promociones reutilizan estilos de product-card para consistencia */
 /* public/css/components.css */
 /* Estilos de componentes reutilizables */
 
@@ -38,6 +39,10 @@
   transition: all var(--transition-normal);
   box-shadow: var(--shadow-sm);
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  position: relative;
 }
 
 .product-card:hover,
@@ -81,7 +86,7 @@
 }
 
 .product-card .card-header {
-  margin-bottom: 0.3rem;
+  margin-bottom: 0.5rem;
   padding: 0;
 }
 
@@ -94,6 +99,8 @@
   display: -webkit-box;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
 }
 
 .product-card .card-body {
@@ -104,6 +111,28 @@
   margin: 0.25rem 0;
   font-size: 0.8rem;
   color: var(--color-text);
+}
+
+.product-card .card-image > .badge,
+.product-card .card-image > .badge-offer,
+.product-card .card-image > .badge-combo,
+.product-card .card-image > .badge-discount {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  padding: 0.22rem 0.55rem;
+  background: rgba(255,255,255,0.97);
+  color: #4A0E1A !important;
+  font-weight: 700;
+  font-size: 0.8rem;
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.10);
+  min-height: 1.35rem;
+  display: inline-flex;
+  align-items: center;
+  z-index: 2;
+  letter-spacing: 0.5px;
+  text-shadow: 0 1px 2px #fff, 0 0 2px #fff;
 }
 
 .product-card .card-footer {
@@ -125,9 +154,7 @@
   overflow: hidden;
 }
 
-.product-card .stock {
-  display: none;
-}
+/* stock eliminado de la card */
 
 /* =========================================
    PRECIOS
@@ -141,8 +168,17 @@
 
 .price-original {
   text-decoration: line-through;
+  min-height: 2.1em;
   color: var(--color-text-muted);
   font-size: 0.9rem;
+}
+
+.price-details {
+  padding: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
 }
 
 .price-final {
@@ -155,6 +191,16 @@
   color: var(--color-accent);
   font-weight: 700;
   font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.product-card .card-badge {
+  margin-bottom: 0.35rem;
+  min-height: 1.35rem;
+  display: inline-flex;
+  align-items: center;
 }
 
 .savings {
@@ -162,6 +208,16 @@
   font-size: 0.75rem;
   margin: 0.2rem 0;
 }
+
+.product-card .price-container {
+  min-height: 1.4rem;
+}
+
+.product-card .savings {
+  min-height: 1.1rem;
+  margin: 0.05rem 0;
+}
+
 
 .validity {
   color: var(--color-text-muted);

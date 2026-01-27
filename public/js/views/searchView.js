@@ -91,10 +91,15 @@ function createResultCard(product) {
         </svg>
       </div>
     </div>
-    <h4 class="card-title">${escapeHtml(product.name) || 'Producto'}</h4>
-    <p><strong>Bodega:</strong> ${escapeHtml(product.winery_distillery) || '—'}</p>
-    <p class="price"><strong>Precio:</strong> <span class="price-value">$${displayPrice.toFixed(2)}</span></p>
-    <p class="code"><small>Código: ${escapeHtml(product.public_code)}</small></p>
+    <div class="card-header">
+      <h4 class="card-title">${escapeHtml(product.name) || 'Producto'}</h4>
+    </div>
+    <div class="card-body">
+      <p><strong>Bodega:</strong> ${escapeHtml(product.winery_distillery) || '—'}</p>
+      <p class="price"><strong>Precio:</strong> <span class="price-value">$${displayPrice.toFixed(2)}</span></p>
+    </div>
+    <div class="card-footer">
+      <span class="code">Código: ${escapeHtml(product.public_code)}</span>
   `;
   
   // Detectar si esta búsqueda viene de un QR scan

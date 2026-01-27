@@ -59,7 +59,7 @@ function createProductCard(product) {
   // Generar badge y texto de promoción según el tipo de promo
   let badge = '';
   let priceHtml = '';
-  let savingsHtml = '';
+  let savingsText = '';
 
   if (priceData.hasPromo) {
     switch (priceData.type) {
@@ -69,7 +69,7 @@ function createProductCard(product) {
           <span class="price-original">$${basePrice.toFixed(2)}</span>
           <span class="price-final">$${priceData.final.toFixed(2)}</span>
         `;
-        savingsHtml = `<p class="savings">Ahorrás $${priceData.savings.toFixed(2)}</p>`;
+        savingsText = `Ahorrás $${priceData.savings.toFixed(2)}`;
         break;
       case 'precio_fijo':
         badge = `<span class="badge badge-offer">OFERTA</span>`;
@@ -77,39 +77,37 @@ function createProductCard(product) {
           <span class="price-original">$${basePrice.toFixed(2)}</span>
           <span class="price-final">$${priceData.final.toFixed(2)}</span>
         `;
-        savingsHtml = `<p class="savings">Ahorrás $${priceData.savings.toFixed(2)}</p>`;
+        savingsText = `Ahorrás $${priceData.savings.toFixed(2)}`;
         break;
       case '2x1':
         badge = `<span class="badge badge-combo">2x1</span>`;
         priceHtml = `<span class="price-final">$${basePrice.toFixed(2)}</span>`;
-        savingsHtml = `<p class="savings">Precio efectivo: $${priceData.final.toFixed(2)} c/u</p>`;
+        savingsText = `Precio efectivo: $${priceData.final.toFixed(2)} c/u`;
         break;
       case '3x2':
         badge = `<span class="badge badge-combo">3x2</span>`;
         priceHtml = `<span class="price-final">$${basePrice.toFixed(2)}</span>`;
-        savingsHtml = `<p class="savings">Pagás solo 2 unidades</p>`;
+        savingsText = `Pagás solo 2 unidades`;
         break;
       case 'nxm':
         badge = `<span class="badge badge-combo">COMBO</span>`;
         priceHtml = `<span class="price-final">$${priceData.final.toFixed(2)}</span>`;
-        savingsHtml = `<p class="savings">${escapeHtml(priceData.customText) || 'Consultá condiciones'}</p>`;
+        savingsText = `${escapeHtml(priceData.customText) || 'Consultá condiciones'}`;
         break;
     }
   } else {
     priceHtml = `<span class="price-final">$${priceData.final.toFixed(2)}</span>`;
   }
 
-  // Mostrar stock si está disponible
-  const stockHtml = product.visible_stock !== null 
-    ? `<p class="stock"><strong>Stock:</strong> ${product.visible_stock} unidades</p>` 
-    : '';
+  const badgeBlock = badge;
+  const savingsBlock = `<p class="savings">${savingsText || '&nbsp;'}</p>`;
 
   const imageUrl = product.image_url || '';
 
   card.innerHTML = `
     <div class="card-image">
       ${imageUrl
-        ? `<img src="${escapeHtml(imageUrl)}" alt="${escapeHtml(product.name)}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">`
+        ? `<img src="${escapeHtml(imageUrl)}" alt="${escapeHtml(product.name)}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"/>`
         : ''
       }
       <div class="card-image-placeholder" style="${imageUrl ? 'display: none;' : 'display: flex;'}">
@@ -119,9 +117,9 @@ function createProductCard(product) {
           <line x1="12" y1="22.08" x2="12" y2="12"></line>
         </svg>
       </div>
+      ${badgeBlock}
     </div>
     <div class="card-header">
-      ${badge}
       <h3 class="card-title">${escapeHtml(product.name) || 'Producto'}</h3>
     </div>
     <div class="card-body">
@@ -129,8 +127,7 @@ function createProductCard(product) {
       <div class="price-container">
         ${priceHtml}
       </div>
-      ${savingsHtml}
-      ${stockHtml}
+      ${savingsBlock}
     </div>
     <div class="card-footer">
       <span class="code">Cód: ${escapeHtml(product.public_code)}</span>
