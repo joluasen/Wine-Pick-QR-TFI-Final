@@ -15,6 +15,26 @@
   z-index: 99999; /* Por encima de los modales (z-index: 9999) */
 }
 
+@media (max-width: 768px) {
+  .toast-container {
+    top: 64px; /* debajo del header (ajustar según altura real del header) */
+    right: 1rem;
+    left: auto;
+    bottom: auto;
+    padding: 1rem 0 0;
+    display: flex;
+    justify-content: flex-end;
+    max-width: 90%;
+    pointer-events: none;
+    z-index: 99999;
+  }
+
+  .toast-container .toast {
+    pointer-events: auto;
+    margin: 0;
+  }
+}
+
 /* =========================================
    MÉTRICAS - REFACTORIZADO 100%
    ========================================= */

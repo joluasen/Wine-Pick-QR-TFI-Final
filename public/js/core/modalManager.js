@@ -1498,56 +1498,11 @@ class ModalManager {
   }
 
   /**
-   * Muestra un diálogo para elegir qué hacer con la imagen anterior
-   * @returns {Promise<boolean>} true si se debe eliminar, false si se debe conservar
+   * Elimina el modal de acción de imagen anterior: siempre conservar (no mostrar modal)
+   * @returns {Promise<boolean>} false (no eliminar)
    */
   async _showImageActionDialog(oldImageUrl) {
-    return new Promise((resolve) => {
-      const dialogContent = `
-        <div class="image-action-dialog">
-          <div class="dialog-icon">
-            <i class="fas fa-images fa-3x text-warning"></i>
-          </div>
-          <h3 class="dialog-title">Imagen anterior detectada</h3>
-          <p class="dialog-message">
-            Has subido una nueva imagen. ¿Qué deseas hacer con la imagen anterior?
-          </p>
-          <div class="old-image-preview">
-            <img src="${escapeHtml(oldImageUrl)}" alt="Imagen anterior" style="max-width: 200px; border-radius: 8px;">
-          </div>
-          <div class="dialog-actions">
-            <button type="button" class="btn-modal" id="keep-old-image">
-              <i class="fas fa-save me-1"></i>Conservar
-            </button>
-            <button type="button" class="btn-modal btn-modal-danger" id="delete-old-image">
-              <i class="fas fa-trash-alt me-1"></i>Eliminar del servidor
-            </button>
-          </div>
-        </div>
-      `;
-
-      const dialogModal = this.open(
-        "image-action-dialog-modal",
-        dialogContent,
-        {
-          disableClickOutside: true,
-          preventClose: true,
-        },
-      );
-
-      const keepBtn = dialogModal.querySelector("#keep-old-image");
-      const deleteBtn = dialogModal.querySelector("#delete-old-image");
-
-      keepBtn?.addEventListener("click", () => {
-        this.close();
-        resolve(false);
-      });
-
-      deleteBtn?.addEventListener("click", () => {
-        this.close();
-        resolve(true);
-      });
-    });
+    return false;
   }
 
   /**

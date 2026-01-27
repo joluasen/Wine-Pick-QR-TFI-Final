@@ -115,7 +115,7 @@
 .modal-close:hover,
 .btn-close-custom:hover,
 [data-close-modal]:hover {
-  color: #4A0E1A;
+  color: #6B0F2A;
   transform: scale(1.1);
 }
 
@@ -136,7 +136,9 @@
 }
 
 .modal .form-control,
-.modal .form-select {
+.modal .form-select,
+.modal select,
+.modal .filter-select {
   border: 1px solid #DDDDDD;
   border-radius: 0.375rem;
   padding: 0.625rem 0.875rem;
@@ -147,11 +149,47 @@
   color: var(--color-text, #333);
 }
 
+.modal .form-select,
+.modal select,
+.modal .filter-select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: none;
+}
+
 .modal .form-control:focus,
-.modal .form-select:focus {
-  border-color: #4A0E1A;
-  box-shadow: 0 0 0 0.2rem rgba(74, 14, 26, 0.15);
+.modal .form-select:focus,
+.modal select:focus,
+.modal .filter-select:focus {
+  border-color: #6B0F2A;
+  box-shadow: 0 0 0 0.2rem rgba(107, 15, 42, 0.15);
   outline: none;
+}
+
+/* Colores y estados de opciones en selects (unifica con color principal) */
+.modal .form-select option,
+.modal select option,
+.modal .filter-select option {
+  color: #1A1A1A;
+  background-color: #ffffff;
+}
+
+.modal .form-select option:checked,
+.modal select option:checked,
+.modal .filter-select option:checked,
+.modal .form-select option:focus,
+.modal select option:focus,
+.modal .filter-select option:focus {
+  background-color: #6B0F2A !important;
+  color: #ffffff !important;
+}
+
+.modal .form-select option:hover,
+.modal select option:hover,
+.modal .filter-select option:hover {
+  background-color: #8B1F3C !important;
+  color: #ffffff !important;
 }
 
 .modal .form-control[readonly] {
@@ -200,51 +238,60 @@
 }
 
 /* =========================================
+   CHECKBOXES EN MODALES (FILTROS)
+   ========================================= */
+
+.filter-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 0;
+}
+
+.filter-checkbox-input {
+  width: 18px;
+  height: 18px;
+  min-width: 18px;
+  cursor: pointer;
+  accent-color: var(--color-brand, #6B0F2A);
+  border: 1px solid #DDDDDD;
+  border-radius: 0.25rem;
+  transition: all 0.2s ease;
+}
+
+.filter-checkbox-input:checked {
+  background-color: var(--color-brand, #6B0F2A);
+  border-color: var(--color-brand, #6B0F2A);
+}
+
+.filter-checkbox-input:focus {
+  outline: none;
+  box-shadow: 0 0 0 0.2rem rgba(107, 15, 42, 0.15);
+}
+
+.filter-checkbox-label {
+  font-size: 0.95rem;
+  color: #333;
+  cursor: pointer;
+  margin: 0;
+  user-select: none;
+  transition: color 0.2s ease;
+}
+
+.filter-checkbox-input:hover:not(:disabled) ~ .filter-checkbox-label,
+.filter-checkbox:hover .filter-checkbox-label {
+  color: var(--color-brand, #6B0F2A);
+}
+
+/* =========================================
    BOTONES EN MODALES
+   (estilos unificados en buttons.css)
    ========================================= */
 
 .modal .btn,
 .modal button[type="submit"],
 .modal .btn-modal {
-  padding: 0.625rem 1.5rem;
-  border-radius: 0.375rem;
-  font-weight: 500;
-  font-size: 0.95rem;
-  transition: all 0.2s ease;
   min-width: 120px;
-  border: none;
-  cursor: pointer;
-}
-
-.modal .btn i {
-  margin-right: 0.35rem;
-}
-
-.modal .btn:disabled {
-  cursor: not-allowed;
-  opacity: 0.6;
-}
-
-/* Botón primario */
-.btn-modal-primary {
-  background: #4A0E1A;
-  color: #FFFFFF;
-}
-
-.btn-modal-primary:hover:not(:disabled) {
-  background: #6B0F2A;
-}
-
-/* Botón secundario */
-.btn-modal-secondary {
-  background: #FFFFFF;
-  color: #333;
-  border: 1px solid #DDDDDD;
-}
-
-.btn-modal-secondary:hover:not(:disabled) {
-  background: #F5F5F5;
-  border-color: #BBBBBB;
 }
 
 /* =========================================

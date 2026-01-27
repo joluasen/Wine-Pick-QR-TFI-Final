@@ -32,6 +32,13 @@ function initToastContainer() {
 export function showToast(message, type = 'info', duration = 3500) {
   const container = initToastContainer();
 
+  // Remover cualquier toast visible antes de mostrar uno nuevo
+  const activeToasts = container.querySelectorAll('.toast.show');
+  activeToasts.forEach((toast) => {
+    toast.classList.remove('show');
+    setTimeout(() => toast.remove(), 500);
+  });
+
   const iconMap = {
     success: 'bi-check-circle-fill',
     error: 'bi-x-circle-fill',

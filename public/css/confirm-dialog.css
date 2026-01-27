@@ -125,28 +125,18 @@
   border-color: #bb2d3b;
 }
 
-/* Tema oscuro (si lo tienes) */
-@media (prefers-color-scheme: dark) {
-  .confirm-dialog-content {
-    background: #2d2d2d;
-    color: #e0e0e0;
-  }
+/* Asegurar que siempre sea blanco (sin tema oscuro) */
+.confirm-dialog-content {
+  background: #ffffff !important;
+  color: #1A1A1A !important;
+}
 
-  .confirm-dialog-header {
-    border-bottom-color: #3d3d3d;
-  }
+.confirm-dialog-title {
+  color: #1A1A1A !important;
+}
 
-  .confirm-dialog-title {
-    color: #ffffff;
-  }
-
-  .confirm-dialog-body {
-    color: #b0b0b0;
-  }
-
-  .confirm-dialog-footer {
-    border-top-color: #3d3d3d;
-  }
+.confirm-dialog-body {
+  color: #495057 !important;
 }
 
 /* Responsive */

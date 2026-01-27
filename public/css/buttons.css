@@ -1,379 +1,437 @@
-/**
+﻿/**
  * buttons.css
- * Sistema de botones elegante para WinePick - Vinoteca
+ * Sistema unificado de botones para WinePick
+ * Usa tokens de color definidos en theme.css
  */
 
-/* =========================================
-   BOTONES DE TABLA - btn-table
-   Estilo sofisticado tipo badge con efecto moderno
-   ========================================= */
-
-.btn-table {
-  /* Reset */
-  margin: 0;
-  font-family: inherit;
-
-  /* Estructura */
-  display: inline-block;
-  padding: 0.4rem 1rem;
-  font-size: 0.8125rem;
-  font-weight: 500;
-  line-height: 1.4;
+/* Base (incluye alias legacy para compatibilidad) */
+.btn,
+.btn-table,
+.btn-modal,
+.btn-pagination,
+.period-btn,
+.btn-winepick {
+  --btn-bg-hover: var(--color-brand, #6B0F2A);
+  --btn-border-hover: var(--color-brand, #6B0F2A);
+  --btn-color-hover: #ffffff;
+  padding: 0.4rem 0.9rem;
+  --btn-border: var(--btn-bg);
+  transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+  --btn-color: #ffffff;
+  --btn-bg-hover: var(--color-brand-dark, #4A0E1A);
+  line-height: 1.2;
+  border-radius: var(--radius-sm, 6px);
+  border: 1px solid var(--btn-border);
+  background-color: var(--btn-bg);
+  color: var(--btn-color);
   text-align: center;
-  white-space: nowrap;
-  vertical-align: middle;
-  cursor: pointer;
+  box-shadow: none !important;
+  transform: none !important;
+  transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease, transform 0.1s ease;
+  box-shadow: var(--btn-shadow);
+  text-decoration: none;
   user-select: none;
-
-  /* Diseño elegante */
-  background: linear-gradient(135deg, #4A0E1A 0%, #6B0F2A 100%);
-  color: #FFFFFF;
-  border: none;
-  border-radius: 6px;
-
-  /* Sombra sutil para profundidad */
-  box-shadow:
-    0 2px 4px rgba(74, 14, 26, 0.15),
-    0 1px 2px rgba(0, 0, 0, 0.1);
-
-  /* Transiciones suaves */
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-
-  /* Tipografía refinada */
-  letter-spacing: 0.3px;
-  text-transform: capitalize;
 }
 
-/* Hover - Efecto de elevación y brillo */
-.btn-table:hover {
-  background: linear-gradient(135deg, #6B0F2A 0%, #8B1538 100%);
-  color: #FFFFFF;
-
-  /* Efecto de elevación */
-  transform: translateY(-2px);
-  box-shadow:
-    0 4px 8px rgba(74, 14, 26, 0.25),
-    0 2px 4px rgba(0, 0, 0, 0.15),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+.btn:hover:not(:disabled),
+.btn-table:hover:not(:disabled),
+.btn-modal:hover:not(:disabled),
+.btn-pagination:hover:not(:disabled),
+.period-btn:hover:not(:disabled),
+.btn-filters:hover:not(:disabled),
+.btn-eye:hover:not(:disabled),
+.btn-mobile:hover:not(:disabled),
+.btn-winepick:hover:not(:disabled) {
+  background-color: var(--btn-bg-hover);
+  border-color: var(--btn-border-hover, var(--btn-bg-hover));
+  color: var(--btn-color-hover);
+  box-shadow: var(--btn-shadow-hover, var(--shadow-md, 0 4px 12px rgba(107, 15, 42, 0.15)));
+  transform: translateY(-1px);
 }
 
-/* Active - Efecto de presión */
-.btn-table:active {
-  background: linear-gradient(135deg, #2D0810 0%, #4A0E1A 100%);
-  color: #E8E8E8;
-
-  /* Presionado hacia abajo */
-  transform: translateY(0) scale(0.98);
-  box-shadow:
-    0 1px 2px rgba(74, 14, 26, 0.2),
-    inset 0 2px 4px rgba(0, 0, 0, 0.2);
+.btn:active:not(:disabled),
+.btn-table:active:not(:disabled),
+.btn-modal:active:not(:disabled),
+.btn-pagination:active:not(:disabled),
+.period-btn:active:not(:disabled),
+.btn-filters:active:not(:disabled),
+.btn-eye:active:not(:disabled),
+.btn-mobile:active:not(:disabled),
+.btn-winepick:active:not(:disabled) {
+  transform: translateY(0) scale(0.99);
+  box-shadow: var(--btn-shadow-active, var(--shadow-sm, 0 1px 3px rgba(0, 0, 0, 0.08)));
 }
 
-/* Focus - Outline elegante */
-.btn-table:focus {
-  outline: none;
-  box-shadow:
-    0 2px 4px rgba(74, 14, 26, 0.15),
-    0 1px 2px rgba(0, 0, 0, 0.1),
-    0 0 0 3px rgba(74, 14, 26, 0.15);
+.btn:focus-visible,
+.btn-table:focus-visible,
+.btn-modal:focus-visible,
+.btn-pagination:focus-visible,
+.period-btn:focus-visible,
+.btn-filters:focus-visible,
+.btn-search:focus-visible,
+.btn-eye:focus-visible,
+.btn-mobile:focus-visible,
+.btn-winepick:focus-visible {
+  outline: 2px solid rgba(107, 15, 42, 0.35);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(107, 15, 42, 0.12);
 }
 
-/* Disabled - Apariencia desaturada */
+.btn:disabled,
 .btn-table:disabled,
-.btn-table.disabled {
-  background: linear-gradient(135deg, #9E9E9E 0%, #BDBDBD 100%);
-  color: #FFFFFF;
-  cursor: not-allowed;
-  opacity: 0.6;
-  transform: none;
-  box-shadow: none;
-}
-
-.btn-table:disabled:hover,
-.btn-table.disabled:hover {
-  background: linear-gradient(135deg, #9E9E9E 0%, #BDBDBD 100%);
-  transform: none;
-  box-shadow: none;
-}
-
-/* =========================================
-   VARIANTES DE COLOR (opcional)
-   ========================================= */
-
-/* Botón secundario - Tono más claro */
-.btn-table.btn-secondary {
-  background: linear-gradient(135deg, #721C2E 0%, #8B2842 100%);
-}
-
-.btn-table.btn-secondary:hover {
-  background: linear-gradient(135deg, #8B2842 0%, #A33556 100%);
-}
-
-.btn-table.btn-secondary:active {
-  background: linear-gradient(135deg, #5A1624 0%, #721C2E 100%);
-}
-
-/* Botón de acción suave - Sin gradiente */
-.btn-table.btn-soft {
-  background: #4A0E1A;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.btn-table.btn-soft:hover {
-  background: #6B0F2A;
-  border-color: rgba(255, 255, 255, 0.2);
-}
-
-.btn-table.btn-soft:active {
-  background: #2D0810;
-}
-
-/* =========================================
-   UTILIDADES DE SPACING
-   ========================================= */
-
-.ms-1 {
-  margin-left: 0.25rem;
-}
-
-.ms-2 {
-  margin-left: 0.5rem;
-}
-
-.me-1 {
-  margin-right: 0.25rem;
-}
-
-.me-2 {
-  margin-right: 0.5rem;
-}
-
-/* =========================================
-   BOTONES DE MODALES - btn-modal
-   Botones para modales y formularios
-   ========================================= */
-
-.btn-modal {
-  /* Reset */
-  margin: 0;
-  font-family: inherit;
-
-  /* Estructura */
-  display: inline-block;
-  padding: 0.5rem 1.25rem;
-  font-size: 0.9375rem;
-  font-weight: 500;
-  line-height: 1.5;
-  text-align: center;
-  white-space: nowrap;
-  vertical-align: middle;
-  cursor: pointer;
-  user-select: none;
-
-  /* Diseño */
-  border: none;
-  border-radius: 6px;
-  position: relative;
-  overflow: hidden;
-
-  /* Transición suave */
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-/* Primary - Rojo vino (acción principal) */
-.btn-modal-primary {
-  background: linear-gradient(135deg, #4A0E1A 0%, #6B0F2A 100%);
-  color: #FFFFFF;
-  box-shadow:
-    0 2px 4px rgba(74, 14, 26, 0.15),
-    0 1px 2px rgba(0, 0, 0, 0.1);
-}
-
-.btn-modal-primary:hover {
-  background: linear-gradient(135deg, #6B0F2A 0%, #8B1538 100%);
-  transform: translateY(-1px);
-  box-shadow:
-    0 4px 8px rgba(74, 14, 26, 0.25),
-    0 2px 4px rgba(0, 0, 0, 0.15);
-}
-
-.btn-modal-primary:active {
-  background: linear-gradient(135deg, #2D0810 0%, #4A0E1A 100%);
-  transform: translateY(0) scale(0.98);
-  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
-}
-
-/* Secondary - Gris (cancelar) */
-.btn-modal-secondary {
-  background: linear-gradient(135deg, #6C757D 0%, #5A6268 100%);
-  color: #FFFFFF;
-  box-shadow:
-    0 2px 4px rgba(108, 117, 125, 0.15),
-    0 1px 2px rgba(0, 0, 0, 0.1);
-}
-
-.btn-modal-secondary:hover {
-  background: linear-gradient(135deg, #5A6268 0%, #4E555B 100%);
-  transform: translateY(-1px);
-  box-shadow:
-    0 4px 8px rgba(108, 117, 125, 0.25),
-    0 2px 4px rgba(0, 0, 0, 0.15);
-}
-
-.btn-modal-secondary:active {
-  background: linear-gradient(135deg, #4E555B 0%, #3E4549 100%);
-  transform: translateY(0) scale(0.98);
-  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
-}
-
-/* Success - Verde (guardar) */
-.btn-modal-success {
-  background: linear-gradient(135deg, #198754 0%, #157347 100%);
-  color: #FFFFFF;
-  box-shadow:
-    0 2px 4px rgba(25, 135, 84, 0.15),
-    0 1px 2px rgba(0, 0, 0, 0.1);
-}
-
-.btn-modal-success:hover {
-  background: linear-gradient(135deg, #157347 0%, #0F5132 100%);
-  transform: translateY(-1px);
-  box-shadow:
-    0 4px 8px rgba(25, 135, 84, 0.25),
-    0 2px 4px rgba(0, 0, 0, 0.15);
-}
-
-.btn-modal-success:active {
-  background: linear-gradient(135deg, #0F5132 0%, #0A3622 100%);
-  transform: translateY(0) scale(0.98);
-  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
-}
-
-/* Danger - Rojo (eliminar) */
-.btn-modal-danger {
-  background: linear-gradient(135deg, #DC3545 0%, #BB2D3B 100%);
-  color: #FFFFFF;
-  box-shadow:
-    0 2px 4px rgba(220, 53, 69, 0.15),
-    0 1px 2px rgba(0, 0, 0, 0.1);
-}
-
-.btn-modal-danger:hover {
-  background: linear-gradient(135deg, #BB2D3B 0%, #A02834 100%);
-  transform: translateY(-1px);
-  box-shadow:
-    0 4px 8px rgba(220, 53, 69, 0.25),
-    0 2px 4px rgba(0, 0, 0, 0.15);
-}
-
-.btn-modal-danger:active {
-  background: linear-gradient(135deg, #A02834 0%, #842029 100%);
-  transform: translateY(0) scale(0.98);
-  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
-}
-
-/* Disabled */
 .btn-modal:disabled,
-.btn-modal-primary:disabled,
-.btn-modal-secondary:disabled,
-.btn-modal-success:disabled,
-.btn-modal-danger:disabled {
-  background: linear-gradient(135deg, #E9ECEF 0%, #CED4DA 100%);
-  color: #6C757D;
+.btn-pagination:disabled,
+.period-btn:disabled,
+.btn-filters:disabled,
+.btn-search:disabled,
+.btn-eye:disabled,
+.btn-mobile:disabled,
+.btn-winepick:disabled {
+  opacity: 0.6;
   cursor: not-allowed;
-  opacity: 0.65;
+  box-shadow: none;
   transform: none;
+}
+
+/* Tamaños */
+.btn-sm {
+  padding: 0.45rem 0.85rem;
+  font-size: 0.85rem;
+  border-radius: 5px;
+}
+
+.btn-lg {
+  padding: 0.85rem 1.5rem;
+  font-size: 1.05rem;
+  border-radius: 7px;
+}
+
+/* Modificadores de forma */
+.btn-block,
+.btn-fluid {
+  width: 100%;
+}
+
+.btn-pill {
+  border-radius: 999px;
+}
+
+.btn-icon {
+  width: 2.5rem;
+  height: 2.5rem;
+  padding: 0.5rem;
+  gap: 0;
+}
+
+.btn-icon.btn-sm {
+  width: 2.2rem;
+  height: 2.2rem;
+  padding: 0.4rem;
+}
+
+.btn-icon-text {
+  gap: 0.35rem;
+}
+
+.btn-link {
+  --btn-bg: transparent;
+  --btn-border: transparent;
+  --btn-color: var(--color-brand, #6B0F2A);
+  --btn-bg-hover: transparent;
+  --btn-border-hover: transparent;
+  --btn-color-hover: var(--color-brand-dark, #4A0E1A);
+  --btn-shadow: none;
+  padding: 0;
+  border: none;
   box-shadow: none;
 }
 
-/* Focus */
-.btn-modal:focus,
-.btn-modal-primary:focus,
-.btn-modal-secondary:focus,
-.btn-modal-success:focus,
-.btn-modal-danger:focus {
-  outline: none;
-  box-shadow: 0 0 0 3px rgba(74, 14, 26, 0.15);
+/* Variantes de color */
+.btn-primary,
+.btn-modal,
+.btn-modal-primary {
+  --btn-bg: var(--color-brand, #6B0F2A);
+  --btn-border: var(--color-brand, #6B0F2A);
+  --btn-color: #ffffff;
+  --btn-bg-hover: var(--color-brand-dark, #4A0E1A);
+  --btn-border-hover: var(--color-brand-dark, #4A0E1A);
 }
 
-/* Small size variant for pagination and inline buttons */
+.btn-secondary,
+.btn-modal-secondary {
+  --btn-bg: #f5f5f5;
+  --btn-border: var(--color-border, #DDDDDD);
+  --btn-color: var(--color-text, #1A1A1A);
+  --btn-bg-hover: #e9e9e9;
+  --btn-border-hover: #cfcfcf;
+  --btn-color-hover: var(--color-text, #1A1A1A);
+  --btn-shadow: none;
+}
+
+.btn-success,
+.btn-modal-success {
+  --btn-bg: var(--color-success, #2E7D42);
+  --btn-border: var(--color-success, #2E7D42);
+  --btn-color: #ffffff;
+  --btn-bg-hover: #256534;
+  --btn-border-hover: #256534;
+}
+
+.btn-danger,
+.btn-modal-danger {
+  --btn-bg: var(--color-danger, #C62828);
+  --btn-border: var(--color-danger, #C62828);
+  --btn-color: #ffffff;
+  --btn-bg-hover: #a31f1f;
+  --btn-border-hover: #a31f1f;
+}
+
+.btn-warning {
+  --btn-bg: var(--color-accent, #d4af37);
+  --btn-border: var(--color-accent, #d4af37);
+  --btn-color: #3b2b00;
+  --btn-bg-hover: #b89226;
+  --btn-border-hover: #b89226;
+  --btn-color-hover: #2a1d00;
+}
+
+.btn-info {
+  --btn-bg: var(--color-info, #0277BD);
+  --btn-border: var(--color-info, #0277BD);
+  --btn-color: #ffffff;
+  --btn-bg-hover: #015b90;
+  --btn-border-hover: #015b90;
+}
+
+.btn-light {
+  --btn-bg: #f8f9fa;
+  --btn-border: #f8f9fa;
+  --btn-color: #1A1A1A;
+  --btn-bg-hover: #e9ecef;
+  --btn-border-hover: #e9ecef;
+  --btn-shadow: none;
+}
+
+.btn-dark {
+  --btn-bg: #1f1f1f;
+  --btn-border: #1f1f1f;
+  --btn-color: #ffffff;
+  --btn-bg-hover: #111111;
+  --btn-border-hover: #111111;
+}
+
+/* Outline */
+.btn-outline-primary {
+  --btn-bg: transparent;
+  --btn-border: var(--color-brand, #6B0F2A);
+
+
+  --btn-color: var(--color-brand, #6B0F2A);
+  --btn-bg-hover: var(--color-brand, #6B0F2A);
+  --btn-border-hover: var(--color-brand, #6B0F2A);
+  --btn-color-hover: #ffffff;
+}
+
+.btn-outline-secondary {
+  --btn-bg: transparent;
+  --btn-border: #5A5A5A;
+  --btn-color: #5A5A5A;
+  --btn-bg-hover: #5A5A5A;
+  --btn-border-hover: #5A5A5A;
+  --btn-color-hover: #ffffff;
+}
+
+.btn-outline-success {
+  --btn-bg: transparent;
+  --btn-border: var(--color-success, #2E7D42);
+  --btn-color: var(--color-success, #2E7D42);
+  --btn-bg-hover: var(--color-success, #2E7D42);
+  --btn-border-hover: var(--color-success, #2E7D42);
+  --btn-color-hover: #ffffff;
+}
+
+.btn-outline-danger {
+  --btn-bg: transparent;
+  --btn-border: var(--color-danger, #C62828);
+  --btn-color: var(--color-danger, #C62828);
+  --btn-bg-hover: var(--color-danger, #C62828);
+  --btn-border-hover: var(--color-danger, #C62828);
+  --btn-color-hover: #ffffff;
+}
+
+/* Ghost */
+.btn-ghost {
+  --btn-bg: transparent;
+  --btn-border: transparent;
+  --btn-color: var(--color-brand, #6B0F2A);
+  --btn-bg-hover: rgba(107, 15, 42, 0.08);
+  --btn-border-hover: rgba(107, 15, 42, 0.14);
+  --btn-color-hover: var(--color-brand-dark, #4A0E1A);
+  --btn-shadow: none;
+}
+
+/* Aliases legacy a nuevo sistema */
+.btn-table {
+  --btn-bg: #ffffff;
+  --btn-border: var(--color-brand, #6B0F2A);
+  --btn-color: var(--color-brand, #6B0F2A);
+  --btn-bg-hover: #ffffff;
+  --btn-border-hover: var(--color-brand, #6B0F2A);
+  --btn-color-hover: var(--color-brand, #6B0F2A);
+  --btn-shadow: none;
+  padding: 0.4rem 0.9rem;
+  font-size: 0.82rem;
+}
+
+/* Botón de buscador (sin !important) */
+.btn-search {
+  --btn-bg: #6B0F2A;
+  --btn-border: var(--color-brand, #6B0F2A);
+  --btn-color: var(--color-brand, #6B0F2A);
+  --btn-bg-hover: var(--color-brand, #6B0F2A);
+  --btn-border-hover: var(--color-brand, #6B0F2A);
+  --btn-color-hover: #ffffff;
+  --btn-shadow: none;
+  padding: 0.65rem 1.15rem;
+  font-size: 0.95rem;
+  border-radius: 999px;
+  transition: background-color 0.18s ease, color 0.18s ease, border-color 0.18s ease;
+}
+
+.btn-search:hover:not(:disabled),
+.btn-search:active:not(:disabled),
+.btn-search:focus-visible:not(:disabled) {
+  background-color: var(--btn-bg-hover);
+  border-color: var(--btn-border-hover);
+  color: var(--btn-color-hover);
+  box-shadow: none;
+  transform: none;
+}
+
+/* Botón especial para buscador: igual a btn-table */
+
+.btn-table.btn-secondary {
+  --btn-bg: #f5f5f5;
+  --btn-border: var(--color-border, #DDDDDD);
+  --btn-color: var(--color-text, #1A1A1A);
+  --btn-bg-hover: #e9e9e9;
+  --btn-border-hover: #cfcfcf;
+  --btn-color-hover: var(--color-text, #1A1A1A);
+}
+
+.btn-table.btn-soft {
+  --btn-bg: rgba(107, 15, 42, 0.08);
+  --btn-border: rgba(107, 15, 42, 0.18);
+  --btn-color: var(--color-brand, #6B0F2A);
+  --btn-bg-hover: rgba(107, 15, 42, 0.16);
+  --btn-border-hover: rgba(107, 15, 42, 0.26);
+  --btn-color-hover: var(--color-brand-dark, #4A0E1A);
+}
+
 .btn-modal.btn-sm,
 .btn-modal-primary.btn-sm,
 .btn-modal-secondary.btn-sm,
 .btn-modal-success.btn-sm,
 .btn-modal-danger.btn-sm {
-  padding: 0.375rem 0.75rem;
-  font-size: 0.8125rem;
-  line-height: 1.4;
-  min-height: auto;
+  padding: 0.45rem 0.85rem;
+  font-size: 0.85rem;
 }
 
-/* =========================================
-   UTILIDADES ADICIONALES
-   ========================================= */
-
-.mx-1 {
-  margin-left: 0.25rem;
-  margin-right: 0.25rem;
+.btn-pagination {
+  --btn-bg: transparent;
+  --btn-border: var(--color-border, #DDDDDD);
+  --btn-color: var(--color-text, #1A1A1A);
+  --btn-bg-hover: #f5f5f5;
+  --btn-border-hover: var(--color-border, #DDDDDD);
+  --btn-color-hover: var(--color-text, #1A1A1A);
+  --btn-shadow: none;
+  padding: 0.45rem 0.9rem;
+  font-size: 0.9rem;
 }
 
-.px-2 {
-  padding-left: 0.5rem;
-  padding-right: 0.5rem;
+.btn-pagination:disabled {
+  --btn-bg: #f8f8f8;
+  --btn-border: var(--color-border, #DDDDDD);
+  --btn-color: #9e9e9e;
 }
 
-.py-1 {
-  padding-top: 0.25rem;
-  padding-bottom: 0.25rem;
+.period-btn {
+  --btn-bg: transparent;
+  --btn-border: var(--color-border, #DDDDDD);
+  --btn-color: var(--color-text, #1A1A1A);
+  --btn-bg-hover: #f5f5f5;
+  --btn-border-hover: var(--color-border, #DDDDDD);
+  --btn-color-hover: var(--color-text, #1A1A1A);
+  --btn-shadow: none;
+  padding: 0.45rem 0.9rem;
+  font-size: 0.9rem;
 }
 
-.fw-semibold {
-  font-weight: 600;
+.period-btn.active {
+  --btn-bg: var(--color-brand, #6B0F2A);
+  --btn-border: var(--color-brand, #6B0F2A);
+  --btn-color: #ffffff;
+  --btn-bg-hover: var(--color-brand-dark, #4A0E1A);
+  --btn-border-hover: var(--color-brand-dark, #4A0E1A);
 }
 
-/* =========================================
-   ANIMACIÓN OPCIONAL - Ripple effect
-   ========================================= */
-
-@keyframes ripple {
-  0% {
-    transform: scale(0);
-    opacity: 1;
-  }
-  100% {
-    transform: scale(4);
-    opacity: 0;
-  }
+.btn-filters {
+  --btn-bg: transparent;
+  --btn-border: transparent;
+  --btn-color: #5A5A5A;
+  --btn-bg-hover: transparent;
+  --btn-border-hover: transparent;
+  --btn-color-hover: var(--color-brand, #6B0F2A);
+  --btn-shadow: none;
+  padding: 0.65rem 0.9rem;
 }
 
-.btn-table::after {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 5px;
-  height: 5px;
-  background: rgba(255, 255, 255, 0.5);
-  opacity: 0;
-  border-radius: 100%;
-  transform: scale(1) translate(-50%, -50%);
-  transform-origin: 50% 50%;
+.btn-filters:hover:not(:disabled) {
+  transform: none;
+  box-shadow: none;
 }
 
-.btn-table {
-  position: relative;
-  overflow: hidden;
+.btn-eye {
+  --btn-bg: transparent;
+  --btn-border: transparent;
+  --btn-color: #5A5A5A;
+  --btn-bg-hover: rgba(0, 0, 0, 0.05);
+  --btn-border-hover: transparent;
+  --btn-color-hover: var(--color-brand, #6B0F2A);
+  --btn-shadow: none;
+  width: 2.25rem;
+  height: 2.25rem;
+  padding: 0.25rem;
 }
 
-.btn-table:active::after {
-  animation: ripple 0.6s ease-out;
+.btn-mobile {
+  width: 100%;
+  font-size: 0.9rem;
+  padding: 0.6rem 0.9rem;
+  --btn-shadow: none;
 }
 
-/* =========================================
-   CARDS MOBILE ADMIN PRODUCTOS
-   Diseño ultra-minimalista y armonioso
-   ========================================= */
+.btn-winepick {
+  --btn-bg: var(--color-brand, #6B0F2A);
+  --btn-border: var(--color-brand, #6B0F2A);
+  --btn-color: #ffffff;
+  --btn-bg-hover: var(--color-brand-dark, #4A0E1A);
+  --btn-border-hover: var(--color-brand-dark, #4A0E1A);
+  border-radius: 999px;
+  padding: 0.75rem 1.5rem;
+}
 
+/* Utilidades básicas (mantener por compatibilidad) */
+.ms-1 { margin-left: 0.25rem; }
+.ms-2 { margin-left: 0.5rem; }
+.me-1 { margin-right: 0.25rem; }
+.me-2 { margin-right: 0.5rem; }
+.mx-1 { margin-left: 0.25rem; margin-right: 0.25rem; }
+.px-2 { padding-left: 0.5rem; padding-right: 0.5rem; }
+.py-1 { padding-top: 0.25rem; padding-bottom: 0.25rem; }
+.fw-semibold { font-weight: 600; }
+
+/* Cards mobile admin productos */
 .admin-product-card-mobile {
   background: #FFFFFF;
   border: 1px solid #DDDDDD;
@@ -389,7 +447,6 @@
   transform: scale(0.99);
 }
 
-/* Header simplificado */
 .card-mobile-header {
   display: flex;
   justify-content: space-between;
@@ -430,7 +487,6 @@
   background: #F1F8F4;
 }
 
-/* Body simplificado */
 .card-mobile-body {
   padding: 0.75rem 0;
   border-top: 1px solid #F5F5F5;
@@ -444,13 +500,9 @@
   margin-bottom: 0.5rem;
 }
 
-.card-mobile-info:last-child {
-  margin-bottom: 0;
-}
+.card-mobile-info:last-child { margin-bottom: 0; }
 
-.card-mobile-label {
-  color: #8A8A8A;
-}
+.card-mobile-label { color: #8A8A8A; }
 
 .card-mobile-value {
   color: #1A1A1A;
@@ -460,10 +512,9 @@
 .card-mobile-price {
   font-size: 1.1rem;
   font-weight: 700;
-  color: #4A0E1A;
+  color: var(--color-brand, #6B0F2A);
 }
 
-/* Botones mejorados - más espacio, mejor disposición */
 .card-mobile-actions {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -471,33 +522,11 @@
   margin-top: 0.75rem;
 }
 
-.btn-mobile {
-  font-size: 0.8rem;
-  padding: 0.6rem 0.75rem;
-  font-weight: 500;
-  text-align: center;
-  min-height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.35rem;
-  border-radius: 4px;
-}
+.btn-mobile i { font-size: 0.85rem; }
 
-.btn-mobile i {
-  font-size: 0.85rem;
-}
-
-/* Responsividad mejorada */
 @media (max-width: 360px) {
-  .admin-product-card-mobile {
-    padding: 10px;
-  }
-
-  .card-mobile-title {
-    font-size: 0.85rem;
-  }
-
+  .admin-product-card-mobile { padding: 10px; }
+  .card-mobile-title { font-size: 0.85rem; }
   .btn-mobile {
     font-size: 0.75rem;
     padding: 0.5rem 0.5rem;
@@ -505,11 +534,7 @@
   }
 }
 
-/* =========================================
-   CARDS MOBILE ADMIN PROMOCIONES
-   Diseño ultra-minimalista y armonioso
-   ========================================= */
-
+/* Cards mobile admin promociones */
 .admin-promo-card-mobile {
   background: #FFFFFF;
   border: 1px solid #DDDDDD;
@@ -525,7 +550,6 @@
   transform: scale(0.99);
 }
 
-/* Reutilizar estilos de productos para mantener consistencia */
 .admin-promo-card-mobile .card-mobile-header,
 .admin-promo-card-mobile .card-mobile-title,
 .admin-promo-card-mobile .card-mobile-code,
@@ -535,10 +559,9 @@
 .admin-promo-card-mobile .card-mobile-label,
 .admin-promo-card-mobile .card-mobile-value,
 .admin-promo-card-mobile .card-mobile-actions {
-  /* Los estilos ya están definidos arriba para productos, se reutilizan */
+  /* Reutiliza estilos de tarjetas de producto */
 }
 
-/* Ajustes específicos para promociones */
 .admin-promo-card-mobile .card-mobile-actions {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -546,10 +569,6 @@
   margin-top: 0.75rem;
 }
 
-
-/* Responsividad para cards de promociones */
 @media (max-width: 360px) {
-  .admin-promo-card-mobile {
-    padding: 10px;
-  }
+  .admin-promo-card-mobile { padding: 10px; }
 }

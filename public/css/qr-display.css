@@ -89,46 +89,8 @@
 }
 
 /* Estilos específicos para botones dentro de modales QR */
-.qr-modal-actions .btn-modal {
-  padding: 0.75rem 1.5rem;
-  border: none;
-  border-radius: 4px;
-  font-size: 0.95rem;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  transition: all 0.2s ease;
-  background-color: #f0f0f0;
-  color: #333;
-  font-weight: 500;
+.qr-modal-actions .btn {
   min-width: 140px;
-  justify-content: center;
-}
-
-.qr-modal-actions .btn-modal:hover {
-  background-color: #e0e0e0;
-  transform: translateY(-2px);
-}
-
-.qr-modal-actions .btn-modal-primary {
-  background-color: #4A0E1A;
-  color: white;
-  font-weight: 600;
-}
-
-.qr-modal-actions .btn-modal-primary:hover {
-  background-color: #6b1428;
-  box-shadow: 0 4px 12px rgba(74, 14, 26, 0.3);
-}
-
-.qr-modal-actions .btn-modal-danger {
-  background-color: #dc3545;
-  color: white;
-}
-
-.qr-modal-actions .btn-modal-danger:hover {
-  background-color: #c82333;
 }
 
 /* Responsive */
@@ -154,7 +116,7 @@
     flex-direction: column;
   }
 
-  .qr-modal-actions .btn-modal {
+  .qr-modal-actions .btn {
     width: 100%;
     min-width: auto;
   }

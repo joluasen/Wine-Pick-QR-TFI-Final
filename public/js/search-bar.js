@@ -13,6 +13,7 @@
  */
 
 import { fetchJSON, escapeHtml, getHashParams, registerMetric } from './core/utils.js';
+import { showToast } from './admin/components/Toast.js';
 
 // Cache simple para saber si el usuario es admin
 let isAdminUser = null;
@@ -68,6 +69,10 @@ function initUnifiedSearchBar() {
     form.parentNode.replaceChild(newForm, form);
     const newInput = newForm.querySelector('#searchInput');
 
+    // Evitar que la validación nativa muestre el tooltip del navegador
+    if (input.hasAttribute('required')) input.removeAttribute('required');
+    input.setAttribute('aria-required', 'true');
+
     // Crear dropdown simple fuera del input-group para evitar overflow hidden
     let dropdown = newForm.querySelector('#search-autocomplete');
     if (!dropdown) {
@@ -93,6 +98,18 @@ function initUnifiedSearchBar() {
       newForm.style.position = 'relative';
       newForm.appendChild(dropdown);
     }
+
+    // Validación custom en submit para evitar el mensaje nativo "Completa este campo"
+    newForm.addEventListener('submit', (e) => {
+      const query = (newInput.value || '').trim();
+      if (!query) {
+        e.preventDefault();
+        e.stopPropagation();
+        showToast('Ingresa un nombre o código de producto', 'warning');
+        newInput.focus();
+        return;
+      }
+    });
 
     /**
      * Limpia y oculta el dropdown de sugerencias.

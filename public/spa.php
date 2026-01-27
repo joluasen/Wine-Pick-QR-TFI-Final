@@ -169,7 +169,7 @@ $appConfig = [
           <!-- Tipo de bebida (select) -->
           <div class="mb-3">
             <label for="filterDrinkType" class="form-label fw-semibold">Tipo de bebida</label>
-            <select class="form-select" id="filterDrinkType">
+            <select class="filter-select" id="filterDrinkType">
               <option value="">Todos los tipos</option>
               <option value="vino">Vino</option>
               <option value="espumante">Espumante</option>
@@ -182,17 +182,17 @@ $appConfig = [
           </div>
 
           <!-- Checkboxes de filtros -->
-          <div class="form-check mb-2">
-            <input class="form-check-input" type="checkbox" id="filterVarietal">
-            <label class="form-check-label" for="filterVarietal">Filtrar por varietal (uva)</label>
+          <div class="filter-checkbox mb-2">
+            <input class="filter-checkbox-input" type="checkbox" id="filterVarietal">
+            <label class="filter-checkbox-label" for="filterVarietal">Filtrar por varietal (uva)</label>
           </div>
-          <div class="form-check mb-2">
-            <input class="form-check-input" type="checkbox" id="filterOrigin">
-            <label class="form-check-label" for="filterOrigin">Filtrar por origen</label>
+          <div class="filter-checkbox mb-2">
+            <input class="filter-checkbox-input" type="checkbox" id="filterOrigin">
+            <label class="filter-checkbox-label" for="filterOrigin">Filtrar por origen</label>
           </div>
-          <div class="form-check mb-2">
-            <input class="form-check-input" type="checkbox" id="filterWinery">
-            <label class="form-check-label" for="filterWinery">Filtrar por bodega/destilería</label>
+          <div class="filter-checkbox mb-2">
+            <input class="filter-checkbox-input" type="checkbox" id="filterWinery">
+            <label class="filter-checkbox-label" for="filterWinery">Filtrar por bodega/destilería</label>
           </div>
 
           <!-- Filtro de año -->

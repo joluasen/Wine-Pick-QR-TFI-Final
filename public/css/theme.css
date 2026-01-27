@@ -3,8 +3,8 @@
 
 :root {
   /* Paleta primaria Bordeaux */
-  --bs-primary: #4A0E1A;
-  --bs-primary-rgb: 74, 14, 26;
+  --bs-primary: #6B0F2A;
+  --bs-primary-rgb: 107, 15, 42;
   
   /* Secundarios */
   --bs-secondary: #5A5A5A;
@@ -24,12 +24,12 @@
   
   /* Links */
   --bs-link-color: var(--bs-primary);
-  --bs-link-hover-color: #2D0810;
+  --bs-link-hover-color: #4A0E1A;
 
   /* Canonical app variables (usadas en vistas y styles.css) */
   --primary: var(--bs-primary);
-  --primary-light: #6B0F2A;
-  --primary-dark: #2D0810;
+  --primary-light: #8B1F3C;
+  --primary-dark: #4A0E1A;
   --accent: #721C2E;
   --bg: var(--bs-body-bg);
   --bg-card: #FFFFFF;
@@ -42,9 +42,9 @@
   --info: #0277BD;
 
   /* Tokens unificados (app-wide) */
-  --color-brand: #4A0E1A;
-  --color-brand-light: #6B0F2A;
-  --color-brand-dark: #2D0810;
+  --color-brand: #6B0F2A;
+  --color-brand-light: #8B1F3C;
+  --color-brand-dark: #4A0E1A;
   --color-text: #1A1A1A;
   --color-muted: #5A5A5A;
   --color-bg: #FAFAFA;
@@ -56,8 +56,8 @@
   --color-danger: #C62828;
   --color-info: #0277BD;
   --radius-sm: 6px;
-  --shadow-sm: 0 1px 3px rgba(74, 14, 26, 0.08);
-  --shadow-md: 0 4px 12px rgba(74, 14, 26, 0.12);
+  --shadow-sm: 0 1px 3px rgba(107, 15, 42, 0.1);
+  --shadow-md: 0 4px 12px rgba(107, 15, 42, 0.15);
 }
 
 /* Ajustes globales */
@@ -67,44 +67,11 @@ body {
   color: var(--bs-body-color);
 }
 
-/* Botones primarios */
-.btn-primary {
-  background-color: var(--bs-primary);
-  border-color: var(--bs-primary);
-}
-
-.btn-primary:hover {
-  background-color: #2D0810;
-  border-color: #2D0810;
-}
-
-.btn-primary:focus {
-  background-color: #2D0810;
-  border-color: #2D0810;
-  box-shadow: 0 0 0 0.25rem rgba(74, 14, 26, 0.25);
-}
-
-.btn-primary.active {
-  background-color: #2D0810;
-  border-color: #2D0810;
-}
-
-/* Outline primary */
-.btn-outline-primary {
-  color: var(--bs-primary);
-  border-color: var(--bs-primary);
-}
-
-.btn-outline-primary:hover {
-  color: #fff;
-  background-color: var(--bs-primary);
-  border-color: var(--bs-primary);
-}
 
 /* Tarjetas */
 .card {
   border: 1px solid var(--bs-border-color);
-  box-shadow: 0 1px 3px rgba(74, 14, 26, 0.08);
+  box-shadow: var(--shadow-sm, 0 1px 3px rgba(107, 15, 42, 0.1));
 }
 
 .card-header {
@@ -130,32 +97,6 @@ body {
   opacity: 1;
 }
 
-/* Botones base: asegurar contraste */
-.btn {
-  color: #FFFFFF;
-}
-
-.btn-light, .btn-outline-light {
-  color: #4A0E1A;
-}
-
-/* Botones secundarios y outline */
-.btn-secondary {
-  background-color: #5A5A5A;
-  border-color: #5A5A5A;
-  color: #FFFFFF;
-}
-
-.btn-outline-secondary {
-  color: #5A5A5A;
-  border-color: #5A5A5A;
-}
-
-.btn-outline-secondary:hover {
-  color: #FFFFFF;
-  background-color: #5A5A5A;
-  border-color: #5A5A5A;
-}
 
 /* Modal: asegurar fondo blanco para contenido */
 .modal-content {
@@ -199,24 +140,3 @@ a:hover {
   text-decoration: underline;
 }
 
-/* Compat con clase anterior */
-.btn-winepick {
-  background: var(--bs-primary);
-  color: white;
-  border: none;
-  padding: 0.75rem 1.5rem;
-  border-radius: 999px;
-  font-weight: 500;
-  transition: all 0.2s ease;
-  cursor: pointer;
-}
-
-.btn-winepick:hover {
-  background: #2D0810;
-  color: white;
-}
-
-.btn-winepick:focus {
-  color: white;
-  box-shadow: 0 0 0 0.25rem rgba(74, 14, 26, 0.25);
-}

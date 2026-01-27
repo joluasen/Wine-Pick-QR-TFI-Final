@@ -35,7 +35,7 @@ header('Content-Type: text/html; charset=utf-8');
       id="searchInput"
       class="form-control border-0"
       placeholder="Buscar productos..."
-      required
+      data-require-query="true"
       autocomplete="off"
       aria-label="Buscar productos"
     >
@@ -51,7 +51,7 @@ header('Content-Type: text/html; charset=utf-8');
       <i class="fas fa-sliders-h" aria-hidden="true"></i>
     </button>
     <!-- Botón para enviar el formulario de búsqueda -->
-    <button type="submit" class="btn-modal btn-modal-primary" aria-label="Buscar">
+    <button type="submit" class="btn-search" aria-label="Buscar">
       <i class="fas fa-search" aria-hidden="true"></i>
     </button>
   </div>
