@@ -1,0 +1,15 @@
+# Log de Riesgos – WINE-PICK-QR
+
+| ID    | Riesgo                                 | Prob.  | Impacto | Mitigación                                                                                                                                                        | Dueño   | Estado    |
+|-------|----------------------------------------|--------|---------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------|-----------|
+| R-01  | Incompatibilidad lector QR             | Media  | Alto    | Búsqueda por texto como alternativa; QR con URL completa; uso de html5-qrcode probada y soporte cámara nativa.                                                    | Esteban | Mitigado  |
+| R-02  | Scope creep                            | Media  | Alto    | Alcance definido en Project Brief; priorización MoSCoW; documentado "Won't have".                                                                                | Esteban | Mitigado  |
+| R-03  | Problemas de configuración en hosting  | Media  | Medio   | Arquitectura compatible con hosting compartido; pasos de despliegue documentados; pruebas en entorno local similar a producción.                                  | Esteban | Mitigado  |
+| R-04  | Admin no mantiene catálogo actualizado | Media  | Medio   | Interfaz admin simple; acceso rápido desde QR; acciones directas desde ficha de producto.                                                                         | Esteban | Mitigado  |
+| R-05  | Promociones superpuestas               | Baja   | Alto    | Validación automática de superposición en backend y formularios; rechazo de creación si hay conflicto.                                                            | Esteban | Mitigado  |
+| R-06  | Acceso no autorizado al panel admin    | Baja   | Alto    | Autenticación JWT con expiración; cookie HttpOnly; rutas admin protegidas; API retorna 401 si token inválido.                                                     | Esteban | Mitigado  |
+| R-07  | Inyección SQL                          | Baja   | Alto    | Consultas SQL parametrizadas; sin concatenación de datos usuario; validación de tipos en backend.                                                                 | Esteban | Mitigado  |
+| R-08  | Pérdida de datos por falta de backups  | Media  | Alto    | Proceso de backup/restore documentado; recomendación de backups automáticos; script SQL para recrear base; pendiente configurar backup automático en producción.  | Esteban | Abierto   |
+| R-09  | Tiempos de carga lentos                | Baja   | Medio   | Sin frameworks JS pesados; uso de CDN; paginación en listados; PWA con Service Worker para caché.                                                                 | Esteban | Mitigado  |
+| R-10  | Cliente no entiende la app             | Baja   | Medio   | Botón QR flotante visible; buscador accesible; no requiere registro; interfaz minimalista y directa.                                                              | Esteban | Mitigado  |
+

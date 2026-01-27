@@ -2,10 +2,6 @@
 # Wine-Pick-QR - Git Ignore
 # ============================================
 
-# Archivos de entorno (CRÍTICO - contienen credenciales)
-!.env.example
-!.env.production.template
-
 # Logs (pueden contener información sensible)
 logs/
 *.log
@@ -20,10 +16,6 @@ logs/
 public/uploads/products/*
 !public/uploads/products/.gitkeep
 
-# Documentación de desarrollo interno
-docs/
-templates/
-
 # IDE y editores
 .vscode/
 
@@ -31,5 +23,5 @@ templates/
 .DS_Store
 Thumbs.db
 
-# Reporte de seguridad (no subir a producción)
-SECURITY_AUDIT_REPORT.md
+# Variables de entorno
+.env
