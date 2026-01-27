@@ -406,6 +406,16 @@ class ModalManager {
                 <dd>${escapeHtml(product.winery_distillery) || "—"}</dd>
               </div>
               ${
+                product.varietal
+                  ? `
+                <div class="spec-item">
+                  <dt>Varietal</dt>
+                  <dd>${escapeHtml(product.varietal)}</dd>
+                </div>
+              `
+                  : ""
+              }
+              ${
                 product.origin
                   ? `
                 <div class="spec-item">
