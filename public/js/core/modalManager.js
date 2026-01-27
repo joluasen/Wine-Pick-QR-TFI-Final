@@ -480,7 +480,6 @@ class ModalManager {
       "#admin-metrics",
       "#admin-promotions",
       "#admin-scan",
-      "#admin-search",
     ].includes(h);
   }
 

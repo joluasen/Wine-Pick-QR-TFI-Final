@@ -12,7 +12,7 @@
  * - UX accesible y responsiva
  */
 
-import { fetchJSON, escapeHtml, registerMetric } from './core/utils.js';
+import { fetchJSON, escapeHtml, getHashParams, registerMetric } from './core/utils.js';
 
 // Cache simple para saber si el usuario es admin
 let isAdminUser = null;
@@ -35,6 +35,15 @@ async function checkAdmin() {
 
 const AUTOCOMPLETE_LIMIT = 5;
 let debounceTimeout = null;
+
+function getSelectedField(params = {}) {
+  const allowed = ['varietal', 'origin', 'winery_distillery'];
+  if (params.field && allowed.includes(params.field)) return params.field;
+  if (params.varietal === '1') return 'varietal';
+  if (params.origin === '1') return 'origin';
+  if (params.winery_distillery === '1') return 'winery_distillery';
+  return null;
+}
 
 async function fetchPromotionMatches(query) {
   const params = new URLSearchParams({ search: query, limit: 50, offset: 0 });
@@ -189,6 +198,10 @@ function initUnifiedSearchBar() {
       if (!query) return;
       
       try {
+        const currentParams = getHashParams();
+        const selectedField = getSelectedField(currentParams);
+        const drinkType = currentParams.drink_type || '';
+        const vintageYear = currentParams.vintage_year || '';
         const isAdmin = await checkAdmin();
         const currentHash = window.location.hash.split('?')[0];
 
@@ -216,29 +229,43 @@ function initUnifiedSearchBar() {
 
         // Buscar productos
         const params = new URLSearchParams({ search: query, limit: 100 });
+        if (selectedField) params.set('field', selectedField);
+        if (drinkType) params.set('drink_type', drinkType);
+        if (vintageYear) params.set('vintage_year', vintageYear);
         const url = `./api/public/productos?${params.toString()}`;
         const data = await fetchJSON(url);
         const products = data?.data?.products || [];
         
-        // Si hay exactamente 1 resultado, abrir directamente
-        if (products.length === 1) {
+        // Si hay exactamente 1 resultado, abrir directamente solo para público.
+        // Para admin, navegar igual a la vista (evita abrir ficha automática).
+        if (products.length === 1 && !isAdmin) {
           const product = products[0];
           const { modalManager } = await import('./core/modalManager.js');
 
-          if (isAdmin) {
-            // Admin no registra métricas
-            modalManager.showProductAdmin(product);
-          } else {
-            registerMetric(product.id, 'BUSQUEDA');
-            modalManager.showProduct(product, null); // null = no registrar de nuevo
-          }
+          registerMetric(product.id, 'BUSQUEDA');
+          modalManager.showProduct(product, null); // null = no registrar de nuevo
           clearDropdown();
           return;
         }
         
         // Si hay múltiples resultados, ir a vista search (sin registrar aún)
-        const target = isAdmin ? '#admin-search' : '#search';
-        window.location.hash = `${target}?query=${encodeURIComponent(query)}`;
+        const target = (() => {
+          if (!isAdmin) return '#search';
+          // Solo promociones se queda en su vista; todo lo demás va a productos
+          if (currentHash === '#admin-promotions') return '#admin-promotions';
+          return '#admin-products';
+        })();
+        const hashParams = new URLSearchParams({ query });
+        if (selectedField) {
+          hashParams.set('field', selectedField);
+          if (selectedField === 'varietal') hashParams.set('varietal', '1');
+          if (selectedField === 'origin') hashParams.set('origin', '1');
+          if (selectedField === 'winery_distillery') hashParams.set('winery_distillery', '1');
+        }
+        if (drinkType) hashParams.set('drink_type', drinkType);
+        if (vintageYear) hashParams.set('vintage_year', vintageYear);
+
+        window.location.hash = `${target}?${hashParams.toString()}`;
         setTimeout(() => {
           newInput.value = query;
         }, 200);
@@ -250,7 +277,6 @@ function initUnifiedSearchBar() {
 
     /**
      * Sincroniza el valor del input con el hash de la URL.
-     * Permite mantener la búsqueda al navegar entre vistas.
      */
     function syncInputWithHash() {
       const params = new URLSearchParams(window.location.hash.split('?')[1] || '');

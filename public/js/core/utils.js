@@ -194,7 +194,9 @@ export function getHashParams() {
     paramString.split('&').forEach(pair => {
       const [key, value] = pair.split('=');
       if (key) {
-        params[key] = decodeURIComponent(value || '');
+        // Reemplazar + por espacio antes de decodificar (URLSearchParams genera + para espacios)
+        // decodeURIComponent no decodifica + en contexto de hash (solo en form-urlencoded)
+        params[key] = decodeURIComponent((value || '').replace(/\+/g, ' '));
       }
     });
   }

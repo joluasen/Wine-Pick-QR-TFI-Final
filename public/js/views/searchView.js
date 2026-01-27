@@ -182,8 +182,10 @@ function getActiveFilters() {
   const params = getHashParams();
   const filters = {};
 
-  // Filtros de campo (checkboxes)
-  if (params.varietal === '1') filters.field = 'varietal';
+  const allowedFields = ['varietal', 'origin', 'winery_distillery'];
+  if (params.field && allowedFields.includes(params.field)) {
+    filters.field = params.field;
+  } else if (params.varietal === '1') filters.field = 'varietal';
   else if (params.origin === '1') filters.field = 'origin';
   else if (params.winery_distillery === '1') filters.field = 'winery_distillery';
 

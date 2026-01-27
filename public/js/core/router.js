@@ -26,7 +26,6 @@ const ROUTES = {
   "#search": "search",
   "#admin": "adminMetrics",
   "#admin-scan": "adminScan",
-  "#admin-search": "adminSearch",
   "#admin-products": "adminProducts",
   "#admin-metrics": "adminMetrics",
   "#admin-promotions": "adminPromotions",
@@ -103,7 +102,6 @@ async function loadNavigation(viewName) {
   const isAdminView = [
     "admin",
     "adminScan",
-    "adminSearch",
     "adminMetrics",
     "adminProducts",
     "adminPromotions",
@@ -284,7 +282,6 @@ async function loadView(viewName) {
     const isAdminView = [
       "admin",
       "adminScan",
-      "adminSearch",
       "adminMetrics",
       "adminProducts",
       "adminPromotions",
@@ -398,7 +395,6 @@ async function initializeView(viewName, container) {
     search: () => import("../views/searchView.js"),
     promotions: () => import("../views/promotionsView.js"),
     adminMetrics: () => import("../views/adminMetricsView.js"),
-    adminSearch: () => import("../views/adminSearchView.js"),
     admin: () => import("../views/adminView.js"),
     adminProducts: () => import("../views/adminProductsView.js"),
     adminPromotions: () => import("../views/adminPromotionsView.js"),

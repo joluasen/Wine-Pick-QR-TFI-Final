@@ -19,6 +19,7 @@ import { showToast, showToastSequence } from "../admin/components/Toast.js";
 import { showConfirmDialog } from "../admin/components/ConfirmDialog.js";
 import { modalManager } from "../core/modalManager.js";
 import { getActivePromotionByProduct } from "../admin/services/getActivePromotionByProduct.js";
+import { fetchJSON, getHashParams } from "../core/utils.js";
 
 /**
  * Inicializa la vista de gestión de productos.
@@ -39,6 +40,27 @@ export async function initAdminProductsView(_container) {
   let currentPage = 0;
   let totalProducts = 0;
   let cachedProducts = [];
+  let currentQuery = "";
+  let currentFilters = {};
+
+  function getActiveFilters() {
+    const params = getHashParams();
+    const filters = {};
+
+    const allowedFields = ["varietal", "origin", "winery_distillery", "public_code", "name", "drink_type"];
+    if (params.field && allowedFields.includes(params.field)) {
+      filters.field = params.field;
+    } else if (params.varietal === "1") filters.field = "varietal";
+    else if (params.origin === "1") filters.field = "origin";
+    else if (params.winery_distillery === "1") filters.field = "winery_distillery";
+
+    if (params.drink_type) filters.drink_type = params.drink_type;
+    if (params.vintage_year) filters.vintage_year = params.vintage_year;
+
+    currentQuery = params.query || "";
+    currentFilters = filters;
+    return { query: currentQuery, filters: currentFilters };
+  }
 
 
   /**
@@ -251,9 +273,21 @@ export async function initAdminProductsView(_container) {
 
     try {
       const offset = page * PAGE_SIZE;
+      const { query, filters } = getActiveFilters();
+      const hasSearch = Boolean(query || filters.field || filters.drink_type || filters.vintage_year);
 
       // Crear promesas para el fetch y el delay de 250 milisegundos
-      const fetchPromise = getProducts({ limit: PAGE_SIZE, offset });
+      let fetchPromise;
+      if (hasSearch) {
+        const params = new URLSearchParams({ search: query, limit: PAGE_SIZE, offset });
+        if (filters.field) params.set("field", filters.field);
+        if (filters.drink_type) params.set("drink_type", filters.drink_type);
+        if (filters.vintage_year) params.set("vintage_year", filters.vintage_year);
+        fetchPromise = fetchJSON(`./api/public/productos?${params.toString()}`)
+          .then((data) => ({ products: data?.data?.products || [], total: data?.data?.total || 0 }));
+      } else {
+        fetchPromise = getProducts({ limit: PAGE_SIZE, offset });
+      }
       const delayPromise = new Promise((resolve) => setTimeout(resolve, 250));
 
       // Esperar ambas promesas

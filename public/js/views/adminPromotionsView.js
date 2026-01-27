@@ -49,16 +49,15 @@ export async function initAdminPromotionsView(container) {
     const params = getHashParams();
     const filters = {};
 
-    // Filtros de campo textual (varietal, origin, bodega)
-    if (params.varietal) {
+    const allowedFields = ["varietal", "origin", "winery_distillery"];
+    if (params.field && allowedFields.includes(params.field)) {
+      filters.field = params.field;
+    } else if (params.varietal) {
       filters.field = "varietal";
-      filters.query = params.varietal;
     } else if (params.origin) {
       filters.field = "origin";
-      filters.query = params.origin;
     } else if (params.winery_distillery) {
       filters.field = "winery_distillery";
-      filters.query = params.winery_distillery;
     }
 
     if (params.drink_type && params.drink_type !== "1") {

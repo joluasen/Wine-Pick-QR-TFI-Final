@@ -229,73 +229,78 @@ $appConfig = [
 
   <!-- Lógica de filtros -->
   <script>
-    document.getElementById('applyFiltersBtn')?.addEventListener('click', function() {
-      // Buscar el input visible (desktop o mobile)
-      let input = null;
+    const filterCheckboxIds = ['filterVarietal', 'filterOrigin', 'filterWinery'];
+    const fieldMap = {
+      filterVarietal: 'varietal',
+      filterOrigin: 'origin',
+      filterWinery: 'winery_distillery'
+    };
+
+    const getVisibleSearchInput = () => {
       const desktopInput = document.querySelector('#desktop-search-header #searchInput');
       const mobileInput = document.querySelector('#mobile-search-header #searchInput');
-      if (desktopInput && window.getComputedStyle(desktopInput).display !== 'none') {
-        input = desktopInput;
-      } else if (mobileInput && window.getComputedStyle(mobileInput).display !== 'none') {
-        input = mobileInput;
-      } else {
-        // Fallback: tomar el primero disponible
-        input = desktopInput || mobileInput;
-      }
+      if (desktopInput && window.getComputedStyle(desktopInput).display !== 'none') return desktopInput;
+      if (mobileInput && window.getComputedStyle(mobileInput).display !== 'none') return mobileInput;
+      return desktopInput || mobileInput;
+    };
+
+    // Forzar selección única entre los filtros de campo
+    filterCheckboxIds.forEach((id) => {
+      const checkbox = document.getElementById(id);
+      checkbox?.addEventListener('change', () => {
+        if (!checkbox.checked) return;
+        filterCheckboxIds.forEach(otherId => {
+          if (otherId === id) return;
+          const other = document.getElementById(otherId);
+          if (other) other.checked = false;
+        });
+      });
+    });
+
+    document.getElementById('applyFiltersBtn')?.addEventListener('click', function() {
+      const input = getVisibleSearchInput();
       const query = input?.value?.trim() || '';
 
-
-      // Filtros de texto para varietal, origin, bodega
       const currentHash = window.location.hash.split('?')[0];
       const isAdmin = currentHash.startsWith('#admin');
       const target = currentHash === '#admin-promotions'
         ? '#admin-promotions'
-        : (isAdmin ? '#admin-search' : '#search');
+        : (isAdmin ? '#admin-products' : '#search');
 
-      let hash = target + '?query=' + encodeURIComponent(query);
+      const params = new URLSearchParams();
+      params.set('query', query);
 
-      // Filtros de texto
-      const varietalInput = document.getElementById('filterVarietalInput');
-      const originInput = document.getElementById('filterOriginInput');
-      const wineryInput = document.getElementById('filterWineryInput');
-
-      if (varietalInput?.value) {
-        hash += `&varietal=${encodeURIComponent(varietalInput.value)}`;
-      } else if (originInput?.value) {
-        hash += `&origin=${encodeURIComponent(originInput.value)}`;
-      } else if (wineryInput?.value) {
-        hash += `&winery_distillery=${encodeURIComponent(wineryInput.value)}`;
+      const selectedFieldId = filterCheckboxIds.find(id => document.getElementById(id)?.checked);
+      if (selectedFieldId) {
+        const field = fieldMap[selectedFieldId];
+        params.set('field', field);
+        params.set(field, '1');
       }
 
-      // Filtro de tipo de bebida (select)
       const drinkTypeSelect = document.getElementById('filterDrinkType');
       if (drinkTypeSelect?.value) {
-        hash += `&drink_type=${encodeURIComponent(drinkTypeSelect.value)}`;
+        params.set('drink_type', drinkTypeSelect.value);
       }
 
-      // Filtro de año
       const yearInput = document.getElementById('filterYearInput');
       if (yearInput?.value) {
-        hash += `&vintage_year=${encodeURIComponent(yearInput.value)}`;
+        params.set('vintage_year', yearInput.value);
       }
 
-      window.location.hash = hash;
+      const queryString = params.toString();
+      window.location.hash = queryString ? `${target}?${queryString}` : target;
     });
 
     // Limpiar filtros
     document.getElementById('clearFiltersBtn')?.addEventListener('click', function() {
-      // Limpiar select de tipo de bebida
       const drinkTypeSelect = document.getElementById('filterDrinkType');
       if (drinkTypeSelect) drinkTypeSelect.value = '';
 
-      // Limpiar checkboxes
-      const checkboxes = ['filterVarietal', 'filterOrigin', 'filterWinery'];
-      checkboxes.forEach(id => {
+      filterCheckboxIds.forEach(id => {
         const el = document.getElementById(id);
         if (el) el.checked = false;
       });
 
-      // Limpiar input de año
       const yearInput = document.getElementById('filterYearInput');
       if (yearInput) yearInput.value = '';
     });
