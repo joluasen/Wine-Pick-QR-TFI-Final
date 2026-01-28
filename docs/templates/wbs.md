@@ -138,14 +138,25 @@ Descomposición por entregables y tareas.
 
 ## Resumen WBS
 
-| Módulo                | Horas estimadas | Contingencia |   Total |
-| --------------------- | --------------: | -----------: | ------: |
-| 1. Kickoff y Diseño   |              23 |          15% |      26 |
-| 2. Módulo Público     |              47 |          15% |      54 |
-| 3. Panel Admin        |              61 |          15% |      70 |
-| 4. PWA y Ajustes      |              19 |          20% |      23 |
-| 5. QA y Documentación |              35 |          10% |      39 |
-| **TOTAL**             |         **185** |            - | **212** |
+### Estimación inicial vs Ejecución real
+
+| Módulo                               | Horas estimadas | Horas reales | Desviación |
+| ------------------------------------ | --------------: | -----------: | ---------- |
+| Kickoff y diseño                     |              11 |           21 | +91%       |
+| Módulo público (QR, búsqueda, ficha) |              23 |           32 | +39%       |
+| Panel admin (CRUD productos)         |              18 |           39 | +117%      |
+| Promociones y validaciones           |              14 |           26 | +86%       |
+| Métricas y dashboard                 |              12 |           18 | +50%       |
+| PWA y ajustes finales                |               8 |           20 | +150%      |
+| QA y testing                         |               7 |           10 | +43%       |
+| Documentación                        |               7 |            9 | +29%       |
+| **TOTAL**                            |         **100** |      **175** | **+75%**   |
+
+**Lecciones aprendidas:**
+
+- La validación de promociones superpuestas tomó más tiempo del estimado
+- El panel de administración requirió más iteraciones UX de lo previsto
+- La documentación de 13 templates fue más exhaustiva que lo planificado
 
 ---
 

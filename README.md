@@ -40,51 +40,61 @@ Este proyecto es un **Trabajo Final Integrador (TFI)** desarrollado para la Tecn
   <img src="docs/img/Movil/9.jpeg" width="140" alt="Búsqueda"/>
   <img src="docs/img/Movil/1.jpeg" width="140" alt="Escaneo QR"/>
   <img src="docs/img/Movil/11.jpeg" width="140" alt="Ficha Producto"/>
-  <img src="docs/img/Movil/2.jpeg" width="140" alt="Promoción"/>
 </p>
-
+<br>
 <p align="center">
+  <img src="docs/img/Movil/2.jpeg" width="140" alt="Promoción"/>
   <img src="docs/img/Movil/14.jpeg" width="140" alt="Lista Promociones"/>
   <img src="docs/img/Movil/12.jpeg" width="140" alt="Admin Móvil"/>
   <img src="docs/img/Movil/5.jpeg" width="140" alt="Métricas"/>
+</p>
+<br>
+<p align="center">
     <img src="docs/img/Movil/6.jpeg" width="140" alt="Métricas"/>
   <img src="docs/img/Movil/16.jpeg" width="140" alt="Productos"/>
-</p>
-
-<p align="center">
   <img src="docs/img/Movil/15.jpeg" width="140" alt="Promociones"/>
   <img src="docs/img/Movil/3.jpeg" width="140" alt="Crear Producto"/>
+</p>
+<br>
+<p align="center">
   <img src="docs/img/Movil/17.jpeg" width="140" alt="Editar Producto"/>
     <img src="docs/img/Movil/4.jpeg" width="140" alt="Crear Promoción"/>
       <img src="docs/img/Movil/18.jpeg" width="140" alt="Editar Promoción"/>
 </p>
 
 </details>
-
 <details>
 <summary><b>💻 Versión Escritorio (Administrador)</b></summary>
 <br>
 
 <p align="center">
-  <img src="docs/img/PC/Captura de pantalla 2026-01-27 191523.png" width="280" alt="Login"/>
-  <img src="docs/img/PC/Captura de pantalla 2026-01-27 190932.png" width="280" alt="Métricas"/>
-  <img src="docs/img/PC/Captura de pantalla 2026-01-27 191024.png" width="280" alt="Productos"/>
+  <img src="docs/img/PC/Captura de pantalla 2026-01-27 191523.png" width="320" alt="Login"/>
+  <img src="docs/img/PC/Captura de pantalla 2026-01-27 190932.png" width="320" alt="Métricas"/>
 </p>
-
+<br>
 <p align="center">
-  <img src="docs/img/PC/Captura de pantalla 2026-01-27 191219.png" width="280" alt="Promociones"/>
-  <img src="docs/img/PC/Captura de pantalla 2026-01-27 191200.png" width="280" alt="Crear Producto"/>
-  <img src="docs/img/PC/Captura de pantalla 2026-01-27 194848.png" width="280" alt="Crear Promoción"/>
-</p>
-
+  <img src="docs/img/PC/Captura de pantalla 2026-01-27 191024.png" width="320" alt="Productos"/>
+  <img src="docs/img/PC/Captura de pantalla 2026-01-27 191219.png" width="320" alt="Promociones"/>
+  </p>
+  <br>
 <p align="center">
-  <img src="docs/img/PC/Captura de pantalla 2026-01-27 191101.png" width="280" alt="Editar Producto"/>
-  <img src="docs/img/PC/Captura de pantalla 2026-01-27 191240.png" width="280" alt="Editar Promoción"/>
-  <img src="docs/img/PC/Captura de pantalla 2026-01-27 191401.png" width="280" alt="Busquedas"/>
+  <img src="docs/img/PC/Captura de pantalla 2026-01-27 191200.png" width="320" alt="Crear Producto"/>
+  <img src="docs/img/PC/Captura de pantalla 2026-01-27 194848.png" width="320" alt="Crear Promoción"/>
 </p>
+<br>
 <p align="center">
-  <img src="docs/img/PC/Captura de pantalla 2026-01-27 191340.png" width="280" alt="Busquedas"/>
+  <img src="docs/img/PC/Captura de pantalla 2026-01-27 191101.png" width="320" alt="Editar Producto"/>
+  <img src="docs/img/PC/Captura de pantalla 2026-01-27 191240.png" width="320" alt="Editar Promoción"/>
 </p>
+<br>
+<p align="center">
+  <img src="docs/img/PC/Captura de pantalla 2026-01-27 191401.png" width="320" alt="Busquedas"/>
+  <img src="docs/img/PC/Captura de pantalla 2026-01-27 191340.png" width="320" alt="Busquedas"/>
+</p>
+<br>
+<br>
+<br>
+<br>
 </details>
 
 ## Arquitectura
@@ -208,7 +218,7 @@ Todos los documentos del proyecto están en `docs/templates/` para referencia:
 
 - **Project Brief:** [project_brief.md](docs/templates/project_brief.md) — Definición del alcance, objetivos SMART, stakeholders y KPIs
 - **Historias de Usuario:** [user_story.md](docs/templates/user_story.md) — Requisitos detallados desde perspectiva del usuario (14 HU)
-- **WBS:** [wbs.md](docs/templates/wbs.md) — Descomposición del trabajo y estimación PERT (7 módulos, ~168h)
+- **WBS:** [wbs.md](docs/templates/wbs.md) — Descomposición del trabajo y estimación PERT (5 módulos, 100h estimadas / 175h reales)
 - **MoSCoW:** [moscow_prioritization.md](docs/templates/moscow_prioritization.md) — Priorización de requisitos
 
 ### Ejecución y validación
@@ -264,9 +274,9 @@ Wine-Pick-QR-TFI/
 ├── 📁 database/                     # Base de datos
 │   ├── database.sql                 # Schema MySQL
 │   └── seed.sql                     # Datos iniciales
-├── 📁 templates/                    # Documentación del proyecto
 ├── 📁 docs/                         # Recursos (imágenes, diagramas)
 │   └── 📂 img/
+|   └── 📁 templates/                # Documentación del proyecto
 ├── 🔑 .env                          # Variables de entorno (NO subir)
 ├── 📋 .env.example                  # Ejemplo de configuración
 ├── 📜 README.md                     # Este archivo
