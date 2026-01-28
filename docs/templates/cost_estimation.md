@@ -50,11 +50,11 @@ No se utilizó metodología Scrum formal con story points. El desarrollo fue inc
 | Kickoff y diseño                     |              11 |           21 |
 | Módulo público (QR, búsqueda, ficha) |              23 |           32 |
 | Panel admin (CRUD productos)         |              18 |           39 |
-| Promociones y validaciones           |              14 |           25 |
-| Métricas y dashboard                 |              11 |           18 |
-| PWA y ajustes finales                |               7 |           14 |
-| QA y testing                         |               7 |           11 |
-| Documentación                        |               9 |           15 |
+| Promociones y validaciones           |              14 |           26 |
+| Métricas y dashboard                 |              12 |           18 |
+| PWA y ajustes finales                |               8 |           20 |
+| QA y testing                         |               7 |           10 |
+| Documentación                        |               7 |           9  |
 | **Total**                            |         **100** |      **175** |
 
 ## Cronograma tentativo (derivado de capacidad)
