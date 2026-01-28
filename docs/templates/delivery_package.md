@@ -1,6 +1,6 @@
 # Paquete de Entrega (deploy)
 
-**URL Producción:** `http://localhost/proyectos/Wine-Pick-QR-TFI` (entorno local XAMPP) | Producción: `https://imperialsoft.site/projects/winepickqr/`
+**URL Producción:** `http://localhost/proyectos/Wine-Pick-QR-TFI` (entorno local XAMPP) | Producción: `https://dominio.com`
 **Usuario demo:** Admin / Admin2026!
 
 > **Importante:** Cambiar la contraseña del administrador antes de usar en producción.
