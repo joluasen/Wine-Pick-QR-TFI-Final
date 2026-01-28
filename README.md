@@ -8,9 +8,14 @@ Aplicación web progresiva (PWA) para vinotecas, que permite a los clientes cons
 
 ## Resumen del proyecto
 
-- Permite digitalizar la consulta de precios y promociones en vinotecas.
-- Elimina la dependencia de cartelería física y reduce errores en caja.
-- Captura métricas de interés sobre productos más consultados.
+Este proyecto es un **Trabajo Final Integrador (TFI)** desarrollado para la Tecnicatura Universitaria en Programación de la UTN. Resuelve un problema real: en vinotecas, mantener precios actualizados en cartelería es costoso y genera fricción cuando no coinciden con caja. La solución digitaliza la consulta mediante QR y búsqueda, eliminando carteles físicos mientras captura métricas de interés del cliente.
+
+**Objetivos:**
+
+- Digitalizar consulta de precios y promociones en vinotecas
+- Eliminar dependencia de cartelería física y reducir errores en caja
+- Capturar métricas sobre productos más consultados
+- Entrega como PWA instalable sin requirir app nativa
 
 ## Características principales
 
@@ -122,7 +127,6 @@ Aplicación web progresiva (PWA) para vinotecas, que permite a los clientes cons
 - PHP 8.x (con type declarations y arquitectura MVC)
 - API REST (respuestas en JSON)
 - Router personalizado con mapeo de rutas
-- Autoloader PSR-4
 
 **Base de datos:**
 
@@ -132,7 +136,6 @@ Aplicación web progresiva (PWA) para vinotecas, que permite a los clientes cons
 
 - JWT (autenticación con tokens)
 - password_hash (almacenamiento seguro de contraseñas)
-- Prepared Statements (prevención de inyección SQL)
 - HttpOnly Cookies (almacenamiento seguro de tokens)
 
 **PWA:**
@@ -146,11 +149,10 @@ Aplicación web progresiva (PWA) para vinotecas, que permite a los clientes cons
 
 ### Requisitos previos
 
-- PHP 8.x
-- MySQL 8.x
-- Navegador moderno (Chrome, Edge, Safari, Firefox)
-
-### Instalación
+- **PHP 8.x** — Motor de backend
+- **MySQL 8.x** — Base de datos
+- **Navegador moderno** — Chrome, Edge, Safari o Firefox
+- **XAMPP** (recomendado para desarrollo local)
 
 ### Instalación con XAMPP
 
@@ -161,20 +163,21 @@ Aplicación web progresiva (PWA) para vinotecas, que permite a los clientes cons
 2. **Configura las variables de entorno:**
    - En la raíz del proyecto, copia `.env.example` y renómbralo a `.env`
    - Abre `.env` y verifica/ajusta los valores según tu entorno:
+
      ```env
      # Entorno de desarrollo
      WPQ_ENV=dev
-     
+
      # Base de datos (valores por defecto de XAMPP)
      DB_HOST=localhost
      DB_NAME=wine_pick_qr
      DB_USER=root
      DB_PASS=
      DB_CHARSET=utf8mb4
-     
+
      # URL base (usar esta para desarrollo local con XAMPP)
      BASE_URL=http://localhost/Wine-Pick-QR-TFI
-     
+
      # Clave JWT (mantener la proporcionada o generar una nueva)
      JWT_SECRET=b5c025c29f1932882a6542a360f34e882cd4ae0a2805e7617372d1c4b6d5a5dc
      ```
@@ -191,17 +194,37 @@ Aplicación web progresiva (PWA) para vinotecas, que permite a los clientes cons
    - Usuario admin: `Admin`
    - Contraseña admin: `Admin2026!`
 
-> ⚠️ **Importante:** Cambia la contraseña del administrador después de la primera instalación en `Perfil > Cambiar Contraseña`
+> **Importante:** Cambia la contraseña del administrador después de la primera instalación en `Perfil > Cambiar Contraseña`
 
-> 🔒 **Seguridad:** Nunca subas el archivo `.env` al repositorio. Usa `.env.example` como referencia.
+> **Seguridad:** Nunca subas el archivo `.env` al repositorio. Usa `.env.example` como referencia.
 
-## Documentación
+> **Para más detalles sobre deploy en producción**, consulta [Paquete de Entrega](docs/templates/delivery_package.md)
 
-- **Manual de Usuario:** [templates/manual_usuario.md](templates/manual_usuario.md) — Instrucciones detalladas para clientes y administradores
-- **Project Brief:** [templates/project_brief.md](templates/project_brief.md) — Definición del alcance y objetivos
-- **WBS:** [templates/wbs.md](templates/wbs.md) — Planificación del desarrollo
-- **Historias de Usuario:** [templates/user_story.md](templates/user_story.md) — Requisitos desde perspectiva del usuario
-- **Plan de UAT:** [templates/uat_plan.md](templates/uat_plan.md) — Validación de funcionalidades
+## Documentación completa
+
+Todos los documentos del proyecto están en `docs/templates/` para referencia:
+
+### Planificación y análisis
+
+- **Project Brief:** [project_brief.md](docs/templates/project_brief.md) — Definición del alcance, objetivos SMART, stakeholders y KPIs
+- **Historias de Usuario:** [user_story.md](docs/templates/user_story.md) — Requisitos detallados desde perspectiva del usuario (14 HU)
+- **WBS:** [wbs.md](docs/templates/wbs.md) — Descomposición del trabajo y estimación PERT (7 módulos, ~168h)
+- **MoSCoW:** [moscow_prioritization.md](docs/templates/moscow_prioritization.md) — Priorización de requisitos
+
+### Ejecución y validación
+
+- **Plan de UAT:** [uat_plan.md](docs/templates/uat_plan.md) — 20 casos de prueba validados
+- **QA Checklist:** [qa_checklist.md](docs/templates/qa_checklist.md) — Lista de verificación de calidad
+- **Manual de Usuario:** [manual_usuario.md](docs/templates/manual_usuario.md) — Instrucciones paso a paso para clientes y admin
+- **Paquete de Entrega:** [delivery_package.md](docs/templates/delivery_package.md) — Guía de deploy y puesta en producción
+
+### Seguimiento del proyecto
+
+- **Actas de Reuniones:** [meeting_minutes.md](docs/templates/meeting_minutes.md) — Registro de decisiones y sprints
+- **Registro de Riesgos:** [risk_log.md](docs/templates/risk_log.md) — Riesgos identificados y mitigación
+- **Estimación de Costos:** [cost_estimation.md](docs/templates/cost_estimation.md) — Desglose de recursos
+- **Retrospectiva:** [retrospective.md](docs/templates/retrospective.md) — Lecciones aprendidas
+- **Changelog:** [changelog.md](docs/templates/changelog.md) — Historial de cambios versión a versión
 
 ## Estructura de carpetas
 
@@ -273,38 +296,54 @@ BASE_URL=http://localhost/Wine-Pick-QR-TFI
 
 ### Buenas prácticas de seguridad:
 
-- ✅ **Nunca subas `.env` al repositorio** — Solo `.env.example` debe versionarse
-- ✅ **Genera un JWT_SECRET único** — Usa `bin2hex(random_bytes(32))` en PHP
-- ✅ **Cambia las credenciales en producción** — Usuario y contraseña BD diferentes
-- ✅ **Cambia la contraseña del admin** — Después de la instalación inicial
-- ✅ **Usa HTTPS en producción** — Actualiza `BASE_URL` a `https://`
-- ✅ **Usa `WPQ_ENV=prod` en producción** — Desactiva logs verbosos y errores detallados
-- ✅ **Usa contraseñas fuertes para admin** — Mínimo 10 caracteres, mayúsculas, números, símbolos
+- **Nunca subas `.env` al repositorio** — Solo `.env.example` debe versionarse
+- **Genera un JWT_SECRET único** — Usa `bin2hex(random_bytes(32))` en PHP
+- **Cambia las credenciales en producción** — Usuario y contraseña BD diferentes
+- **Cambia la contraseña del admin** — Después de la instalación inicial
+- **Usa HTTPS en producción** — Actualiza `BASE_URL` a `https://`
+- **Usa `WPQ_ENV=prod` en producción** — Desactiva logs verbosos y errores detallados
+- **Usa contraseñas fuertes para admin** — Mínimo 10 caracteres, mayúsculas, números, símbolos
 
 ## Pruebas y validación
 
-Se incluye un plan de UAT completo con 20 casos de prueba validados:
+Todos los 20 casos de prueba del **[Plan de UAT](docs/templates/uat_plan.md)** han sido **validados exitosamente**
 
-- ✅ Escaneo de QR
-- ✅ Búsqueda con filtros
-- ✅ CRUD de productos y promociones
-- ✅ Autenticación y seguridad
-- ✅ Métricas y reportes
-- ✅ Responsividad móvil/desktop
+**Cobertura de pruebas:**
+
+| Área                | Casos           | Estado   |
+| ------------------- | --------------- | -------- |
+| Escaneo de QR       | UAT-01 a UAT-04 | Aprobado |
+| Búsqueda y filtros  | UAT-05 a UAT-06 | Aprobado |
+| Promociones         | UAT-07 a UAT-08 | Aprobado |
+| Autenticación admin | UAT-09 a UAT-11 | Aprobado |
+| CRUD Productos      | UAT-12 a UAT-14 | Aprobado |
+| CRUD Promociones    | UAT-15 a UAT-17 | Aprobado |
+| Métricas y reportes | UAT-18 a UAT-19 | Aprobado |
+| Gestión de sesión   | UAT-20          | Aprobado |
+
+Ver [QA Checklist](docs/templates/qa_checklist.md) para detalles técnicos de validación.
 
 ## Declaración de uso de Inteligencia Artificial
 
 Parte del desarrollo de este proyecto fue asistido por herramientas de Inteligencia Artificial (IA), incluyendo generación y revisión de código, documentación y redacción de manuales. Se utilizaron modelos como **Claude (Anthropic)** y **Copilot (OpenAI GPT-4)** para optimizar tiempos, mejorar la calidad del código y asegurar buenas prácticas de desarrollo. Todas las decisiones técnicas y de diseño final fueron validadas y adaptadas por los autores del proyecto.
+
+## Referencias cruzadas con documentos de proyecto
+
+- **Análisis detallado** → [Project Brief](docs/templates/project_brief.md)
+- **Requisitos funcionales** → [Historias de Usuario](docs/templates/user_story.md)
+- **Roadmap técnico** → [WBS](docs/templates/wbs.md)
+- **Validación completa** → [Plan de UAT](docs/templates/uat_plan.md)
+- **Puesta en marcha** → [Paquete de Entrega](docs/templates/delivery_package.md)
+- **Lecciones aprendidas** → [Retrospectiva](docs/templates/retrospective.md)
 
 ## Créditos y contacto
 
 **Autores:**
 
 - [Esteban Rusch](https://github.com/EstebanRsh) — Desarrollador principal
-- Jorge Asencio — Co-desarrollador
+- Jorge Asencio — Desarrollador
 
 **Proyecto:** Trabajo Final Integrador (TFI) — Tecnicatura Universitaria en Programación — UTN (Noviembre 2025 - Febrero 2026)
-
 
 ## Licencia
 
