@@ -2,7 +2,7 @@
 
 **Alcance UAT:** Validar flujos principales del sistema desde la perspectiva del cliente (consulta por QR/búsqueda) y del administrador (CRUD productos/promociones, métricas).
 
-**Ambiente/Accesos:** Local XAMPP o `https://imperialsoft.site/projects/winepickqr/` | Usuario: Admin / Admin2026! | Dispositivos: celular con cámara, navegador desktop.
+**Ambiente/Accesos:** Local XAMPP o `https://dominio.com` | Usuario: Admin / Admin2026! | Dispositivos: celular con cámara, navegador desktop.
 
 ## Casos de prueba (alto nivel)
 
