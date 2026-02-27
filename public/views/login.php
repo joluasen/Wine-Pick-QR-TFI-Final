@@ -1,4 +1,3 @@
-
 <?php
 /**
  * Vista de Login (modal custom, sin Bootstrap)

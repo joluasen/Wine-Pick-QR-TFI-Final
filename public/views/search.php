@@ -1,4 +1,3 @@
-
 <?php
 /**
  * Vista parcial: search.php
@@ -6,7 +5,6 @@
  * Descripción: Vista de resultados de búsqueda pública con soporte para filtros.
  * Muestra los productos encontrados según los criterios seleccionados.
  */
-header('Content-Type: text/html; charset=utf-8');
 ?>
 
 <section data-view="search">

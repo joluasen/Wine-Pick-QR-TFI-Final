@@ -1,4 +1,3 @@
-
 <?php
 /**
  * Vista parcial: promotions.php
@@ -6,7 +5,6 @@
  * Propósito: Listado de productos con promociones vigentes.
  * Muestra las ofertas y descuentos activos en la plataforma, con paginación y estado dinámico.
  */
-header('Content-Type: text/html; charset=utf-8');
 ?>
 
 <section data-view="promotions">

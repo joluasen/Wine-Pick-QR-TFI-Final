@@ -1,4 +1,3 @@
-
 <?php
 /**
  * Vista de Promociones para Admin
@@ -6,7 +5,6 @@
  * Este archivo define la interfaz de administración de promociones, permitiendo crear, editar y controlar
  * las promociones del catálogo. Incluye tabla para escritorio, cards para móvil y paginación.
  */
-header('Content-Type: text/html; charset=utf-8');
 ?>
 
 <!--
