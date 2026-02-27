@@ -1,0 +1,27 @@
+# ============================================
+# Wine-Pick-QR - Git Ignore
+# ============================================
+
+# Logs (pueden contener información sensible)
+logs/
+*.log
+
+# Archivos temporales
+*.zip
+*.tmp
+*.bak
+*.swp
+
+# Uploads de usuarios (no versionar)
+public/uploads/products/*
+!public/uploads/products/.gitkeep
+
+# IDE y editores
+.vscode/
+
+# Sistema
+.DS_Store
+Thumbs.db
+
+# Variables de entorno
+.env

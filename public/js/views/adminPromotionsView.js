@@ -1,0 +1,375 @@
+
+/**
+ * adminPromotionsView.js
+ *
+ * Vista de gestión de promociones para el panel de administración.
+ *
+ * Orquesta la carga, renderizado y acciones CRUD sobre promociones, tanto en tabla (desktop)
+ * como en cards (mobile), delegando operaciones a servicios y componentes.
+ *
+ * Principales responsabilidades:
+ * - Renderizar tabla y cards de promociones
+ * - Manejar paginación y estado de carga
+ * - Delegar operaciones CRUD a servicios
+ * - Adjuntar listeners para editar y eliminar
+ */
+
+import {
+  getPromotions,
+  deletePromotion,
+} from "../admin/services/promotionService.js";
+import { getHashParams } from "../core/utils.js";
+import { showToast } from "../admin/components/Toast.js";
+import { showConfirmDialog } from "../admin/components/ConfirmDialog.js";
+import { modalManager } from "../core/modalManager.js";
+
+/**
+ * Inicializa la vista de gestión de promociones.
+ * Configura listeners, renderiza tabla/cards y maneja paginación y acciones CRUD.
+ * @param {HTMLElement} container - Contenedor de la vista
+ */
+export async function initAdminPromotionsView(container) {
+  // El HTML está en adminPromotions.php, solo obtenemos referencias a los elementos existentes
+  const loadingEl = container.querySelector("#admin-promos-loading");
+  const contentEl = container.querySelector("#admin-promos-content");
+  const tableBody = container.querySelector("#admin-promos-table tbody");
+  const cardsContainer = container.querySelector("#admin-promos-cards");
+  const paginationEl = container.querySelector("#admin-promos-page");
+  const prevBtn = container.querySelector("#admin-promos-prev");
+  const nextBtn = container.querySelector("#admin-promos-next");
+
+  const PAGE_SIZE = 20;
+  let currentPage = 0;
+  let totalPromos = 0;
+  let currentQuery = "";
+  let lastPromotions = [];
+  let currentFilters = {};
+
+  function getActiveFilters() {
+    const params = getHashParams();
+    const filters = {};
+
+    const allowedFields = ["varietal", "origin", "winery_distillery"];
+    if (params.field && allowedFields.includes(params.field)) {
+      filters.field = params.field;
+    } else if (params.varietal) {
+      filters.field = "varietal";
+    } else if (params.origin) {
+      filters.field = "origin";
+    } else if (params.winery_distillery) {
+      filters.field = "winery_distillery";
+    }
+
+    if (params.drink_type && params.drink_type !== "1") {
+      filters.drink_type = params.drink_type;
+    }
+
+    if (params.vintage_year) {
+      filters.vintage_year = params.vintage_year;
+    }
+
+    return filters;
+  }
+
+
+  /**
+   * Muestra el estado de carga (oculta contenido)
+   */
+  function showLoading() {
+    if (loadingEl) loadingEl.style.display = "block";
+    if (contentEl) contentEl.style.display = "none";
+  }
+
+  /**
+   * Muestra el contenido (oculta loading)
+   */
+  function showContent() {
+    if (loadingEl) loadingEl.style.display = "none";
+    if (contentEl) contentEl.style.display = "block";
+  }
+
+
+  /**
+   * Actualiza los controles de paginación (número de página y botones).
+   * @param {number} page - Página actual (base 0)
+   * @param {number} total - Total de promociones
+   */
+  function updatePagination(page, total) {
+    const totalPages = Math.ceil(total / PAGE_SIZE) || 1;
+    paginationEl.textContent = `${page + 1} de ${totalPages}`;
+    prevBtn.disabled = page <= 0;
+    nextBtn.disabled = page >= totalPages - 1;
+
+    // Ocultar paginación si hay menos de PAGE_SIZE resultados
+    if (total < PAGE_SIZE) {
+      paginationEl.style.display = 'none';
+      prevBtn.style.display = 'none';
+      nextBtn.style.display = 'none';
+    } else {
+      paginationEl.style.display = '';
+      prevBtn.style.display = '';
+      nextBtn.style.display = '';
+    }
+  }
+
+  /**
+   * Renderiza las filas de la tabla de promociones (modo desktop).
+   * @param {Array} promos - Lista de promociones
+   * @returns {string} HTML de filas
+   */
+  function renderRows(promos) {
+    let rows = promos.map(
+      (p) => `
+      <tr>
+        <td>${p.id}</td>
+        <td class="cell-truncate" title="${p.product_name || ""}">${p.product_name || ""}</td>
+        <td class="col-secondary">${p.promotion_type}</td>
+        <td class="col-secondary">${p.parameter_value}</td>
+        <td class="cell-truncate" title="${p.visible_text}">${p.visible_text}</td>
+        <td>${p.start_at ? p.start_at.split(" ")[0] : ""}</td>
+        <td>${p.end_at ? p.end_at.split(" ")[0] : ""}</td>
+        <td>
+          <button class="btn-table" data-edit-promo="${p.id}">Editar</button>
+          <button class="btn-table ms-1" data-delete-promo="${p.id}">Borrar</button>
+          <button class="btn-table ms-1" data-view-product="${p.product_id}">Ver</button>
+        </td>
+      </tr>
+    `
+    );
+
+    // Rellenar con filas vacías
+    for (let i = promos.length; i < PAGE_SIZE; i++) {
+      rows.push("<tr>" + "<td>&nbsp;</td>".repeat(8) + "</tr>");
+    }
+
+    return rows.join("");
+  }
+
+  /**
+   * Renderiza las cards de promociones para la vista mobile.
+   * @param {Array} promos - Lista de promociones
+   * @returns {string} HTML de cards
+   */
+  function renderCards(promos) {
+    if (promos.length === 0) {
+      return '<div class="text-center py-4 text-muted">No hay promociones para mostrar.</div>';
+    }
+
+    return promos
+      .map(
+        (p) => `
+      <div class="admin-promo-card-mobile">
+        <div class="card-mobile-header">
+          <div style="flex: 1;">
+            <div class="card-mobile-title">${p.product_name || "Sin producto"}</div>
+            <div class="card-mobile-code">ID: ${p.id}</div>
+          </div>
+        </div>
+        <div class="card-mobile-body">
+          <div class="card-mobile-info">
+            <span class="card-mobile-label">Tipo</span>
+            <span class="card-mobile-value">${p.promotion_type}</span>
+          </div>
+          <div class="card-mobile-info">
+            <span class="card-mobile-label">Valor</span>
+            <span class="card-mobile-value">${p.parameter_value}</span>
+          </div>
+          <div class="card-mobile-info">
+            <span class="card-mobile-label">Texto visible</span>
+            <span class="card-mobile-value">${p.visible_text}</span>
+          </div>
+          <div class="card-mobile-info">
+            <span class="card-mobile-label">Inicio</span>
+            <span class="card-mobile-value">${p.start_at ? p.start_at.split(" ")[0] : "N/A"}</span>
+          </div>
+          <div class="card-mobile-info">
+            <span class="card-mobile-label">Fin</span>
+            <span class="card-mobile-value">${p.end_at ? p.end_at.split(" ")[0] : "N/A"}</span>
+          </div>
+        </div>
+        <div class="card-mobile-actions">
+          <button class="btn-table btn-mobile" data-edit-promo="${p.id}">
+            <i class="fas fa-edit"></i>
+            <span>Editar</span>
+          </button>
+          <button class="btn-table btn-mobile" data-delete-promo="${p.id}">
+            <i class="fas fa-trash"></i>
+            <span>Borrar</span>
+          </button>
+        </div>
+      </div>
+    `
+      )
+      .join("");
+  }
+
+  /**
+   * Adjunta event listeners a los botones de acciones (editar, eliminar).
+   * Utiliza la lista actual de promociones para encontrar la promoción correspondiente.
+   */
+  function attachActionListeners() {
+    // Obtener todos los botones tanto de tabla como de cards
+    const allEditBtns = container.querySelectorAll("[data-edit-promo]");
+    const allDeleteBtns = container.querySelectorAll("[data-delete-promo]");
+    const allViewProductBtns = container.querySelectorAll("[data-view-product]");
+    // Ver producto
+    allViewProductBtns.forEach((btn) => {
+      btn.onclick = async () => {
+        const productId = btn.getAttribute("data-view-product");
+        try {
+          // Traer ficha completa del producto desde el backend
+          const { getProductById } = await import("../admin/services/productService.js");
+          const product = await getProductById(productId);
+          if (!product) {
+            showToast("No se pudo cargar el producto", "error");
+            return;
+          }
+          modalManager.showProductAdmin(product);
+        } catch (err) {
+          showToast("Error al cargar producto: " + err.message, "error");
+        }
+      };
+    });
+
+    // Editar
+    allEditBtns.forEach((btn) => {
+      btn.onclick = async () => {
+        const promoId = btn.getAttribute("data-edit-promo");
+        
+        try {
+          // Buscar la promoción en la lista actual
+          const promotion = lastPromotions.find(p => p.id == promoId);
+          
+          if (!promotion) {
+            showToast("No se pudo cargar la promoción", "error");
+            return;
+          }
+          
+          // Abrir modal de edición
+          modalManager.showEditPromotion(promotion, () => {
+            // Recargar lista después de editar
+            loadPromos(currentPage, currentQuery);
+          });
+          
+        } catch (err) {
+          showToast(`Error al cargar promoción: ${err.message}`, "error");
+        }
+      };
+    });
+
+    // Eliminar
+    allDeleteBtns.forEach((btn) => {
+      btn.onclick = async () => {
+        const promoId = btn.getAttribute("data-delete-promo");
+        
+        // Confirmar eliminación con diálogo personalizado
+        const confirmed = await showConfirmDialog({
+          title: "Eliminar promoción",
+          message: `¿Estás seguro de que deseas eliminar esta promoción?`,
+          confirmText: "Eliminar",
+          cancelText: "Cancelar",
+          confirmClass: "btn-danger",
+        });
+
+        if (!confirmed) {
+          return;
+        }
+
+        try {
+          // Mostrar toast de inicio
+          const loadingToast = showToast("Eliminando promoción...", "info", 0);
+          
+          // Llamar al servicio de eliminación
+          await deletePromotion(promoId);
+          
+          // Esperar un poco para que se vea el toast de carga
+          await new Promise((resolve) => setTimeout(resolve, 800));
+          
+          // Remover toast de carga
+          loadingToast.classList.remove('show');
+          setTimeout(() => loadingToast.remove(), 300);
+          
+          // Mostrar toast de éxito
+          showToast("Promoción eliminada correctamente", "success");
+          
+          // Recargar lista
+          loadPromos(currentPage, currentQuery);
+        } catch (err) {
+          showToast(`Error al eliminar: ${err.message}`, "error");
+        }
+      };
+    });
+  }
+
+  /**
+   * Carga promociones de la página especificada desde el servicio.
+   * Renderiza tabla/cards, actualiza paginación y maneja estados vacíos y errores.
+   * @param {number} page - Página a cargar (base 0)
+   */
+  async function loadPromos(page = 0, query = "") {
+    showLoading();
+    tableBody.innerHTML = `<tr><td colspan='9'>Cargando...</td></tr>`;
+
+    try {
+      const offset = page * PAGE_SIZE;
+      currentQuery = query;
+      currentFilters = getActiveFilters();
+      
+      // Crear promesas para el fetch y el delay de 250 milisegundos
+      const fetchPromise = getPromotions({
+        limit: PAGE_SIZE,
+        offset,
+        search: query,
+        filters: currentFilters,
+      });
+      const delayPromise = new Promise((resolve) => setTimeout(resolve, 250));
+
+      // Esperar ambas promesas
+      const [{ promotions, total }] = await Promise.all([
+        fetchPromise,
+        delayPromise,
+      ]);
+
+      lastPromotions = promotions;
+      totalPromos = total;
+
+      if (promotions.length === 0 && totalPromos === 0) {
+        tableBody.innerHTML = `<tr><td colspan='9'>No hay promociones para mostrar.</td></tr>`;
+        cardsContainer.innerHTML =
+          '<div class="text-center py-4 text-muted">No hay promociones para mostrar.</div>';
+      } else {
+        tableBody.innerHTML = renderRows(promotions);
+        cardsContainer.innerHTML = renderCards(promotions);
+        attachActionListeners();
+      }
+
+      updatePagination(page, totalPromos);
+      showContent();
+    } catch (err) {
+      tableBody.innerHTML = `<tr><td colspan='9'>Error al cargar promociones</td></tr>`;
+      showToast(`Error: ${err.message}`, "error");
+      updatePagination(page, totalPromos);
+      showContent();
+    }
+  }
+
+  // Event listeners de paginación
+  prevBtn.onclick = () => {
+    if (currentPage > 0) {
+      currentPage--;
+      loadPromos(currentPage, currentQuery);
+    }
+  };
+
+  nextBtn.onclick = () => {
+    const totalPages = Math.ceil(totalPromos / PAGE_SIZE) || 1;
+    if (currentPage < totalPages - 1) {
+      currentPage++;
+      loadPromos(currentPage, currentQuery);
+    }
+  };
+
+  const initialParams = getHashParams();
+  currentQuery = initialParams.query || "";
+  loadPromos(0, currentQuery);
+}

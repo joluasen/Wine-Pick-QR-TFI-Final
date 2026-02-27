@@ -1,0 +1,349 @@
+/* =========================================
+   LAYOUT.CSS - Estilos de Layout Principal
+   ========================================= */
+
+/* Consumir tokens desde theme.css para evitar duplicaciones */
+
+/* =========================================
+   BODY Y CONTENEDOR PRINCIPAL
+   ========================================= */
+
+body {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: #ffffff;
+  color: #333333;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  overflow-x: hidden;
+}
+
+/* =========================================
+   HEADER
+   ========================================= */
+
+header {
+  background-color: #ffffff;
+  border-bottom: 1px solid #e8e8e8;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  position: sticky;
+  top: 0;
+  z-index: 1025;
+}
+
+header .h5 {
+  color: var(--winepick-primary);
+  font-weight: 700;
+  letter-spacing: -0.3px;
+}
+
+header .h5 i {
+  margin-right: 0.5rem;
+}
+
+#loginBtn {
+  transition: color 0.2s ease, transform 0.1s ease;
+}
+
+#loginBtn:hover {
+  color: var(--winepick-accent) !important;
+  text-decoration: underline !important;
+}
+
+#loginBtn:active {
+  transform: scale(0.98);
+}
+
+/* =========================================
+   MAIN FLEX CONTAINER
+   ========================================= */
+
+.d-flex.flex-grow-1 {
+  flex: 1;
+  display: flex;
+  gap: 0;
+}
+
+/* =========================================
+   SIDEBAR
+   ========================================= */
+
+#sidebar-container {
+  position: sticky;
+  top: 80px;
+  height: calc(100vh - 80px);
+  overflow-y: auto;
+  background-color: #ffffff;
+  border-right: 1px solid #e8e8e8;
+  padding: 0;
+  width: 70px;
+  flex-shrink: 0;
+}
+
+#sidebar-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+#sidebar-container::-webkit-scrollbar-track {
+  background: #f0f0f0;
+}
+
+#sidebar-container::-webkit-scrollbar-thumb {
+  background: #d0d0d0;
+  border-radius: 3px;
+}
+
+#sidebar-container::-webkit-scrollbar-thumb:hover {
+  background: #b0b0b0;
+}
+
+/* =========================================
+   MAIN CONTENT
+   ========================================= */
+
+#app-root {
+  flex: 1;
+  display: block;
+  overflow-y: auto;
+  background-color: #fafafa;
+  min-height: 100%;
+  padding: 10px;
+}
+
+/* =========================================
+   MOBILE PADDING (BOTTOM NAV)
+   ========================================= */
+
+@media (max-width: 767.98px) {
+  body {
+    padding-bottom: 80px;
+  }
+
+  #sidebar-container {
+    display: none !important;
+  }
+
+  header {
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+  }
+
+  #app-root {
+    padding: 0;
+  }
+
+  section[data-view] {
+    padding: 0;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  section[data-view] h2 {
+    padding: 0 0.5rem;
+    font-size: 1rem;
+    margin-bottom: 0.15rem;
+  }
+
+  section[data-view] > p {
+    padding: 0 0.5rem;
+    font-size: 0.75rem;
+    margin-bottom: 0.35rem;
+  }
+
+  section[data-view] > div[id$="-status"],
+  section[data-view] > div[id$="-pagination"] {
+    padding: 0 0.5rem;
+  }
+}
+
+/* =========================================
+   DESKTOP STYLES
+   ========================================= */
+
+@media (min-width: 768px) {
+  #nav-container {
+    display: none !important;
+  }
+
+  header {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  }
+
+  header .py-3 {
+    padding: 1rem 0 !important;
+  }
+}
+
+/* =========================================
+   VISTAS Y CONTENIDO
+   ========================================= */
+
+/* Contenedor de vista genérica */
+.view-container {
+  padding: 0.5rem;
+  max-width: 100%;
+}
+
+@media (min-width: 768px) {
+  .view-container {
+    padding: 1rem;
+    max-width: 1280px;
+    margin: 0 auto;
+  }
+}
+
+/* Secciones de vistas (data-view) */
+section[data-view] {
+  background: var(--color-card);
+  padding: 10px;
+  border-radius: 2px;
+  border: 1px solid var(--color-border-light);
+  box-shadow: var(--shadow-sm);
+}
+
+section[data-view] h2 {
+  font-size: 1.1rem;
+  margin-bottom: 0.25rem;
+  padding: 0 0.5rem;
+  font-weight: 600;
+}
+
+section[data-view] > p {
+  font-size: 0.8rem;
+  color: var(--color-muted);
+  margin-bottom: 0.5rem;
+  padding: 0 0.5rem;
+}
+
+section[data-view] > div[id$="-status"],
+section[data-view] > div[id$="-pagination"] {
+  padding: 0 0.5rem;
+}
+
+@media (min-width: 768px) {
+  section[data-view] h2 {
+    font-size: 1.3rem;
+    padding: 0 0.75rem;
+    margin-bottom: 0.35rem;
+  }
+
+  section[data-view] > p {
+    font-size: 0.875rem;
+    padding: 0 0.75rem;
+    margin-bottom: 0.65rem;
+  }
+
+  section[data-view] > div[id$="-status"],
+  section[data-view] > div[id$="-pagination"] {
+    padding: 0 0.75rem;
+  }
+}
+
+/* Cards genéricas */
+.card {
+  border: 1px solid #e8e8e8;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  border-radius: 8px;
+}
+
+.card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+/* =========================================
+   SCROLLBAR GLOBAL
+   ========================================= */
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f5f5f5;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #999;
+}
+
+/* =========================================
+   BOOTSTRAP MODAL OVERRIDES (z-index para Bootstrap modals)
+   ========================================= */
+.modal-backdrop.show {
+  opacity: 0.2;
+  z-index: 1040 !important;
+}
+
+.modal-dialog {
+  position: relative;
+  z-index: 1050 !important;
+}
+
+.modal.show {
+  z-index: 1050 !important;
+}
+
+/* =========================================
+   BOTÓN PWA INSTALAR
+   ========================================= */
+
+/* Estado oculto (por defecto hasta que JS lo muestre) */
+.pwa-btn-hidden {
+  display: none !important;
+}
+
+/* Botón Mobile: visible solo en mobile cuando no está hidden */
+#pwa-install-btn-mobile:not(.pwa-btn-hidden) {
+  display: flex;
+}
+
+@media (min-width: 768px) {
+  #pwa-install-btn-mobile {
+    display: none !important;
+  }
+}
+
+/* Botón Desktop: visible solo en desktop cuando no está hidden */
+#pwa-install-btn:not(.pwa-btn-hidden) {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  #pwa-install-btn:not(.pwa-btn-hidden) {
+    display: inline-flex;
+  }
+}
+
+/* Estilos del botón desktop */
+#pwa-install-btn {
+  padding: 0.6rem 1.25rem;
+  font-size: 0.95rem;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+#pwa-install-btn i {
+  font-size: 1rem;
+}
+
+/* Estilos del botón mobile */
+.btn-pwa-mobile {
+  padding: 0.5rem 0.65rem;
+  font-size: 1rem;
+  min-width: 42px;
+  min-height: 42px;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.btn-pwa-mobile i {
+  font-size: 1.1rem;
+  margin: 0;
+}

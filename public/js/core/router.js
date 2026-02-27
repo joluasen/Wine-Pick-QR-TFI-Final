@@ -1,0 +1,467 @@
+
+/**
+ * router.js
+ *
+ * Sistema de enrutamiento SPA para la aplicación Wine Pick QR.
+ *
+ * Permite navegación entre vistas, carga dinámica de componentes y manejo de rutas protegidas (admin).
+ *
+ * Principales responsabilidades:
+ * - Definir rutas y vistas asociadas
+ * - Controlar autenticación y acceso a vistas admin
+ * - Cargar navegación y headers dinámicamente
+ * - Inicializar vistas y delegar lógica a cada módulo
+ * - Gestionar navegación, eventos y estado de la SPA
+ */
+
+import { getBasePath, getHashParams } from "./utils.js";
+import { modalManager } from "./modalManager.js";
+import { initUnifiedSearchBar } from "../search-bar.js";
+
+// Configuración de rutas: hash -> nombre de vista
+const ROUTES = {
+  "": "home",
+  "#home": "home",
+  "#login": "login",
+  "#search": "search",
+  "#admin": "adminMetrics",
+  "#admin-scan": "adminScan",
+  "#admin-products": "adminProducts",
+  "#admin-metrics": "adminMetrics",
+  "#admin-promotions": "adminPromotions",
+  "#promotions": "promotions",
+  "#scan": "scan",
+};
+
+const DEFAULT_ROUTE = "home";
+
+let currentView = null;
+let isNavigating = false;
+
+/**
+ * Obtiene la URL base del proyecto (prioriza APP_CONFIG inyectado por PHP)
+ * @returns {string} URL base
+ */
+function getBaseUrl() {
+  if (window.APP_CONFIG?.baseUrl) {
+    return window.APP_CONFIG.baseUrl;
+  }
+  return getBasePath();
+}
+
+/**
+ * Verifica si el usuario está autenticado consultando /api/admin/me
+ * @returns {Promise<boolean>} true si autenticado
+ */
+async function checkAuth() {
+  try {
+    const baseUrl = getBaseUrl();
+    const res = await fetch(`${baseUrl}api/admin/me`, {
+      credentials: "same-origin",
+    });
+    return res.ok;
+  } catch (e) {
+    return false;
+  }
+}
+
+/**
+ * Obtiene el nombre de la vista desde el hash actual
+ * @returns {string} Nombre de la vista o "product" si es ruta de producto
+ */
+function getViewFromHash() {
+  const hash = window.location.hash.split("?")[0] || "#home";
+
+  // Detectar ruta de producto: #product/CODIGO
+  if (hash.startsWith("#product/")) {
+    return "product";
+  }
+
+  // Validar si la ruta existe en ROUTES
+  if (ROUTES.hasOwnProperty(hash)) {
+    return ROUTES[hash];
+  }
+
+  // Si la ruta no existe y no es la de home, redirigir
+  if (hash !== "#home" && hash !== "") {
+    window.location.hash = "#home";
+  }
+
+  return DEFAULT_ROUTE;
+}
+
+/**
+ * Carga la navegación (navbar/sidebar) según el contexto y autenticación
+ * @param {string} viewName - Nombre de la vista actual
+ */
+async function loadNavigation(viewName) {
+  const navContainer = document.getElementById("nav-container");
+  const sidebarContainer = document.getElementById("sidebar-container");
+
+  let navFile = "nav-public.php";
+  const isAdminView = [
+    "admin",
+    "adminScan",
+    "adminMetrics",
+    "adminProducts",
+    "adminPromotions",
+  ].includes(viewName);
+  if (isAdminView) {
+    const authenticated = await checkAuth();
+    navFile = authenticated ? "nav-admin.php" : "nav-public.php";
+    if (!authenticated) {
+      // Redirigir silenciosamente a home si no está autenticado
+      window.location.hash = "#home";
+    }
+  }
+
+  try {
+    const baseUrl = getBaseUrl();
+    const response = await fetch(`${baseUrl}views/partials/${navFile}`, {
+      cache: "no-store",
+      credentials: "same-origin",
+    });
+
+    if (response.ok) {
+      const html = await response.text();
+
+      if (navContainer) navContainer.innerHTML = html;
+      if (sidebarContainer) sidebarContainer.innerHTML = html;
+
+      setupNavigationListeners();
+      updateActiveNavItem();
+
+      // Configurar botones específicos de admin o login
+      if (navFile === "nav-admin.php") {
+        try {
+          const {
+            setupNewProductButtons,
+            setupNewPromotionButtons,
+            setupLogout,
+            setupProfileModal,
+          } = await import("../views/adminView.js");
+          setupNewProductButtons();
+          setupNewPromotionButtons();
+          setupLogout(document.body, null);
+          setupProfileModal();
+        } catch (err) {}
+      }
+    }
+  } catch (err) {}
+}
+
+/**
+ * Carga el header de búsqueda (desktop y mobile)
+ */
+async function loadSearchHeader() {
+  const mobileSearch = document.getElementById("mobile-search-header");
+  const desktopSearch = document.getElementById("desktop-search-header");
+
+  if (!mobileSearch && !desktopSearch) return;
+
+  try {
+    const baseUrl = getBaseUrl();
+    const response = await fetch(`${baseUrl}views/partials/search-header.php`, {
+      cache: "no-store",
+    });
+
+    if (response.ok) {
+      const html = await response.text();
+      if (mobileSearch) mobileSearch.innerHTML = html;
+      if (desktopSearch) desktopSearch.innerHTML = html;
+
+      initUnifiedSearchBar();
+    }
+  } catch (err) {}
+}
+
+/**
+ * Configura los listeners de navegación usando event delegation
+ */
+function setupNavigationListeners() {
+  const containers = ["nav-container", "sidebar-container"];
+
+  containers.forEach((containerId) => {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    if (container.dataset.listenersAttached) return;
+    container.dataset.listenersAttached = "true";
+
+    container.addEventListener("click", handleNavClick);
+  });
+}
+
+/**
+ * Handler para clicks de navegación en elementos con data-link
+ * @param {Event} e - Evento click
+ */
+function handleNavClick(e) {
+  const link = e.target.closest("[data-link]");
+  if (!link) return;
+
+  e.preventDefault();
+  e.stopPropagation();
+
+  const target = link.getAttribute("data-link");
+
+  // Si el usuario hace clic en 'Ingresar' y ya está autenticado, redirigir al panel admin
+  if (target === "#login") {
+    checkAuth().then((authenticated) => {
+      if (authenticated) {
+        navigate("#admin-products");
+      } else {
+        navigate("#login");
+      }
+    });
+    return;
+  }
+
+  if (target) {
+    navigate(target);
+  }
+}
+
+/**
+ * Actualiza el item activo en la navegación según el hash actual
+ */
+function updateActiveNavItem() {
+  const currentHash = window.location.hash.split("?")[0] || "#home";
+
+  document.querySelectorAll("[data-link]").forEach((item) => {
+    const itemHash = item.getAttribute("data-link");
+    item.classList.toggle("active", itemHash === currentHash);
+  });
+}
+
+/**
+ * Inicializa los listeners del buscador global
+ */
+function initSearchListeners() {
+  const form = document.getElementById("searchForm");
+  const input = document.getElementById("searchInput");
+
+  if (!form) return;
+
+  const newForm = form.cloneNode(true);
+  form.parentNode.replaceChild(newForm, form);
+
+  const newInput = newForm.querySelector("#searchInput");
+
+  newForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const query = newInput?.value?.trim();
+
+    if (query) {
+      navigate(`#search?query=${encodeURIComponent(query)}`);
+      newInput?.blur();
+    }
+  });
+
+  const params = getHashParams();
+  if (params.query && newInput) {
+    newInput.value = params.query;
+  }
+}
+
+/**
+ * Carga e inicializa una vista (HTML y lógica JS)
+ * @param {string} viewName - Nombre de la vista
+ */
+async function loadView(viewName) {
+  // Interceptar búsqueda QR admin: si venimos de adminScan y hay query, mostrar ficha admin
+  if (viewName === "search") {
+    const params = getHashParams();
+    // Si el usuario es admin y viene de adminScan, mostrar ficha admin
+    if (
+      window.sessionStorage.getItem("adminScanActive") === "1" &&
+      params.query
+    ) {
+      window.sessionStorage.removeItem("adminScanActive");
+      const { editProductByCode } = await import("../views/adminView.js");
+      await editProductByCode(params.query);
+      return;
+    }
+  }
+  const root = document.getElementById("app-root");
+  if (!root) return;
+
+  if (isNavigating) return;
+  isNavigating = true;
+
+  try {
+    // Verificar autenticación para vistas admin
+    const isAdminView = [
+      "admin",
+      "adminScan",
+      "adminMetrics",
+      "adminProducts",
+      "adminPromotions",
+    ].includes(viewName);
+    if (isAdminView) {
+      const authenticated = await checkAuth();
+      if (!authenticated) {
+        // Redirigir silenciosamente a home
+        window.location.hash = "#home";
+        isNavigating = false;
+        return;
+      }
+    }
+
+    // Ruta especial #product/CODIGO (acceso directo desde QR externo)
+    if (viewName === "product") {
+      const hash = window.location.hash;
+      const code = hash.replace("#product/", "");
+
+      if (code) {
+        const found = await modalManager.openProductFromUrl(code);
+        if (!found) {
+          // Si no encuentra el producto, buscar
+          window.location.hash = `#search?query=${encodeURIComponent(code)}`;
+        }
+      } else {
+        window.location.hash = "#home";
+      }
+      isNavigating = false;
+      return;
+    }
+
+    // Ruta especial #scan (modal QR)
+    if (viewName === "scan") {
+      await modalManager.showQrScanner();
+      isNavigating = false;
+      return;
+    }
+    // Ruta especial #admin-scan (modal QR admin)
+    if (viewName === "adminScan") {
+      // Marcar que el próximo #search?query=... es por adminScan
+      window.sessionStorage.setItem("adminScanActive", "1");
+      const { showAdminQrScanner } = await import("./modalAdmin.js");
+      await showAdminQrScanner();
+      isNavigating = false;
+      return;
+    }
+
+    // Solo mostrar loading del router si la vista no tiene su propio loading
+    const viewsWithOwnLoading = [
+      "adminMetrics",
+      "adminProducts",
+      "adminPromotions",
+    ];
+
+    if (!viewsWithOwnLoading.includes(viewName)) {
+      root.innerHTML = "";
+    } else {
+      // Para vistas con su propio loading, solo limpiar el contenido
+      root.innerHTML = "";
+    }
+
+    // Cargar header y navegación en paralelo
+    await Promise.all([loadSearchHeader(), loadNavigation(viewName)]);
+
+    // Cargar vista (.php)
+    const baseUrl = getBaseUrl();
+    const response = await fetch(`${baseUrl}views/${viewName}.php`, {
+      cache: "no-store",
+      credentials: "same-origin",
+    });
+
+    if (!response.ok) {
+      throw new Error(`Vista no encontrada: ${viewName}`);
+    }
+
+    const html = await response.text();
+    root.innerHTML = html;
+
+    // Inicializar la vista
+    await initializeView(viewName, root);
+
+    currentView = viewName;
+    root.scrollTop = 0;
+    window.scrollTo(0, 0);
+  } catch (err) {
+    root.innerHTML = `
+      <div class="error-view text-center py-5">
+        <i class="fas fa-exclamation-triangle fa-3x text-warning mb-3"></i>
+        <h2>Error al cargar la página</h2>
+        <p class="text-muted">${err.message}</p>
+        <button onclick="window.location.hash='#home'" class="btn-modal btn-modal-primary">
+          <i class="fas fa-home me-1"></i> Volver al inicio
+        </button>
+      </div>
+    `;
+  } finally {
+    isNavigating = false;
+  }
+}
+
+/**
+ * Inicializa la lógica específica de cada vista
+ * @param {string} viewName - Nombre de la vista
+ * @param {HTMLElement} container - Contenedor principal
+ */
+async function initializeView(viewName, container) {
+  const viewModules = {
+    home: () => import("../views/homeView.js"),
+    login: () => import("../views/loginView.js"),
+    search: () => import("../views/searchView.js"),
+    promotions: () => import("../views/promotionsView.js"),
+    adminMetrics: () => import("../views/adminMetricsView.js"),
+    admin: () => import("../views/adminView.js"),
+    adminProducts: () => import("../views/adminProductsView.js"),
+    adminPromotions: () => import("../views/adminPromotionsView.js"),
+  };
+
+  const moduleLoader = viewModules[viewName];
+
+  if (moduleLoader) {
+    try {
+      const module = await moduleLoader();
+      const initFnName = `init${viewName.charAt(0).toUpperCase() + viewName.slice(1)}View`;
+      const initFn = module[initFnName];
+
+      if (typeof initFn === "function") {
+        await initFn(container);
+      }
+    } catch (err) {}
+  }
+}
+
+/**
+ * Navega a una ruta específica (hash)
+ * @param {string} hash - Hash destino
+ */
+export function navigate(hash) {
+  modalManager.closeAll();
+
+  if (window.location.hash !== hash) {
+    window.location.hash = hash;
+  } else {
+    handleHashChange();
+  }
+}
+
+/**
+ * Handler para cambios de hash (evento hashchange)
+ */
+function handleHashChange() {
+  const viewName = getViewFromHash();
+  loadView(viewName);
+}
+
+/**
+ * Inicializa el router SPA y listeners globales
+ */
+export function initRouter() {
+  modalManager.init();
+  window.addEventListener("hashchange", handleHashChange);
+  handleHashChange();
+}
+
+/**
+ * Obtiene la vista actual cargada
+ * @returns {string|null} Nombre de la vista actual
+ */
+export function getCurrentView() {
+  return currentView;
+}
