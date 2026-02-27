@@ -1,4 +1,3 @@
-
 <?php
 /**
  * Vista parcial: home.php
@@ -6,7 +5,6 @@
  * Descripción: fragmento HTML que representa la vista de inicio pública.
  * Muestra los productos más buscados como tarjetas interactivas, con paginación y estado dinámico.
  */
-header('Content-Type: text/html; charset=utf-8');
 ?>
 
 <section data-view="home">
