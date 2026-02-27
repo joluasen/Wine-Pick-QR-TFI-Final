@@ -17,7 +17,7 @@ WORKDIR /var/www/html
 COPY . /var/www/html
 
 # (Aiven) si vas a commitear el CA:
-# COPY certs/aiven-ca.pem /etc/ssl/certs/aiven-ca.pem
+COPY certs/aiven-ca.pem /etc/ssl/certs/aiven-ca.pem
 
 RUN mkdir -p /var/www/html/public/uploads \
  && chown -R www-data:www-data /var/www/html/public/uploads

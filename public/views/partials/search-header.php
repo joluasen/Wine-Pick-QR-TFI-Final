@@ -1,4 +1,3 @@
-
 <?php
 /**
  * Vista parcial: Buscador en el header
@@ -12,7 +11,6 @@
  * - Botón para abrir el modal de filtros
  * - Botón para enviar la búsqueda
  */
-header('Content-Type: text/html; charset=utf-8');
 ?>
 
 <!--

@@ -1,7 +1,5 @@
 
-DROP DATABASE IF EXISTS wine_pick_qr;
-CREATE DATABASE wine_pick_qr CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-USE wine_pick_qr;
+USE defaultdb;
 
 CREATE TABLE admin_users (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
